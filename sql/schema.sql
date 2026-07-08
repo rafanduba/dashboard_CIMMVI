@@ -1,16 +1,15 @@
 -- ESTRUTURA DO BANCO DE DADOS EXTRAÍDO DA PLANILHA --
 
 CREATE TABLE IF NOT EXISTS lancamentos (
+
+    -- gerenciamento do código
     id SERIAL PRIMARY KEY,
 
     conta TEXT CHECK (conta IN ('CIMMVI - Rateio Banco do Brasil', 'CIMMVI - Licenciamento Caixa', 'AMVI - Banco do Brasil - CC 439')),
 
-    entidade TEXT CHECK (entidade IN ('CIMMVI', 'AMVI')),
-
-    banco TEXT, 
-
     linha_planilha INTEGER NOT NULL, 
 
+    -- colunas planilha
     descricao TEXT,
 
     nf_doc VARCHAR(30),
@@ -19,20 +18,25 @@ CREATE TABLE IF NOT EXISTS lancamentos (
 
     situacao TEXT CHECK (situacao IN ('Pago', 'Em aberto', 'Aprovado - Aguardando Pagamento', 'Aguardando Aprovação', 'Pagamento Realizado - Aguardando autorização Margarete')),
 
+    entidade TEXT CHECK (entidade IN ('CIMMVI', 'AMVI')),
+
     forma_pagamento TEXT CHECK (forma_pagamento IN ('Pix', 'Boleto', 'DIRF')),
 
     entradas NUMERIC(12,2) DEFAULT 0,
 
     saidas NUMERIC(12,2) DEFAULT 0,
 
-    valor_liquido NUMERIC(12,2) DEFAULT 0, 
-
     saldo_acumulado NUMERIC(12,2), 
 
     observacao TEXT,
 
-    tipo_lancamento TEXT NOT NULL DEFAULT 'MOVIMENTAÇÃO',
+    banco TEXT, 
 
+    -- adicional útil (não está na planilha)
+    tipo_lancamento TEXT NOT NULL DEFAULT 'MOVIMENTAÇÃO',
+    valor_liquido NUMERIC(12,2) DEFAULT 0, -- entrada - saída
+
+    -- tratamento de erro
     hash_linha TEXT NOT NULL, 
     UNIQUE(hash_linha)
 );

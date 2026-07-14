@@ -51,6 +51,27 @@ EXPECTED_COLUMNS = [
     "Banco",          # banco (coluna presente na planilha, hoje sem uso)
 ]
 
+RENAME_MAP = {
+    "Descrição": "descricao",
+    "NF/Nº doc": "nf_doc",
+    "Data pagamento": "data_pagamento",
+    "Situação": "situacao",
+    "Entidade": "entidade",
+    "Forma Pagamento": "forma_pagamento",
+    "Entradas": "entradas",
+    "Saídas": "saidas",
+    "Saldo Acumulado": "saldo_acumulado",
+    "Obs": "obs",
+    "Obs 2": "obs2",
+    "Banco": "banco",
+}
+
+# Nomes que indicam saldo do dia (em qualquer variação de maiúsculas e minúsculas)
+# Usado no transform.py
+SALDO_DIA_LABELS = {"Saldo do dia", "Saldo dia", "saldo do dia"}
+# Nomes que indicam saldo inicial
+SALDO_INICIAL_LABELS = {"Saldo inicial", "saldo inicial", "Saldo Inicial", "saldo Inicial"}
+
 
 # Define o nível das informações mostradas pelo logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO") # info mostra informações mais básicas

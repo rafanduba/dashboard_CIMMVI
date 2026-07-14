@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS lancamentos (
     banco TEXT, 
 
     -- adicional útil (não está na planilha)
-    tipo_lancamento TEXT NOT NULL DEFAULT 'MOVIMENTAÇÃO',
+    tipo_lancamento TEXT NOT NULL DEFAULT 'MOVIMENTO'
+        CHECK (tipo_lancamento IN ('MOVIMENTO', 'SALDO_INICIAL', 'SALDO_DIA')),
     valor_liquido NUMERIC(12,2) DEFAULT 0, -- entrada - saída
 
     -- tratamento de erro

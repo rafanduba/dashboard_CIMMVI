@@ -88,7 +88,7 @@ LIMIT 1;
 
 
 -- Saldo final da conta 3 (AMVI - Banco do Brasil - CC 439)
-DROP VIEW IF EXISTS vw_saldo_final_conta_3
+DROP VIEW IF EXISTS vw_saldo_final_conta_3;
 CREATE VIEW vw_saldo_final_conta_3 AS
 SELECT
     saldo_acumulado AS saldo_final
@@ -96,3 +96,19 @@ FROM lancamentos
 WHERE conta = 'AMVI - Banco do Brasil - CC 439'
 ORDER BY data_pagamento DESC, id DESC
 LIMIT 1;
+
+
+
+-- AUDITORIA DO ETL --
+
+CREATE TABLE IF NOT EXISTS etl_execucoes (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    iniciado_em       TEXT    DEFAULT (datetime('now')),
+    finalizado_em     TEXT,
+    arquivo_origem    TEXT,
+    status            TEXT    DEFAULT 'EM_ANDAMENTO',
+    linhas_lidas      INTEGER,
+    linhas_inseridas  INTEGER,
+    linhas_ignoradas  INTEGER,
+    mensagem_erro     TEXT
+);

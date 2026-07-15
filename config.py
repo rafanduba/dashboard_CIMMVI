@@ -12,6 +12,10 @@ EXCEL_FILENAME = os.getenv("EXCEL_FILE", "planilha.xlsx")
 # Caminho planilha
 EXCEL_PATH = Path(os.getenv("EXCEL_PATH", str(DATA_DIR / EXCEL_FILENAME)))
 
+# Caminho pro banco de dados
+DB_PATH = DATA_DIR / "cimmvi_amvi.db"
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DB_PATH}")
+
 # Mapeamento das abas da planilha
 # Impede falhas por erros de digitação
 # Dados fixos por aba (ex: aba da AMVI sempre vai ser a mesma conta, entidade e banco)
@@ -51,6 +55,8 @@ EXPECTED_COLUMNS = [
     "Banco",          # banco (coluna presente na planilha, hoje sem uso)
 ]
 
+# Renomeia as colunas da planilha para facilitar o uso no código
+# Impede falhas por erros de digitação
 RENAME_MAP = {
     "Descrição": "descricao",
     "NF/Nº doc": "nf_doc",

@@ -59,24 +59,26 @@ EXPECTED_COLUMNS = [
 # Impede falhas por erros de digitação
 RENAME_MAP = {
     "Descrição": "descricao",
-    "NF/Nº doc": "nf_doc",
+    "NF/ Nº doc": "nf_doc",      # espaço após '/' — igual ao EXPECTED_COLUMNS
+    "NF/Nº doc": "nf_doc",       # variante sem espaço (fallback)
     "Data pagamento": "data_pagamento",
     "Situação": "situacao",
-    "Entidade": "entidade",
+    "Entidade": "entidade_planilha",  # renomeia para evitar conflito com df["entidade"] fixo
     "Forma Pagamento": "forma_pagamento",
     "Entradas": "entradas",
     "Saídas": "saidas",
     "Saldo Acumulado": "saldo_acumulado",
     "Obs": "obs",
     "Obs 2": "obs2",
-    "Banco": "banco",
+    "Banco": "banco_planilha",   # renomeia para evitar conflito com df["banco"] fixo
+    "_linha_planilha": "linha_planilha",  # gerado pelo extract.py
 }
 
 # Nomes que indicam saldo do dia (em qualquer variação de maiúsculas e minúsculas)
-# Usado no transform.py
-SALDO_DIA_LABELS = {"Saldo do dia", "Saldo dia", "saldo do dia"}
+# Usado no transform.py — todos em lowercase pois _classificar_linha faz .lower() antes de comparar
+SALDO_DIA_LABELS = {"saldo do dia", "saldo dia"}
 # Nomes que indicam saldo inicial
-SALDO_INICIAL_LABELS = {"Saldo inicial", "saldo inicial", "Saldo Inicial", "saldo Inicial"}
+SALDO_INICIAL_LABELS = {"saldo inicial"}
 
 
 # Define o nível das informações mostradas pelo logging

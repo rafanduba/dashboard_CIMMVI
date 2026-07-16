@@ -58,6 +58,7 @@ CREATE VIEW vw_saldo_final_geral AS
                 ORDER BY data_pagamento DESC, id DESC
             ) AS id_ultimo_saldo -- pega a o útlimo saldo acumulado de cada conta e coloca de primeiro (índice 1) pra ser usado no where abaixo
         FROM lancamentos
+        WHERE saldo_acumulado IS NOT NULL
     )
 SELECT 
     SUM(saldo_acumulado) AS vw_saldo_final_geral
@@ -72,6 +73,8 @@ SELECT
     saldo_acumulado AS saldo_final
 FROM lancamentos
 WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
+  AND situacao = 'Pago'
+  AND saldo_acumulado IS NOT NULL
 ORDER BY data_pagamento DESC, id DESC
 LIMIT 1;
 
@@ -83,6 +86,8 @@ SELECT
     saldo_acumulado AS saldo_final
 FROM lancamentos
 WHERE conta = 'CIMMVI - Licenciamento Caixa'
+  AND situacao = 'Pago'
+  AND saldo_acumulado IS NOT NULL
 ORDER BY data_pagamento DESC, id DESC
 LIMIT 1;
 
@@ -94,9 +99,143 @@ SELECT
     saldo_acumulado AS saldo_final
 FROM lancamentos
 WHERE conta = 'AMVI - Banco do Brasil - CC 439'
+  AND situacao = 'Pago'
+  AND saldo_acumulado IS NOT NULL
 ORDER BY data_pagamento DESC, id DESC
 LIMIT 1;
 
+
+
+-- Saldo final por conta (uma linha por conta)
+DROP VIEW IF EXISTS vw_saldos_por_conta;
+CREATE VIEW vw_saldos_por_conta AS
+    SELECT conta, saldo_acumulado AS saldo_final
+    FROM lancamentos
+    WHERE id IN (
+        SELECT id
+        FROM (
+            SELECT id,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY conta
+                       ORDER BY data_pagamento DESC, id DESC
+                   ) AS rn
+            FROM lancamentos
+        ) sub
+        WHERE rn = 1
+    )
+    ORDER BY conta;
+
+
+-- Evolucao do saldo acumulado por dia e por conta
+DROP VIEW IF EXISTS vw_evolucao_saldo_diario;
+CREATE VIEW vw_evolucao_saldo_diario AS
+    SELECT
+        data_pagamento,
+        conta,
+        MAX(saldo_acumulado) AS saldo_acumulado
+    FROM lancamentos
+    WHERE saldo_acumulado IS NOT NULL
+      AND data_pagamento IS NOT NULL
+    GROUP BY data_pagamento, conta
+    ORDER BY data_pagamento, conta;
+
+
+-- Evolucao do saldo acumulado por mes e por conta (ultimo dia de cada mes)
+DROP VIEW IF EXISTS vw_evolucao_saldo_mensal;
+CREATE VIEW vw_evolucao_saldo_mensal AS
+    WITH ultimo_dia AS (
+        SELECT
+            strftime('%Y-%m', data_pagamento) AS ano_mes,
+            conta,
+            MAX(data_pagamento) AS ultima_data
+        FROM lancamentos
+        WHERE saldo_acumulado IS NOT NULL
+          AND data_pagamento IS NOT NULL
+        GROUP BY ano_mes, conta
+    )
+    SELECT
+        ud.ano_mes,
+        ud.conta,
+        MAX(l.saldo_acumulado) AS saldo_acumulado
+    FROM ultimo_dia ud
+    JOIN lancamentos l
+      ON l.conta = ud.conta
+     AND l.data_pagamento = ud.ultima_data
+     AND l.saldo_acumulado IS NOT NULL
+    GROUP BY ud.ano_mes, ud.conta
+    ORDER BY ud.ano_mes, ud.conta;
+
+
+-- Total de entradas e saidas por mes e conta
+DROP VIEW IF EXISTS vw_entradas_saidas_mensais;
+CREATE VIEW vw_entradas_saidas_mensais AS
+    SELECT
+        strftime('%Y-%m', data_pagamento) AS ano_mes,
+        conta,
+        COALESCE(SUM(entradas), 0) AS entradas,
+        COALESCE(SUM(saidas),   0) AS saidas,
+        COALESCE(SUM(valor_liquido), 0) AS liquido
+    FROM lancamentos
+    WHERE tipo_lancamento = 'MOVIMENTO'
+      AND data_pagamento IS NOT NULL
+    GROUP BY ano_mes, conta
+    ORDER BY ano_mes, conta;
+
+
+-- Contagem e valores por situacao (visao geral, sem filtro de periodo)
+DROP VIEW IF EXISTS vw_contagem_por_situacao;
+CREATE VIEW vw_contagem_por_situacao AS
+    SELECT
+        COALESCE(situacao, 'Nao informado') AS situacao,
+        COUNT(*) AS quantidade,
+        COALESCE(SUM(saidas),   0) AS total_saidas,
+        COALESCE(SUM(entradas), 0) AS total_entradas
+    FROM lancamentos
+    WHERE tipo_lancamento = 'MOVIMENTO'
+    GROUP BY situacao
+    ORDER BY total_saidas DESC;
+
+
+-- Total de saidas por forma de pagamento (visao geral, sem filtro de periodo)
+DROP VIEW IF EXISTS vw_saidas_por_forma_pagamento;
+CREATE VIEW vw_saidas_por_forma_pagamento AS
+    SELECT
+        COALESCE(forma_pagamento, 'Nao informado') AS forma_pagamento,
+        COALESCE(SUM(saidas), 0) AS total_saidas,
+        COUNT(*) AS quantidade
+    FROM lancamentos
+    WHERE tipo_lancamento = 'MOVIMENTO'
+      AND saidas > 0
+    GROUP BY forma_pagamento
+    ORDER BY total_saidas DESC;
+
+
+-- Em aberto genuinamente pendentes: aparecem APÓS o último lançamento 'Pago' da mesma conta
+DROP VIEW IF EXISTS vw_valor_em_aberto;
+CREATE VIEW vw_valor_em_aberto AS
+    SELECT COALESCE(SUM(l.saidas), 0) AS valor_em_aberto
+    FROM lancamentos l
+    WHERE l.situacao = 'Em aberto'
+      AND l.tipo_lancamento = 'MOVIMENTO'
+      AND l.id > (
+          SELECT COALESCE(MAX(l2.id), -1)
+          FROM lancamentos l2
+          WHERE l2.conta = l.conta
+            AND l2.situacao = 'Pago'
+      );
+
+
+-- Total de saidas aguardando aprovacao ou pagamento (todas as contas)
+DROP VIEW IF EXISTS vw_valor_aguardando_aprovacao;
+CREATE VIEW vw_valor_aguardando_aprovacao AS
+    SELECT COALESCE(SUM(saidas), 0) AS valor_aguardando_aprovacao
+    FROM lancamentos
+    WHERE situacao IN (
+            'Aguardando Aprovação',
+            'Aprovado - Aguardando Pagamento',
+            'Pagamento Realizado - Aguardando autorização Margarete'
+          )
+      AND tipo_lancamento = 'MOVIMENTO';
 
 
 -- AUDITORIA DO ETL --

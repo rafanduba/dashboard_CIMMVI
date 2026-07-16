@@ -10,8 +10,12 @@ def clean_saldo_value(value):
     # Limpa valores de saldo (remove 'R$', ponto e converte pra float)
     if pd.isna(value) or value == "":
         return None
+    # Se já é numérico (pandas leu direto do Excel como float/int),
+    # não aplicar substituição de string — evita remover o ponto decimal
+    if isinstance(value, (int, float)):
+        return round(float(value), 2)
     try:
-        # Remove R$, espaços e pontos de milhar
+        # Formato BR em string: remove R$, pontos de milhar e troca vírgula por ponto
         value = (str(value)
                  .replace("R$", "")
                  .replace(".", "")
@@ -65,10 +69,15 @@ def transform_sheet(df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
     #Pega os dados brutos do extract_all_sheets do extract.py
 
     info = SHEETS_CONFIG[sheet_name]
-    df = df.rename(columns=RENAME_MAP).copy()
 
-    # Descarta linhas totalmente vazias
+    # Rename case-insensitive: normaliza strip+lower antes de comparar
+    rename_map_lower = {k.lower().strip(): v for k, v in RENAME_MAP.items()}
+    df.columns = [rename_map_lower.get(c.lower().strip(), c) for c in df.columns]
+    df = df.copy()
+
+    # Descarta linhas totalmente vazias (usa apenas as colunas que existem no df)
     colunas_chave = ["descricao", "data_pagamento", "entradas", "saidas", "saldo_acumulado"]
+    colunas_chave = [c for c in colunas_chave if c in df.columns]
     df = df.dropna(how="all", subset=colunas_chave)
 
     # Metadados fixos da conta (fonte da verdade: config.py)

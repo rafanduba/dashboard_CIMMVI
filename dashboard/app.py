@@ -40,7 +40,8 @@ try:
         total_saidas,
         ultima_carga,
         valor_aguardando_aprovacao,
-        valor_em_aberto,
+        saidas_em_aberto,
+        entradas_em_aberto,
     )
     _DB_READY = True
 except Exception as _e:
@@ -413,11 +414,12 @@ app.layout = html.Div([
 
         # ── KPIs ────────────────────────────────────────────────────────────
         html.Div([
-            _kpi("kpi-entradas",  "Entradas no período",   "⬆️", color=SUCCESS),
-            _kpi("kpi-saidas",    "Saídas no período",     "⬇️", color=DANGER),
-            _kpi("kpi-liquido",   "Resultado líquido",     "⚖️", color=WARNING),
-            _kpi("kpi-aberto",    "Em aberto",             "⏳", color=DANGER),
-            _kpi("kpi-aguardando","Aguardando aprovação",  "🔔", color=WARNING),
+            _kpi("kpi-entradas",      "Entradas no período",      "⬆️", color=SUCCESS),
+            _kpi("kpi-saidas",        "Saídas no período",        "⬇️", color=DANGER),
+            _kpi("kpi-liquido",       "Resultado líquido",        "⚖️", color=WARNING),
+            _kpi("kpi-aberto-saidas", "Saídas em aberto",         "📤", color=DANGER),
+            _kpi("kpi-aberto-ent",   "Entradas em aberto",       "📥", color=SUCCESS),
+            _kpi("kpi-aguardando",    "Aguardando aprovação",     "🔔", color=WARNING),
         ], style={
             "display": "grid",
             "gridTemplateColumns": "repeat(auto-fit, minmax(170px, 1fr))",
@@ -517,11 +519,12 @@ def _normalizar(conta: str, entidade: str):
     Output("saldo-c2",      "children"),
     Output("saldo-c3",      "children"),
     # KPIs
-    Output("kpi-entradas",  "children"),
-    Output("kpi-saidas",    "children"),
-    Output("kpi-liquido",   "children"),
-    Output("kpi-aberto",    "children"),
-    Output("kpi-aguardando","children"),
+    Output("kpi-entradas",      "children"),
+    Output("kpi-saidas",        "children"),
+    Output("kpi-liquido",       "children"),
+    Output("kpi-aberto-saidas", "children"),
+    Output("kpi-aberto-ent",   "children"),
+    Output("kpi-aguardando",    "children"),
     # Gráficos
     Output("chart-saldo",       "figure"),
     Output("chart-situacao",    "figure"),
@@ -541,7 +544,7 @@ def atualizar(conta_sel, entidade_sel, data_ini, data_fim):
     if not _DB_READY:
         aviso = html.Span("⚠️ Execute o ETL para carregar os dados.", style={"color": WARNING})
         fig_vazio = _empty_fig("Banco não inicializado — execute o ETL primeiro.")
-        return (aviso, "—", "—", "—", "—", "—", "—", "—", "—", "—",
+        return (aviso, "—", "—", "—", "—", "—", "—", "—", "—", "—", "—",
                 fig_vazio, fig_vazio, fig_vazio, fig_vazio, [])
 
     conta, entidade = _normalizar(conta_sel, entidade_sel)
@@ -572,13 +575,14 @@ def atualizar(conta_sel, entidade_sel, data_ini, data_fim):
 
     # ── KPIs ─────────────────────────────────────────────────────────────
     try:
-        kpi_ent  = _brl(total_entradas(data_ini, data_fim, conta, entidade))
-        kpi_sai  = _brl(total_saidas(data_ini, data_fim, conta, entidade))
-        kpi_liq  = _brl(total_liquido(data_ini, data_fim, conta, entidade), show_sign=True)
-        kpi_ab   = _brl(valor_em_aberto(conta, entidade))
-        kpi_ag   = _brl(valor_aguardando_aprovacao(conta, entidade))
+        kpi_ent    = _brl(total_entradas(data_ini, data_fim, conta, entidade))
+        kpi_sai    = _brl(total_saidas(data_ini, data_fim, conta, entidade))
+        kpi_liq    = _brl(total_liquido(data_ini, data_fim, conta, entidade), show_sign=True)
+        kpi_ab_sai = _brl(saidas_em_aberto(conta, entidade))
+        kpi_ab_ent = _brl(entradas_em_aberto(conta, entidade))
+        kpi_ag     = _brl(valor_aguardando_aprovacao(conta, entidade))
     except Exception:
-        kpi_ent = kpi_sai = kpi_liq = kpi_ab = kpi_ag = "—"
+        kpi_ent = kpi_sai = kpi_liq = kpi_ab_sai = kpi_ab_ent = kpi_ag = "—"
 
     # ── Gráfico 1: Saldo mensal ──────────────────────────────────────────
     try:
@@ -728,7 +732,7 @@ def atualizar(conta_sel, entidade_sel, data_ini, data_fim):
     return (
         header_etl,
         sg, sc1, sc2, sc3,
-        kpi_ent, kpi_sai, kpi_liq, kpi_ab, kpi_ag,
+        kpi_ent, kpi_sai, kpi_liq, kpi_ab_sai, kpi_ab_ent, kpi_ag,
         fig_saldo, fig_sit, fig_mensal, fig_fp,
         dados_tabela,
     )

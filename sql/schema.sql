@@ -210,20 +210,34 @@ CREATE VIEW vw_saidas_por_forma_pagamento AS
     ORDER BY total_saidas DESC;
 
 
--- Em aberto genuinamente pendentes: aparecem APÓS o último lançamento 'Pago' da mesma conta
+-- Saídas em aberto pendentes: aparecem APÓS o último lançamento 'Pago' da mesma conta
 DROP VIEW IF EXISTS vw_valor_em_aberto;
-CREATE VIEW vw_valor_em_aberto AS
-    SELECT COALESCE(SUM(l.saidas), 0) AS valor_em_aberto
-    FROM lancamentos l
-    WHERE l.situacao = 'Em aberto'
-      AND l.tipo_lancamento = 'MOVIMENTO'
-      AND l.id > (
-          SELECT COALESCE(MAX(l2.id), -1)
-          FROM lancamentos l2
-          WHERE l2.conta = l.conta
-            AND l2.situacao = 'Pago'
-      );
+DROP VIEW IF EXISTS vw_saidas_em_aberto;
+CREATE VIEW vw_saidas_em_aberto AS
+SELECT COALESCE(SUM(l.saidas), 0) AS valor_saidas_em_aberto
+FROM lancamentos l
+WHERE l.situacao = 'Em aberto'
+  AND l.tipo_lancamento = 'MOVIMENTO'
+  AND l.id > (
+      SELECT COALESCE(MAX(l2.id), -1)
+      FROM lancamentos l2
+      WHERE l2.conta = l.conta
+        AND l2.situacao = 'Pago'
+  );
 
+-- Entradas em aberto pendentes: aparecem APÓS o último lançamento 'Pago' da mesma conta
+DROP VIEW IF EXISTS vw_entradas_em_aberto;
+CREATE VIEW vw_entradas_em_aberto AS
+SELECT COALESCE(SUM(l.entradas), 0) AS valor_entradas_em_aberto
+FROM lancamentos l
+WHERE l.situacao = 'Em aberto'
+  AND l.tipo_lancamento = 'MOVIMENTO'
+  AND l.id > (
+      SELECT COALESCE(MAX(l2.id), -1)
+      FROM lancamentos l2
+      WHERE l2.conta = l.conta
+        AND l2.situacao = 'Pago'
+  );
 
 -- Total de saidas aguardando aprovacao ou pagamento (todas as contas)
 DROP VIEW IF EXISTS vw_valor_aguardando_aprovacao;

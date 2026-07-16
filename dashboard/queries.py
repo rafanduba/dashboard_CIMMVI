@@ -362,20 +362,48 @@ def contagem_por_situacao(
     return _df(sql, params)
 
 
-def valor_em_aberto(
+def saidas_em_aberto(
     conta: str | None = None,
     entidade: str | None = None,
 ) -> float:
     """
-    Total de saidas com situacao 'Em aberto'.
-    Sem filtros: usa a view vw_valor_em_aberto (caminho rapido).
+    Total de saidas com situacao 'Em aberto' que aparecem APÓS o último 'Pago' da mesma conta.
+    Sem filtros: usa a view vw_saidas_em_aberto.
     """
     if not any([conta, entidade]):
-        return _scalar("SELECT valor_em_aberto FROM vw_valor_em_aberto") or 0.0
+        return _scalar("SELECT valor_saidas_em_aberto FROM vw_saidas_em_aberto") or 0.0
 
     filtros, params = _filtros_periodo(None, None, conta, entidade)
     sql = f"""
         SELECT COALESCE(SUM(l.saidas), 0)
+        FROM lancamentos l
+        WHERE l.situacao = 'Em aberto'
+          AND l.tipo_lancamento = 'MOVIMENTO'
+          AND l.id > (
+              SELECT COALESCE(MAX(l2.id), -1)
+              FROM lancamentos l2
+              WHERE l2.conta = l.conta
+                AND l2.situacao = 'Pago'
+          )
+          {filtros.replace('AND conta', 'AND l.conta').replace('AND entidade', 'AND l.entidade')}
+    """
+    return _scalar(sql, params) or 0.0
+
+
+def entradas_em_aberto(
+    conta: str | None = None,
+    entidade: str | None = None,
+) -> float:
+    """
+    Total de entradas com situacao 'Em aberto' que aparecem APÓS o último 'Pago' da mesma conta.
+    Sem filtros: usa a view vw_entradas_em_aberto.
+    """
+    if not any([conta, entidade]):
+        return _scalar("SELECT valor_entradas_em_aberto FROM vw_entradas_em_aberto") or 0.0
+
+    filtros, params = _filtros_periodo(None, None, conta, entidade)
+    sql = f"""
+        SELECT COALESCE(SUM(l.entradas), 0)
         FROM lancamentos l
         WHERE l.situacao = 'Em aberto'
           AND l.tipo_lancamento = 'MOVIMENTO'

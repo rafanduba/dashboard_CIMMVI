@@ -315,13 +315,15 @@ def lancamentos_detalhados(
     sql = f"""
         SELECT
             id, conta, entidade, banco,
-            data_pagamento, descricao, nf_doc, situacao, forma_pagamento,
+            data_pagamento, descricao, categoria, nf_doc,
+            situacao, forma_pagamento,
+            parc_atual, parc_total,
             entradas, saidas, saldo_acumulado, valor_liquido,
             tipo_lancamento, observacao
         FROM lancamentos
         WHERE 1=1
           {filtros}
-        ORDER BY data_pagamento DESC, id DESC
+        ORDER BY data_pagamento DESC, linha_planilha DESC
         LIMIT :limit OFFSET :offset
     """
     return _df(sql, params)
@@ -534,6 +536,37 @@ def saidas_por_forma_pagamento(
           AND saidas > 0
           {filtros}
         GROUP BY forma_pagamento
+        ORDER BY total_saidas DESC
+    """
+    return _df(sql, params)
+
+
+def saidas_por_categoria(
+    conta: str | None = None,
+    entidade: str | None = None,
+    data_inicio: str | None = None,
+    data_fim: str | None = None,
+) -> pd.DataFrame:
+    """
+    Total de saidas agrupado por categoria.
+    Sem filtros: usa a view vw_saidas_por_categoria (caminho rapido).
+
+    Colunas: categoria, total_saidas, total_entradas, quantidade
+    """
+    if not any([conta, entidade, data_inicio, data_fim]):
+        return _df("SELECT * FROM vw_saidas_por_categoria")
+
+    filtros, params = _filtros_periodo(data_inicio, data_fim, conta, entidade)
+    sql = f"""
+        SELECT
+            COALESCE(categoria, 'Não informado') AS categoria,
+            COALESCE(SUM(saidas),   0) AS total_saidas,
+            COALESCE(SUM(entradas), 0) AS total_entradas,
+            COUNT(*) AS quantidade
+        FROM lancamentos
+        WHERE tipo_lancamento = 'MOVIMENTO'
+          {filtros}
+        GROUP BY categoria
         ORDER BY total_saidas DESC
     """
     return _df(sql, params)

@@ -7,30 +7,41 @@ CREATE TABLE IF NOT EXISTS lancamentos (
 
     conta TEXT CHECK (conta IN ('CIMMVI - Rateio Banco do Brasil', 'CIMMVI - Licenciamento Caixa', 'AMVI - Banco do Brasil - CC 439')),
 
-    linha_planilha INTEGER NOT NULL, 
+    linha_planilha INTEGER NOT NULL,
 
-    -- colunas planilha
+    -- colunas planilha (formato novo)
+    categoria TEXT,
+
     descricao TEXT,
 
-    nf_doc VARCHAR(30),
+    nf_doc VARCHAR(30),                -- presente apenas na aba AMVI
+
+    observacao TEXT,                   -- coluna OBSERVAÇÃO (abas CIMMVI); substitui Obs + Obs 2
+
+    parc_atual INTEGER,                -- coluna Parc.A — presente apenas na aba Rateio BB
+    parc_total INTEGER,                -- coluna Parc.Tr — presente apenas na aba Rateio BB
 
     data_pagamento DATE,
 
-    situacao TEXT CHECK (situacao IN ('Pago', 'Em aberto', 'Aprovado - Aguardando Pagamento', 'Aguardando Aprovação', 'Pagamento Realizado - Aguardando autorização Margarete')),
+    situacao TEXT CHECK (situacao IN (
+        'Pago',
+        'Em aberto',
+        'Aprovado - Aguardando Pagamento',
+        'Aguardando Aprovação',
+        'Pagamento Realizado - Aguardando autorização Margarete'
+    )),
 
     entidade TEXT CHECK (entidade IN ('CIMMVI', 'AMVI')),
 
     forma_pagamento TEXT CHECK (forma_pagamento IN ('Pix', 'Boleto', 'DIRF')),
 
+    -- derivados da coluna MOVIMENTAÇÃO (positivo=entrada, negativo=saída)
     entradas NUMERIC(12,2) DEFAULT 0,
+    saidas   NUMERIC(12,2) DEFAULT 0,
 
-    saidas NUMERIC(12,2) DEFAULT 0,
+    saldo_acumulado NUMERIC(12,2),
 
-    saldo_acumulado NUMERIC(12,2), 
-
-    observacao TEXT,
-
-    banco TEXT, 
+    banco TEXT,
 
     -- adicional útil (não está na planilha)
     tipo_lancamento TEXT NOT NULL DEFAULT 'MOVIMENTO'
@@ -38,7 +49,7 @@ CREATE TABLE IF NOT EXISTS lancamentos (
     valor_liquido NUMERIC(12,2) DEFAULT 0, -- entrada - saída
 
     -- tratamento de erro
-    hash_linha TEXT NOT NULL, 
+    hash_linha TEXT NOT NULL,
     UNIQUE(hash_linha)
 );
 
@@ -51,16 +62,16 @@ DROP VIEW IF EXISTS vw_saldo_final_geral;
 CREATE VIEW vw_saldo_final_geral AS
     WITH ultimo_saldo AS (
         SELECT
-            conta, 
+            conta,
             saldo_acumulado,
             ROW_NUMBER() OVER(
                 PARTITION BY conta
-                ORDER BY data_pagamento DESC, id DESC
-            ) AS id_ultimo_saldo -- pega a o útlimo saldo acumulado de cada conta e coloca de primeiro (índice 1) pra ser usado no where abaixo
+                ORDER BY data_pagamento DESC, linha_planilha DESC
+            ) AS id_ultimo_saldo -- pega o último saldo acumulado de cada conta e coloca de primeiro (índice 1) pra ser usado no where abaixo
         FROM lancamentos
         WHERE saldo_acumulado IS NOT NULL
     )
-SELECT 
+SELECT
     SUM(saldo_acumulado) AS vw_saldo_final_geral
     FROM ultimo_saldo
     WHERE id_ultimo_saldo = 1;
@@ -75,20 +86,20 @@ FROM lancamentos
 WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
   AND situacao = 'Pago'
   AND saldo_acumulado IS NOT NULL
-ORDER BY data_pagamento DESC, id DESC
+ORDER BY data_pagamento DESC, linha_planilha DESC
 LIMIT 1;
 
 
 -- Saldo final da conta 2 (CIMMVI - Licenciamento Caixa)
 DROP VIEW IF EXISTS vw_saldo_final_conta_2;
 CREATE VIEW vw_saldo_final_conta_2 AS
-SELECT 
+SELECT
     saldo_acumulado AS saldo_final
 FROM lancamentos
 WHERE conta = 'CIMMVI - Licenciamento Caixa'
   AND situacao = 'Pago'
   AND saldo_acumulado IS NOT NULL
-ORDER BY data_pagamento DESC, id DESC
+ORDER BY data_pagamento DESC, linha_planilha DESC
 LIMIT 1;
 
 
@@ -101,7 +112,7 @@ FROM lancamentos
 WHERE conta = 'AMVI - Banco do Brasil - CC 439'
   AND situacao = 'Pago'
   AND saldo_acumulado IS NOT NULL
-ORDER BY data_pagamento DESC, id DESC
+ORDER BY data_pagamento DESC, linha_planilha DESC
 LIMIT 1;
 
 
@@ -117,7 +128,7 @@ CREATE VIEW vw_saldos_por_conta AS
             SELECT id,
                    ROW_NUMBER() OVER (
                        PARTITION BY conta
-                       ORDER BY data_pagamento DESC, id DESC
+                       ORDER BY data_pagamento DESC, linha_planilha DESC
                    ) AS rn
             FROM lancamentos
         ) sub
@@ -207,6 +218,20 @@ CREATE VIEW vw_saidas_por_forma_pagamento AS
     WHERE tipo_lancamento = 'MOVIMENTO'
       AND saidas > 0
     GROUP BY forma_pagamento
+    ORDER BY total_saidas DESC;
+
+
+-- Total de saidas por categoria (visao geral, sem filtro de periodo)
+DROP VIEW IF EXISTS vw_saidas_por_categoria;
+CREATE VIEW vw_saidas_por_categoria AS
+    SELECT
+        COALESCE(categoria, 'Não informado') AS categoria,
+        COALESCE(SUM(saidas), 0) AS total_saidas,
+        COALESCE(SUM(entradas), 0) AS total_entradas,
+        COUNT(*) AS quantidade
+    FROM lancamentos
+    WHERE tipo_lancamento = 'MOVIMENTO'
+    GROUP BY categoria
     ORDER BY total_saidas DESC;
 
 

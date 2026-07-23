@@ -110,10 +110,10 @@ def carregar_dados(
         linhas_ignoradas = linhas_lidas - len(df_novo)
 
         if len(df_novo) > 0:
-            # Ajusta nomes de colunas para os presentes na tabela
-            # (obs/obs2 não existem no schema: obs vira observacao, obs2 é descartado)
-            df_para_inserir = df_novo.rename(columns={"obs": "observacao"}).drop(
-                columns=["obs2", "entidade_planilha", "banco_planilha"],
+            # Remove colunas auxiliares que não pertencem ao schema da tabela
+            df_para_inserir = df_novo.drop(
+                columns=["entradas_old", "saidas_old", "obs2_ignorado",
+                         "entidade_planilha", "banco_planilha"],
                 errors="ignore",
             )
             df_para_inserir.to_sql("lancamentos", engine, if_exists="append", index=False)

@@ -3,7 +3,7 @@
 from pathlib import Path
 import pandas as pd
 import logging
-from config import EXCEL_PATH, EXPECTED_COLUMNS, SHEETS_CONFIG
+from config import EXCEL_PATH, SHEETS_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ class PlanilhaNaoEncontradaError(FileNotFoundError):  # excel no caminho errado 
 class EstruturaInvalidaError(ValueError):  # dispara quando as colunas não batem com o esperado
     pass
 
-def _validar_arquivo(caminho:Path) -> None:
+def _validar_arquivo(caminho: Path) -> None:
     if not caminho.exists():
         raise PlanilhaNaoEncontradaError(
             f"Arquivo não encontrado: {caminho}\n"
@@ -22,12 +22,27 @@ def _validar_arquivo(caminho:Path) -> None:
         )
 
 def _validar_colunas(df: pd.DataFrame, aba: str) -> None:
-    colunas_lidas = list(df.columns[: len(EXPECTED_COLUMNS)])
-    if [c.lower() for c in colunas_lidas] != [c.lower() for c in EXPECTED_COLUMNS]:
+    """Valida se as colunas esperadas para a aba estão presentes no DataFrame.
+
+    Cada aba pode ter um conjunto diferente de colunas (definido em SHEETS_CONFIG).
+    A comparação é feita de forma case-insensitive e ignora espaços extras.
+    """
+    expected = SHEETS_CONFIG[aba].get("expected_columns", [])
+    if not expected:
+        logger.warning("Aba '%s': nenhuma expected_columns definida, pulando validação.", aba)
+        return
+
+    colunas_lidas_norm = [c.lower().strip() for c in df.columns]
+    faltando = [
+        col for col in expected
+        if col.lower().strip() not in colunas_lidas_norm
+    ]
+
+    if faltando:
         raise EstruturaInvalidaError(
-            f"A estrutura de colunas da aba '{aba}' mudou.\n"
-            f"Esperado: {EXPECTED_COLUMNS}\n"
-            f"Recebido: {colunas_lidas}"
+            f"A estrutura de colunas da aba '{aba}' não bate com o esperado.\n"
+            f"Colunas faltando: {faltando}\n"
+            f"Colunas encontradas: {list(df.columns)}"
         )
 
 # Extração de dados

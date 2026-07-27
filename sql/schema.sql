@@ -9,17 +9,17 @@ CREATE TABLE IF NOT EXISTS lancamentos (
 
     linha_planilha INTEGER NOT NULL,
 
-    -- colunas planilha (formato novo)
+    -- colunas planilha
     categoria TEXT,
 
     descricao TEXT,
 
-    nf_doc VARCHAR(30),                -- presente apenas na aba AMVI
+    nf_doc VARCHAR(30),                -- presente na aba AMVI
 
-    observacao TEXT,                   -- coluna OBSERVAÇÃO (abas CIMMVI); substitui Obs + Obs 2
+    observacao TEXT,                   -- coluna OBSERVAÇÃO (abas CIMMVI)
 
-    parc_atual INTEGER,                -- coluna Parc.A — presente apenas na aba Rateio BB
-    parc_total INTEGER,                -- coluna Parc.Tr — presente apenas na aba Rateio BB
+    parc_atual INTEGER,                -- coluna Parc.A — presente na aba Rateio BB
+    parc_total INTEGER,                -- coluna Parc.Tr — presente na aba Rateio BB
 
     data_pagamento DATE,
 

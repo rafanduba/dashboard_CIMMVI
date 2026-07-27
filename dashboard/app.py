@@ -313,6 +313,143 @@ app = Dash(
     suppress_callback_exceptions=True,
 )
 
+# CSS injetado no <head>: escurece Dropdown e DatePickerRange
+# (html.Style não existe em versões antigas do Dash; index_string é a forma correta)
+app.index_string = """
+<!DOCTYPE html>
+<html>
+  <head>
+    {%metas%}
+    <title>{%title%}</title>
+    {%favicon%}
+    {%css%}
+    <style>
+      /* ── Dropdown (react-select v1 interno do Dash) ── */
+      .Select-control {
+        background-color: #1a1d2e !important;
+        border: 1px solid #252840 !important;
+        border-radius: 8px !important;
+        color: #e2e8f0 !important;
+        box-shadow: none !important;
+      }
+      .Select-control:hover { border-color: #818cf8 !important; }
+      .Select.is-open > .Select-control {
+        border-color: #818cf8 !important;
+        border-radius: 8px 8px 0 0 !important;
+      }
+      .Select-placeholder, .Select-value-label { color: #e2e8f0 !important; font-size: 13px !important; }
+      .Select-arrow { border-top-color: #64748b !important; }
+      .Select.is-open .Select-arrow { border-bottom-color: #818cf8 !important; }
+
+      /* Menu de opções */
+      .Select-menu-outer {
+        background-color: #1a1d2e !important;
+        border: 1px solid #818cf8 !important;
+        border-top: none !important;
+        border-radius: 0 0 8px 8px !important;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.6) !important;
+      }
+      .Select-menu { background-color: #1a1d2e !important; }
+      .Select-option {
+        background-color: #1a1d2e !important;
+        color: #e2e8f0 !important;
+        font-size: 13px !important;
+        padding: 9px 12px !important;
+      }
+      .Select-option.is-focused {
+        background-color: rgba(129,140,248,0.18) !important;
+        color: #818cf8 !important;
+      }
+      .Select-option.is-selected {
+        background-color: rgba(129,140,248,0.25) !important;
+        color: #818cf8 !important;
+        font-weight: 600 !important;
+      }
+      .Select-noresults {
+        background-color: #1a1d2e !important;
+        color: #64748b !important;
+        font-size: 13px !important;
+      }
+      .Select-input > input {
+        color: #e2e8f0 !important;
+        caret-color: #818cf8 !important;
+        background-color: transparent !important;
+      }
+
+      /* ── DatePickerRange ── */
+      .DateInput, .DateInput_input {
+        background-color: #1a1d2e !important;
+        color: #e2e8f0 !important;
+        font-size: 13px !important;
+        border: none !important;
+      }
+      .DateInput_input::placeholder { color: #64748b !important; }
+      .DateInput_input__focused { border-bottom: 2px solid #818cf8 !important; }
+      .DateRangePickerInput {
+        background-color: #1a1d2e !important;
+        border: 1px solid #252840 !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+      .DateRangePickerInput:hover { border-color: #818cf8 !important; }
+      .DateRangePickerInput_arrow, .DateRangePickerInput_arrow_svg { color: #64748b !important; fill: #64748b !important; }
+      .DateRangePicker_picker, .DayPicker, .DayPicker_transitionContainer,
+      .CalendarMonthGrid, .CalendarMonth {
+        background-color: #141624 !important;
+        color: #e2e8f0 !important;
+      }
+      .CalendarMonth_caption { color: #e2e8f0 !important; font-size: 14px !important; font-weight: 600 !important; }
+      .DayPickerNavigation_button {
+        background-color: #1a1d2e !important;
+        border: 1px solid #252840 !important;
+        border-radius: 6px !important;
+      }
+      .DayPickerNavigation_button:hover { border-color: #818cf8 !important; }
+      .DayPicker_weekHeader_li small { color: #64748b !important; font-size: 11px !important; font-weight: 600 !important; }
+      .CalendarDay__default {
+        background-color: #141624 !important;
+        border-color: #252840 !important;
+        color: #e2e8f0 !important;
+      }
+      .CalendarDay__default:hover {
+        background-color: rgba(129,140,248,0.2) !important;
+        border-color: #818cf8 !important;
+        color: #818cf8 !important;
+      }
+      .CalendarDay__selected, .CalendarDay__selected:active, .CalendarDay__selected:hover {
+        background-color: #818cf8 !important;
+        border-color: #818cf8 !important;
+        color: #fff !important;
+        font-weight: 700 !important;
+      }
+      .CalendarDay__selected_span {
+        background-color: rgba(129,140,248,0.2) !important;
+        border-color: #252840 !important;
+        color: #818cf8 !important;
+      }
+      .CalendarDay__hovered_span, .CalendarDay__hovered_span:hover {
+        background-color: rgba(129,140,248,0.15) !important;
+        color: #818cf8 !important;
+      }
+      .CalendarDay__blocked_out_of_range, .CalendarDay__blocked_out_of_range:hover {
+        background-color: #141624 !important;
+        color: #64748b !important;
+        opacity: 0.4 !important;
+      }
+    </style>
+  </head>
+  <body>
+    {%app_entry%}
+    <footer>
+      {%config%}
+      {%scripts%}
+      {%renderer%}
+    </footer>
+  </body>
+</html>
+"""
+
 app.layout = html.Div([
 
     # Google Fonts
@@ -320,6 +457,7 @@ app.layout = html.Div([
         rel="stylesheet",
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap",
     ),
+
 
     # ── Header ──────────────────────────────────────────────────────────────
     html.Header([

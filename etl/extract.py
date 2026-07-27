@@ -32,7 +32,7 @@ def _validar_colunas(df: pd.DataFrame, aba: str) -> None:
         logger.warning("Aba '%s': nenhuma expected_columns definida, pulando validação.", aba)
         return
 
-    colunas_lidas_norm = [c.lower().strip() for c in df.columns]
+    colunas_lidas_norm = [str(c).lower().strip() for c in df.columns]
     faltando = [
         col for col in expected
         if col.lower().strip() not in colunas_lidas_norm
@@ -50,14 +50,17 @@ def extrair_dados(nome_aba: str, caminho: str = EXCEL_PATH) -> pd.DataFrame:
     path = Path(caminho)
     _validar_arquivo(path)
 
+    header_row = SHEETS_CONFIG[nome_aba].get("header_row", 0)
+
     logger.info("Lendo aba '%s' de %s", nome_aba, path)
-    df = pd.read_excel(path, sheet_name=nome_aba, header=0, engine="openpyxl")
+    df = pd.read_excel(path, sheet_name=nome_aba, header=header_row, engine="openpyxl")
 
     _validar_colunas(df, nome_aba)
 
     # Coluna auxiliar com o número da linha original na planilha Excel (para auditoria)
-    # +2: +1 pelo cabeçalho consumido pelo pandas, +1 porque o Excel começa em 1
-    df["_linha_planilha"] = df.index + 2
+    # +1 pelo cabeçalho consumido pelo pandas, +1 porque o Excel começa em 1
+    # +header_row pelas linhas puladas antes do cabeçalho
+    df["_linha_planilha"] = df.index + 2 + header_row
 
     logger.info("Aba '%s': %d linhas extraídas.", nome_aba, len(df))
     return df

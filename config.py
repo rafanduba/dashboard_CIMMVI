@@ -25,8 +25,9 @@ SHEETS_CONFIG = {
         "conta": "CIMMVI - Rateio Banco do Brasil",
         "entidade": "CIMMVI",
         "banco": "Banco do Brasil",
+        "header_row": 1,  # linha 1 em branco, cabeçalho na linha 2
         "expected_columns": [
-            "CATEGORIA", "DESCRIÇÃO", "OBSERVAÇÕES", "Parc.Atual", "Parc.Totais",
+            "CATEGORIA", "DESCRIÇÃO", "OBSERVAÇÃO", "Parc. Atual", "Parc. Total",
             "DATA PAGAMENTO", "SITUAÇÃO", "FORMA PAGAMENTO", "MOVIMENTAÇÃO", "SALDO ACUMULADO",
         ],
     },
@@ -34,6 +35,7 @@ SHEETS_CONFIG = {
         "conta": "CIMMVI - Licenciamento Caixa",
         "entidade": "CIMMVI",
         "banco": "Caixa Econômica Federal",
+        "header_row": 0,  # cabeçalho direto na linha 1
         "expected_columns": [
             "CATEGORIA", "DESCRIÇÃO", "OBSERVAÇÃO",
             "DATA PAGAMENTO", "SITUAÇÃO", "FORMA PAGAMENTO", "MOVIMENTAÇÃO", "SALDO ACUMULADO",
@@ -43,6 +45,7 @@ SHEETS_CONFIG = {
         "conta": "AMVI - Banco do Brasil - CC 439",
         "entidade": "AMVI",
         "banco": "Banco do Brasil",
+        "header_row": 0,  # cabeçalho na linha 1
         "expected_columns": [
             "CATEGORIA", "DESCRIÇÃO", "NF/ Nº doc",
             "DATA PAGAMENTO", "SITUAÇÃO", "FORMA PAGAMENTO", "MOVIMENTAÇÃO", "SALDO ACUMULADO",
@@ -54,12 +57,18 @@ SHEETS_CONFIG = {
 # Impede falhas por erros de digitação
 # Inclui variantes dos nomes antigos como fallback para compatibilidade
 RENAME_MAP = {
-    # ----- Formato novo (CAPS) -----
     "CATEGORIA":          "categoria",
     "DESCRIÇÃO":          "descricao",
     "OBSERVAÇÕES":        "observacao",
+    "OBSERVAÇÃO":         "observacao",
+    "PARC.ATUAL":         "parc_atual",
+    "PARC.TOTAIS":        "parc_total",
+    "PARC. ATUAL":        "parc_atual",
+    "PARC. TOTAL":        "parc_total",
     "Parc.Atual":          "parc_atual",
     "Parc.Totais":         "parc_total",
+    "Parc. Atual":         "parc_atual",
+    "Parc. Total":         "parc_total",
     "DATA PAGAMENTO":     "data_pagamento",
     "SITUAÇÃO":           "situacao",
     "FORMA PAGAMENTO":    "forma_pagamento",
@@ -86,15 +95,14 @@ RENAME_MAP = {
 }
 
 # Normalização dos valores de Situação
-# Mapeia variações (especialmente FINALIZADO da nova planilha) para o valor padrão do banco
+# Mapeia variações para o valor padrão do banco
 # Chaves em lowercase — o transform faz .lower().strip() antes de comparar
 SITUACAO_MAP = {
-    "finalizado":   "Pago",
-    "pago":         "Pago",
-    "em aberto":    "Em aberto",
-    "aprovado - aguardando pagamento":                            "Aprovado - Aguardando Pagamento",
-    "aguardando aprovação":                                       "Aguardando Aprovação",
-    "pagamento realizado - aguardando autorização margarete":     "Pagamento Realizado - Aguardando autorização Margarete",
+    "pago": "Pago",
+    "em aberto": "Em aberto",
+    "aprovado - aguardando pagamento": "Aprovado - Aguardando Pagamento",
+    "aguardando aprovação": "Aguardando Aprovação",
+    "pagamento realizado - aguardando autorização margarete": "Pagamento Realizado - Aguardando autorização Margarete",
 }
 
 # Nomes que indicam saldo do dia (em qualquer variação de maiúsculas e minúsculas)

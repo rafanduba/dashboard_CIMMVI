@@ -1,175 +1,314 @@
-/* ──────────────────────────────────────────────────────────────
-   Tokens do tema (devem bater com os valores em app.py)
-   ────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   Tokens do tema
+   ═══════════════════════════════════════════════════════════ */
 
 :root {
-  --Dash-Fill-Inverse-Strong: #1a1d2e;
-  --Dash-Fill-Inverse: #1a1d2e;
-  --Dash-Fill-Strong: #1a1d2e;
-  --Dash-Text: #e2e8f0;
-  --Dash-Border: #252840;
-}
-
-:root {
+  /* Cores base */
   --bg: #0d0f1a;
   --card: #141624;
   --card2: #1a1d2e;
+  --calendar-day-bg: #1e2235;
   --border: #252840;
   --primary: #818cf8;
   --text: #e2e8f0;
   --muted: #64748b;
   --font: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Aliases para compatibilidade com Dash */
+  --Dash-Fill-Inverse-Strong: var(--card2);
+  --Dash-Fill-Inverse: var(--card2);
+  --Dash-Fill-Strong: var(--card2);
+  --Dash-Text: var(--text);
+  --Dash-Border: var(--border);
+
+  /* Estados reutilizáveis */
+  --hover-bg: rgba(129, 140, 248, 0.15);
+  --selected-bg: rgba(129, 140, 248, 0.2);
+  --selected-span-bg: rgba(129, 140, 248, 0.2);
 }
 
-/* ──────────────────────────────────────────────────────────────
-   Dropdown (dcc.Dropdown → react-select v1 interno do Dash)
-   ────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   Estilos base compartilhados
+   ═══════════════════════════════════════════════════════════ */
 
-/* Caixa principal do dropdown */
-.Select-control {
-  background-color: var(--card2) !important;
-  border-color: var(--border) !important;
-  border-radius: 8px !important;
-  color: var(--text) !important;
-  box-shadow: none !important;
-  transition: border-color 0.15s ease !important;
+/* Aplica fundo escuro a todos os componentes Dash */
+[class*="dash-"],
+.Select-control,
+.Select-menu-outer,
+.DateInput,
+.DateRangePickerInput,
+.CalendarDay,
+.CalendarMonthGrid,
+.CalendarMonth,
+.DayPicker {
+  background-color: var(--card2);
+  color: var(--text);
+  font-family: var(--font);
 }
 
-/* Popup inteiro */
-.dash-dropdown-content {
-  background-color: var(--card2) !important;
-  border: 1px solid var(--primary) !important;
-  color: var(--text) !important;
+/* Bordas e transições padrão */
+.Select-control,
+.DateRangePickerInput,
+.dash-datepicker-input-wrapper,
+.dash-dropdown {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.15s ease;
 }
 
-/* Container da busca */
-.dash-dropdown-search-container {
-  background-color: var(--card2) !important;
+/* Hover genérico para campos */
+.Select-control:hover,
+.DateRangePickerInput:hover,
+.dash-datepicker-input-wrapper:hover {
+  border-color: var(--primary);
 }
 
-/* Campo de busca */
-.dash-dropdown-search {
-  background-color: var(--card2) !important;
-  color: var(--text) !important;
+/* ═══════════════════════════════════════════════════════════
+   Dropdown (react-select)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Estado aberto */
+.Select.is-open>.Select-control {
+  border-color: var(--primary);
+  border-radius: 8px 8px 0 0;
 }
 
-/* Lista */
-.dash-dropdown-options {
-  background-color: var(--card2) !important;
+/* Placeholder e valor selecionado */
+.Select-placeholder,
+.Select-value-label {
+  font-size: 13px;
 }
 
-/* Cada opção */
-.dash-dropdown-option,
-.dash-options-list-option {
-  background-color: var(--card2) !important;
-  color: var(--text) !important;
+.Select--single>.Select-control .Select-value {
+  background-color: transparent;
 }
 
-/* Caixa inteira */
+/* Seta */
+.Select-arrow {
+  border-top-color: var(--muted);
+}
+
+.Select.is-open .Select-arrow {
+  border-bottom-color: var(--primary);
+}
+
+/* Menu de opções */
+.Select-menu-outer {
+  border: 1px solid var(--primary);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+
+/* Opções */
+.Select-option {
+  font-size: 13px;
+  padding: 9px 12px;
+  transition: background-color 0.1s ease;
+}
+
+.Select-option.is-focused {
+  background-color: var(--hover-bg);
+  color: var(--primary);
+}
+
+.Select-option.is-selected {
+  background-color: var(--selected-bg);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.Select-noresults {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 10px 12px;
+}
+
+/* Input de busca */
+.Select-input,
+.Select-input>input {
+  font-size: 13px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+DatePickerRange
+═══════════════════════════════════════════════════════════ */
+
+/* Wrapper */
 .dash-datepicker-input-wrapper {
-  background-color: var(--card2) !important;
+  overflow: hidden !important;
+  background: var(--card2) !important;
   border: 1px solid var(--border) !important;
   border-radius: 8px !important;
-  color: var(--text) !important;
 }
 
-/* Hover */
 .dash-datepicker-input-wrapper:hover {
   border-color: var(--primary) !important;
 }
 
 /* Inputs */
-.dash-datepicker-input {
+.DateInput,
+.DateInput_input {
   background-color: transparent !important;
-  color: var(--text) !important;
   border: none !important;
-  outline: none !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  color: var(--text) !important;
 }
 
-/* Placeholder */
-.dash-datepicker-input::placeholder {
+.DateInput_input::placeholder {
   color: var(--muted) !important;
 }
 
-/* Ícones */
-.dash-datepicker-range-arrow,
-.dash-datepicker-caret-icon {
+.DateInput_input__focused {
+  border-bottom: 2px solid var(--primary) !important;
+  background-color: transparent !important;
+}
+
+/* Range */
+.DateRangePickerInput {
+  background-color: var(--card2) !important;
+  padding: 2px 6px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+
+.DateRangePickerInput:hover {
+  border-color: var(--primary) !important;
+}
+
+.DateRangePickerInput_arrow,
+.DateRangePickerInput_arrow_svg {
   color: var(--muted) !important;
+  fill: var(--muted) !important;
 }
 
-.dash-datepicker-range-arrow path,
-.dash-datepicker-caret-icon path {
-  fill: currentColor !important;
+/* ═══════════════════════════════════════════════════════════
+   Calendário popup
+   ═══════════════════════════════════════════════════════════ */
+
+/* Container principal do popup */
+.DateRangePicker_picker,
+.DayPicker,
+.DayPicker_transitionContainer,
+.CalendarMonthGrid,
+.CalendarMonth,
+.dash-datepicker-content,
+.dash-datepicker-calendar-wrapper,
+.dash-datepicker-calendar-container,
+.dash-datepicker-calendar {
+  background-color: var(--card2) !important;
+  color: var(--text) !important;
 }
 
-/* ===== Popup ===== */
-.dash-datepicker-content {
-  background: var(--card2) !important;
+/* Cabeçalho do mês */
+.CalendarMonth_caption,
+.dash-datepicker-calendar-month-header {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--text) !important;
+  background-color: var(--card2) !important;
+}
+
+/* Dias da semana (cabeçalho) */
+.DayPicker_weekHeaders,
+.DayPicker_weekHeader,
+.dash-datepicker-calendar thead th {
+  color: var(--muted) !important;
+  background-color: var(--card2) !important;
+}
+
+.DayPicker_weekHeader_li small {
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+/* Navegação */
+.DayPickerNavigation_button {
+  background-color: var(--card2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  color: var(--text) !important;
+}
+
+.DayPickerNavigation_button:hover {
+  border-color: var(--primary) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DIAS DO CALENDÁRIO
+   ═══════════════════════════════════════════════════════════ */
+
+/* Todos os dias */
+.CalendarDay,
+.CalendarDay__default,
+.CalendarDay__default:not(.CalendarDay__selected):not(.CalendarDay__selected_span):not(.CalendarDay__hovered_span),
+.dash-datepicker-calendar-date-inside {
+  background-color: #252840 !important;
+  /* Cor clara fixa - mude aqui */
   border: 1px solid var(--border) !important;
   color: var(--text) !important;
-  border-radius: 10px !important;
+  font-family: var(--font) !important;
+  transition: background-color 0.1s ease !important;
 }
 
-/* Container do calendário */
-.dash-datepicker-calendar-wrapper,
-.dash-datepicker-calendar-container {
-  background: var(--card2) !important;
-}
-
-/* Tabela do calendário */
-.dash-datepicker-calendar {
-  background: var(--card2) !important;
-  color: var(--text) !important;
-}
-
-/* Cabeçalho (June 2026, July 2026...) */
-.dash-datepicker-calendar-month-header {
-  background: var(--card2) !important;
-  color: var(--text) !important;
-}
-
-/* Dias da semana (Su Mo Tu...) */
-.dash-datepicker-calendar thead th {
-  background: var(--card2) !important;
-  color: var(--muted) !important;
-}
-
-/* Dias */
-.dash-datepicker-calendar-date-inside {
-  background: var(--card2) !important;
-  color: var(--text) !important;
-  border-radius: 6px;
-}
-
-/* Hover */
+/* Hover nos dias normais */
+.CalendarDay__default:hover,
 .dash-datepicker-calendar-date-inside:hover {
-  background: rgba(129, 140, 248, .15) !important;
+  background-color: var(--hover-bg) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
 }
 
-/* Dia selecionado */
+/* Dias selecionados (início e fim do range) */
+.CalendarDay__selected,
+.CalendarDay__selected:active,
+.CalendarDay__selected:hover,
 .dash-datepicker-calendar-date-selected {
-  background: var(--primary) !important;
-  color: white !important;
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
 }
 
-/* Intervalo selecionado */
+/* Dias dentro do range selecionado */
+.CalendarDay__selected_span,
 .dash-datepicker-calendar-date-highlighted {
-  background: rgba(129, 140, 248, .20) !important;
+  background-color: rgba(129, 140, 248, 0.25) !important;
+  border-color: var(--border) !important;
+  color: var(--primary) !important;
 }
 
-/* Espaços vazios */
+/* Hover nos dias do range */
+.CalendarDay__hovered_span,
+.CalendarDay__hovered_span:hover {
+  background-color: var(--hover-bg) !important;
+  border-color: var(--border) !important;
+  color: var(--primary) !important;
+}
+
+/* Dias bloqueados (fora do mês atual) */
+.CalendarDay__blocked_out_of_range,
+.CalendarDay__blocked_out_of_range:hover,
 .dash-datepicker-calendar-padding {
-  background: var(--card2) !important;
+  background-color: var(--card) !important;
+  color: rgba(100, 116, 139, 0.5) !important;
+  /* muted com opacidade */
+  border: 1px solid transparent !important;
 }
 
-/* Dropdown do mês */
+/* ═══════════════════════════════════════════════════════════
+   Dropdowns internos do calendário (mês/ano)
+   ═══════════════════════════════════════════════════════════ */
+
 .dash-dropdown {
   background: var(--card2) !important;
   color: var(--text) !important;
   border: 1px solid var(--border) !important;
 }
 
-/* Campo do ano */
 .dash-input {
   background: var(--card2) !important;
   border: 1px solid var(--border) !important;
@@ -185,243 +324,42 @@
   color: var(--text) !important;
 }
 
-/* Hover */
-.dash-dropdown-option:hover,
-.dash-options-list-option:hover {
-  background-color: rgba(129, 140, 248, 0.15) !important;
-}
+/* ═══════════════════════════════════════════════════════════
+   Ícones
+   ═══════════════════════════════════════════════════════════ */
 
-/* Selecionado */
-.dash-dropdown-option.selected,
-.dash-options-list-option.selected {
-  background-color: rgba(129, 140, 248, 0.25) !important;
-  color: var(--primary) !important;
-}
-
-.Select-control:hover {
-  border-color: var(--primary) !important;
-}
-
-.Select.is-open>.Select-control {
-  border-color: var(--primary) !important;
-  border-radius: 8px 8px 0 0 !important;
-}
-
-.Select-placeholder,
-.Select-value-label {
-  color: var(--text) !important;
-  font-family: var(--font) !important;
-  font-size: 13px !important;
-}
-
-.Select-arrow {
-  border-top-color: var(--muted) !important;
-}
-
-.Select.is-open .Select-arrow {
-  border-bottom-color: var(--primary) !important;
-}
-
-/* Input de busca interno do dropdown */
-.Select-input,
-.Select-input>input {
-  background-color: var(--card2) !important;
-  color: var(--text) !important;
-  font-family: var(--font) !important;
-  font-size: 13px !important;
-}
-
-/* Garante que o fundo do controle não vaze branco */
-.Select--single>.Select-control .Select-value {
-  background-color: transparent !important;
-}
-
-/* Menu de opções */
-.Select-menu-outer {
-  background-color: var(--card2) !important;
-  border: 1px solid var(--primary) !important;
-  border-top: none !important;
-  border-radius: 0 0 8px 8px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
-  z-index: 9999 !important;
-}
-
-.Select-menu {
-  background-color: var(--card2) !important;
-}
-
-.Select-option {
-  background-color: var(--card2) !important;
-  color: var(--text) !important;
-  font-family: var(--font) !important;
-  font-size: 13px !important;
-  padding: 9px 12px !important;
-  transition: background-color 0.1s ease !important;
-}
-
-.Select-option.is-focused {
-  background-color: rgba(129, 140, 248, 0.15) !important;
-  color: var(--primary) !important;
-}
-
-.Select-option.is-selected {
-  background-color: rgba(129, 140, 248, 0.2) !important;
-  color: var(--primary) !important;
-  font-weight: 600 !important;
-}
-
-.Select-noresults {
-  background-color: var(--card2) !important;
-  color: var(--muted) !important;
-  font-family: var(--font) !important;
-  font-size: 13px !important;
-  padding: 10px 12px !important;
-}
-
-/* ──────────────────────────────────────────────────────────────
-   DatePickerRange (react-dates)
-   ────────────────────────────────────────────────────────────── */
-
-/* Campos de input de data */
-.DateInput,
-.DateInput_input {
-  background-color: var(--card2) !important;
-  color: var(--text) !important;
-  font-family: var(--font) !important;
-  font-size: 13px !important;
-  border: none !important;
-  border-radius: 6px !important;
-}
-
-.DateInput_input::placeholder {
+.dash-datepicker-range-arrow,
+.dash-datepicker-caret-icon {
   color: var(--muted) !important;
 }
 
-.DateInput_input__focused {
-  border-bottom: 2px solid var(--primary) !important;
+.dash-datepicker-range-arrow path,
+.dash-datepicker-caret-icon path {
+  fill: currentColor !important;
 }
 
-/* Container geral do date picker */
-.DateRangePickerInput {
-  background-color: var(--card2) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
-  padding: 2px 6px !important;
-  transition: border-color 0.15s ease !important;
+/* ═══════════════════════════════════════════════════════════
+   Ícones e elementos SVG
+   ═══════════════════════════════════════════════════════════ */
+
+.dash-datepicker-range-arrow,
+.dash-datepicker-caret-icon {
+  color: var(--muted);
 }
 
-.DateRangePickerInput:hover {
-  border-color: var(--primary) !important;
+.dash-datepicker-range-arrow path,
+.dash-datepicker-caret-icon path {
+  fill: currentColor;
 }
 
-.DateRangePickerInput__withBorder {
-  border-color: var(--border) !important;
+/* ═══════════════════════════════════════════════════════════
+   Componentes auxiliares do datepicker
+   ═══════════════════════════════════════════════════════════ */
+
+.dash-input-element {
+  background: transparent;
 }
 
-.DateRangePickerInput_arrow {
-  color: var(--muted) !important;
-}
-
-.dash-datepicker-input-wrapper {
-  background: var(--card2) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
-  overflow: hidden !important;
-}
-
-.dash-datepicker-range-container,
-.dash-datepicker-range-input {
-  background: var(--card2) !important;
-  border-radius: inherit !important;
-}
-
-/* Calendário popup */
-.DateRangePicker_picker,
-.DayPicker,
-.DayPicker_transitionContainer,
-.CalendarMonthGrid,
-.CalendarMonth {
-  background-color: var(--card) !important;
-  color: var(--text) !important;
-}
-
-/* Cabeçalho do calendário */
-.CalendarMonth_caption {
-  color: var(--text) !important;
-  font-family: var(--font) !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-}
-
-/* Dias da semana */
-.DayPickerNavigation_button {
-  background-color: var(--card2) !important;
-  border-color: var(--border) !important;
-  color: var(--text) !important;
-  border-radius: 6px !important;
-}
-
-.DayPickerNavigation_button:hover {
-  border-color: var(--primary) !important;
-}
-
-.DayPicker_weekHeaders,
-.DayPicker_weekHeader {
-  color: var(--muted) !important;
-  font-family: var(--font) !important;
-}
-
-.DayPicker_weekHeader_li small {
-  color: var(--muted) !important;
-  font-size: 11px !important;
-  font-weight: 600 !important;
-}
-
-/* Células de dia */
-.CalendarDay__default {
-  background-color: var(--card) !important;
-  border-color: var(--border) !important;
-  color: var(--text) !important;
-  font-family: var(--font) !important;
-  transition: background-color 0.1s ease !important;
-}
-
-.CalendarDay__default:hover {
-  background-color: rgba(129, 140, 248, 0.2) !important;
-  border-color: var(--primary) !important;
-  color: var(--primary) !important;
-}
-
-.CalendarDay__selected,
-.CalendarDay__selected:active,
-.CalendarDay__selected:hover {
-  background-color: var(--primary) !important;
-  border-color: var(--primary) !important;
-  color: #fff !important;
-  font-weight: 700 !important;
-}
-
-.CalendarDay__selected_span {
-  background-color: rgba(129, 140, 248, 0.2) !important;
-  border-color: var(--border) !important;
-  color: var(--primary) !important;
-}
-
-.CalendarDay__hovered_span,
-.CalendarDay__hovered_span:hover {
-  background-color: rgba(129, 140, 248, 0.15) !important;
-  border-color: var(--border) !important;
-  color: var(--primary) !important;
-}
-
-.CalendarDay__blocked_out_of_range,
-.CalendarDay__blocked_out_of_range:hover {
-  background-color: var(--card) !important;
-  color: var(--muted) !important;
-  opacity: 0.4 !important;
-}
-
-/* Separador entre os dois inputs */
-.DateRangePickerInput_arrow_svg {
-  fill: var(--muted) !important;
+.dash-input-stepper {
+  background: var(--card2);
 }

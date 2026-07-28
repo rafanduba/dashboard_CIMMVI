@@ -4,7 +4,7 @@ import logging
 
 import pandas as pd
 import plotly.graph_objects as go
-from dash import Input, Output, html
+from dash import Input, Output, State, html, no_update
 
 from dashboard.components import formata_brl, chart_layout, empty_fig
 from dashboard.config import (
@@ -45,12 +45,34 @@ except Exception as _e:
 
 
 # ════════════════════════════════════════════════════════════════════════════
+# Mapeamento de páginas
+# ════════════════════════════════════════════════════════════════════════════
+_PAGE_TITLES = {
+    "visao_executiva":        "🏠  Visão Executiva",
+    "execucao_orcamentaria":  "📈  Execução Orçamentária",
+    "municipios_consorciados": "📋  Municípios Consorciados",
+    "contratos":              "📊  Contratos",
+}
+
+_NAV_PAGES = ["visao_executiva", "execucao_orcamentaria", "municipios_consorciados", "contratos"]
+
+
+# ════════════════════════════════════════════════════════════════════════════
 # Helpers
 # ════════════════════════════════════════════════════════════════════════════
 
 def _normalizar(conta: str, entidade: str):
     """Converte string vazia → None (sem filtro)."""
     return (conta or None), (entidade or None)
+
+
+def _page_from_url(pathname: str) -> str:
+    """Extrai o nome da página da URL (ex: /visao_executiva → 'visao_executiva')."""
+    if pathname and pathname != "/":
+        slug = pathname.strip("/").split("/")[0]
+        if slug in _NAV_PAGES:
+            return slug
+    return "visao_executiva"
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -60,18 +82,76 @@ def _normalizar(conta: str, entidade: str):
 def registrar_callbacks(app):
     """Registra todos os callbacks no app Dash."""
 
+    # ── 1. Navegação: clique nos itens do sidebar → atualiza URL ─────────
     @app.callback(
-        # Header
+        Output("url", "pathname"),
+        [Input(f"nav-{p}", "n_clicks") for p in _NAV_PAGES],
+        prevent_initial_call=True,
+    )
+    def navegar(*clicks):
+        from dash import ctx
+        if not ctx.triggered_id:
+            return no_update
+        # ID format: "nav-<page>"
+        page = ctx.triggered_id.replace("nav-", "")
+        return f"/{page}"
+
+    # ── 2. Renderização da página ativa — show/hide ───────────────────────
+    @app.callback(
+        Output("topbar-title", "children"),
+        # Alterna display de cada página
+        *[Output(f"page-{p}", "style") for p in _NAV_PAGES],
+        # Destaca item ativo no sidebar
+        *[Output(f"nav-{p}", "className") for p in _NAV_PAGES],
+        Input("url", "pathname"),
+    )
+    def render_page(pathname):
+        page = _page_from_url(pathname)
+        title = _PAGE_TITLES.get(page, "🏠  Visão Executiva")
+
+        # Exibe apenas a página ativa; oculta as demais
+        styles = [
+            {"display": "block"} if p == page else {"display": "none"}
+            for p in _NAV_PAGES
+        ]
+
+        # Classes CSS dos itens de nav (ativo vs. normal)
+        classes = [
+            "sidebar-nav-item active" if p == page else "sidebar-nav-item"
+            for p in _NAV_PAGES
+        ]
+
+        return title, *styles, *classes
+
+
+    # ── 3. Toggle do sidebar (colapso / expansão) ─────────────────────────
+    @app.callback(
+        Output("sidebar", "className"),
+        Output("main-area", "className"),
+        Output("sidebar-collapsed", "data"),
+        Input("btn-sidebar-toggle", "n_clicks"),
+        State("sidebar-collapsed", "data"),
+        prevent_initial_call=True,
+    )
+    def toggle_sidebar(n_clicks, is_collapsed):
+        collapsed = not is_collapsed
+        sidebar_cls  = "sidebar collapsed" if collapsed else "sidebar"
+        main_cls     = "main-area expanded" if collapsed else "main-area"
+        return sidebar_cls, main_cls, collapsed
+
+    # ── 4. Atualização dos dados (filtros) ────────────────────────────────
+    @app.callback(
+        # Header ETL
         Output("header-etl",         "children"),
-        # Hero — saldos globais
+        # Saldos globais (Painel)
         Output("saldo-geral",        "children"),
         Output("saldo-cimmvi",       "children"),
         Output("saldo-amvi",         "children"),
-        # Painel — saldo por conta individual
+        # Saldo por conta individual (Painel)
         Output("saldo-c1",           "children"),
         Output("saldo-c2",           "children"),
         Output("saldo-c3",           "children"),
-        # KPIs
+        # KPIs (Painel)
         Output("kpi-entradas",       "children"),
         Output("kpi-saidas",         "children"),
         Output("kpi-liquido",        "children"),
@@ -86,21 +166,31 @@ def registrar_callbacks(app):
         Output("chart-categoria",    "figure"),
         Output("chart-forma-pgto",   "figure"),
         Output("chart-top-saidas",   "figure"),
-        # Tabela
+        # Tabela — lançamentos
         Output("tabela-lancamentos", "data"),
+        # Relatórios
+        Output("rel-entradas",       "children"),
+        Output("rel-saidas",         "children"),
+        Output("rel-liquido",        "children"),
+        Output("rel-saldo",          "children"),
+        Output("rel-ab-saidas",      "children"),
+        Output("rel-ab-ent",         "children"),
+        Output("rel-aguardando",     "children"),
+        Output("rel-saldo-c1",       "children"),
+        Output("rel-saldo-c2",       "children"),
+        Output("rel-saldo-c3",       "children"),
         # Inputs
         Input("filtro-conta",        "value"),
-        Input("filtro-entidade",     "value"),
         Input("filtro-data",         "start_date"),
         Input("filtro-data",         "end_date"),
     )
-    def atualizar(conta_sel, entidade_sel, data_ini, data_fim):
+    def atualizar(conta_sel, data_ini, data_fim):
         EMPTY = "—"
 
-        # ── Banco indisponível ───────────────────────────────────────────
+        # ── Banco indisponível ─────────────────────────────────────────────
         if not _DB_READY:
             aviso = html.Span(
-                "\u26a0\ufe0f Execute o ETL para carregar os dados.",
+                "⚠️ Execute o ETL para carregar os dados.",
                 style={"color": WARNING},
             )
             fig_v = empty_fig("Banco não inicializado — execute o ETL primeiro.")
@@ -112,18 +202,21 @@ def registrar_callbacks(app):
                 fig_v, fig_v, fig_v,
                 fig_v, fig_v, fig_v,
                 [],
+                EMPTY, EMPTY, EMPTY, EMPTY,
+                EMPTY, EMPTY, EMPTY,
+                EMPTY, EMPTY, EMPTY,
             )
 
-        conta, entidade = _normalizar(conta_sel, entidade_sel)
+        conta = conta_sel or None
 
-        # ── Info do ETL ──────────────────────────────────────────────────
+        # ── Info do ETL ───────────────────────────────────────────────────
         try:
             uc = ultima_carga()
             if uc:
                 ts = str(uc["iniciado_em"])[:16].replace("T", " ")
                 header_etl = [
-                    html.Span("\u2705 ", style={"color": SUCCESS}),
-                    html.Span(f"Última carga: {ts}  \u00b7  "),
+                    html.Span("✅ ", style={"color": SUCCESS}),
+                    html.Span(f"Última carga: {ts}  ·  "),
                     html.Span(
                         f"{uc['linhas_inseridas']} linhas inseridas",
                         style={"color": TEXT_DIM},
@@ -136,7 +229,7 @@ def registrar_callbacks(app):
         except Exception:
             header_etl = EMPTY
 
-        # ── Saldos ───────────────────────────────────────────────────────
+        # ── Saldos ────────────────────────────────────────────────────────
         try:
             _v1 = saldo_final_conta_1() or 0.0
             _v2 = saldo_final_conta_2() or 0.0
@@ -150,18 +243,18 @@ def registrar_callbacks(app):
         except Exception:
             sg = sc1 = sc2 = sc3 = s_cimmvi = s_amvi = EMPTY
 
-        # ── KPIs ─────────────────────────────────────────────────────────
+        # ── KPIs ──────────────────────────────────────────────────────────
         try:
-            kpi_ent    = formata_brl(total_entradas(data_ini, data_fim, conta, entidade))
-            kpi_sai    = formata_brl(total_saidas(data_ini, data_fim, conta, entidade))
-            kpi_liq    = formata_brl(total_liquido(data_ini, data_fim, conta, entidade), show_sign=True)
-            kpi_ab_sai = formata_brl(saidas_em_aberto(conta, entidade))
-            kpi_ab_ent = formata_brl(entradas_em_aberto(conta, entidade))
-            kpi_ag     = formata_brl(valor_aguardando_aprovacao(conta, entidade))
+            kpi_ent    = formata_brl(total_entradas(data_ini, data_fim, conta))
+            kpi_sai    = formata_brl(total_saidas(data_ini, data_fim, conta))
+            kpi_liq    = formata_brl(total_liquido(data_ini, data_fim, conta), show_sign=True)
+            kpi_ab_sai = formata_brl(saidas_em_aberto(conta))
+            kpi_ab_ent = formata_brl(entradas_em_aberto(conta))
+            kpi_ag     = formata_brl(valor_aguardando_aprovacao(conta))
         except Exception:
             kpi_ent = kpi_sai = kpi_liq = kpi_ab_sai = kpi_ab_ent = kpi_ag = EMPTY
 
-        # ── Gráfico 1: Evolução do saldo mensal ──────────────────────────
+        # ── Gráfico 1: Evolução do saldo mensal ───────────────────────────
         try:
             df_s = evolucao_saldo_mensal(
                 conta=conta, data_inicio=data_ini, data_fim=data_fim,
@@ -197,10 +290,10 @@ def registrar_callbacks(app):
         except Exception as ex:
             fig_saldo = empty_fig(f"Erro: {ex}")
 
-        # ── Gráfico 2: Situação (donut) ──────────────────────────────────
+        # ── Gráfico 2: Situação (donut) ───────────────────────────────────
         try:
             df_sit = contagem_por_situacao(
-                conta=conta, entidade=entidade,
+                conta=conta,
                 data_inicio=data_ini, data_fim=data_fim,
             )
             if df_sit.empty:
@@ -230,10 +323,10 @@ def registrar_callbacks(app):
         except Exception as ex:
             fig_sit = empty_fig(f"Erro: {ex}")
 
-        # ── Gráfico 3: Entradas e saídas mensais ─────────────────────────
+        # ── Gráfico 3: Entradas e saídas mensais ──────────────────────────
         try:
             df_m = entradas_saidas_mensais(
-                conta=conta, entidade=entidade,
+                conta=conta,
                 data_inicio=data_ini, data_fim=data_fim,
             )
             if df_m.empty:
@@ -249,7 +342,7 @@ def registrar_callbacks(app):
                         name="Entradas", x=agg["ano_mes"], y=agg["entradas"],
                         marker_color=SUCCESS, opacity=0.85,
                         hovertemplate=(
-                            "Entradas \u00b7 <b>%{x}</b><br>"
+                            "Entradas · <b>%{x}</b><br>"
                             "R$\u00a0%{y:,.2f}<extra></extra>"
                         ),
                     ),
@@ -257,7 +350,7 @@ def registrar_callbacks(app):
                         name="Saídas", x=agg["ano_mes"], y=agg["saidas"],
                         marker_color=DANGER, opacity=0.85,
                         hovertemplate=(
-                            "Saídas \u00b7 <b>%{x}</b><br>"
+                            "Saídas · <b>%{x}</b><br>"
                             "R$\u00a0%{y:,.2f}<extra></extra>"
                         ),
                     ),
@@ -273,10 +366,10 @@ def registrar_callbacks(app):
         except Exception as ex:
             fig_mensal = empty_fig(f"Erro: {ex}")
 
-        # ── Gráfico 4: Saídas por categoria ──────────────────────────────
+        # ── Gráfico 4: Saídas por categoria ───────────────────────────────
         try:
             df_cat = saidas_por_categoria(
-                conta=conta, entidade=entidade,
+                conta=conta,
                 data_inicio=data_ini, data_fim=data_fim,
             )
             df_cat = df_cat[df_cat["total_saidas"] > 0].head(12)
@@ -311,10 +404,10 @@ def registrar_callbacks(app):
         except Exception as ex:
             fig_cat = empty_fig(f"Erro: {ex}")
 
-        # ── Gráfico 5: Forma de pagamento ────────────────────────────────
+        # ── Gráfico 5: Forma de pagamento ─────────────────────────────────
         try:
             df_fp = saidas_por_forma_pagamento(
-                conta=conta, entidade=entidade,
+                conta=conta,
                 data_inicio=data_ini, data_fim=data_fim,
             )
             if df_fp.empty:
@@ -348,10 +441,10 @@ def registrar_callbacks(app):
         except Exception as ex:
             fig_fp = empty_fig(f"Erro: {ex}")
 
-        # ── Gráfico 6: Top 10 maiores saídas ─────────────────────────────
+        # ── Gráfico 6: Top 10 maiores saídas ──────────────────────────────
         try:
             df_top = top_saidas(
-                n=10, conta=conta, entidade=entidade,
+                n=10, conta=conta,
                 data_inicio=data_ini, data_fim=data_fim,
             )
             if df_top.empty:
@@ -362,7 +455,7 @@ def registrar_callbacks(app):
                     lambda r: (
                         str(r.get("descricao") or "—")
                     )[:40].rstrip()
-                    + ("\u2026" if len(str(r.get("descricao") or "")) > 40 else ""),
+                    + ("…" if len(str(r.get("descricao") or "")) > 40 else ""),
                     axis=1,
                 )
                 cores_top = [
@@ -397,10 +490,10 @@ def registrar_callbacks(app):
         except Exception as ex:
             fig_top = empty_fig(f"Erro: {ex}")
 
-        # ── Tabela de lançamentos ────────────────────────────────────────
+        # ── Tabela de lançamentos ──────────────────────────────────────────
         try:
             df_tab = lancamentos_detalhados(
-                conta=conta, entidade=entidade,
+                conta=conta,
                 data_inicio=data_ini, data_fim=data_fim,
                 tipo_lancamento="MOVIMENTO",
                 limit=500,
@@ -408,18 +501,15 @@ def registrar_callbacks(app):
             if df_tab.empty:
                 dados_tabela = []
             else:
-                # Arredonda valores monetários
                 for col in ("entradas", "saidas", "saldo_acumulado"):
                     if col in df_tab.columns:
                         df_tab[col] = df_tab[col].apply(
                             lambda v: round(float(v), 2) if pd.notna(v) else None,
                         )
-                # Formata data
                 if "data_pagamento" in df_tab.columns:
                     df_tab["data_pagamento"] = df_tab["data_pagamento"].apply(
                         lambda v: str(v)[:10] if v else "",
                     )
-                # Formata parcelas: "3/12"
                 if "parc_atual" in df_tab.columns and "parc_total" in df_tab.columns:
                     def _fmt_parc(row):
                         pa, pt = row.get("parc_atual"), row.get("parc_total")
@@ -435,6 +525,26 @@ def registrar_callbacks(app):
         except Exception:
             dados_tabela = []
 
+        # ── Valores para a tela Relatórios ────────────────────────────────
+        try:
+            rel_ent    = formata_brl(total_entradas(data_ini, data_fim, conta))
+            rel_sai    = formata_brl(total_saidas(data_ini, data_fim, conta))
+            rel_liq    = formata_brl(total_liquido(data_ini, data_fim, conta), show_sign=True)
+            rel_saldo  = formata_brl(saldo_final_geral())
+            rel_ab_sai = formata_brl(saidas_em_aberto(conta))
+            rel_ab_ent = formata_brl(entradas_em_aberto(conta))
+            rel_ag     = formata_brl(valor_aguardando_aprovacao(conta))
+            _r1 = saldo_final_conta_1() or 0.0
+            _r2 = saldo_final_conta_2() or 0.0
+            _r3 = saldo_final_conta_3() or 0.0
+            rel_sc1 = formata_brl(_r1)
+            rel_sc2 = formata_brl(_r2)
+            rel_sc3 = formata_brl(_r3)
+        except Exception:
+            rel_ent = rel_sai = rel_liq = rel_saldo = EMPTY
+            rel_ab_sai = rel_ab_ent = rel_ag = EMPTY
+            rel_sc1 = rel_sc2 = rel_sc3 = EMPTY
+
         return (
             header_etl,
             sg, s_cimmvi, s_amvi,
@@ -443,4 +553,7 @@ def registrar_callbacks(app):
             fig_saldo, fig_sit, fig_mensal,
             fig_cat, fig_fp, fig_top,
             dados_tabela,
+            rel_ent, rel_sai, rel_liq, rel_saldo,
+            rel_ab_sai, rel_ab_ent, rel_ag,
+            rel_sc1, rel_sc2, rel_sc3,
         )

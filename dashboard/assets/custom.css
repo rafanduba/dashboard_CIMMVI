@@ -1,15 +1,24 @@
 /* ──────────────────────────────────────────────────────────────
    Tokens do tema (devem bater com os valores em app.py)
    ────────────────────────────────────────────────────────────── */
+
 :root {
-  --bg:      #0d0f1a;
-  --card:    #141624;
-  --card2:   #1a1d2e;
-  --border:  #252840;
+  --Dash-Fill-Inverse-Strong: #1a1d2e;
+  --Dash-Fill-Inverse: #1a1d2e;
+  --Dash-Fill-Strong: #1a1d2e;
+  --Dash-Text: #e2e8f0;
+  --Dash-Border: #252840;
+}
+
+:root {
+  --bg: #0d0f1a;
+  --card: #141624;
+  --card2: #1a1d2e;
+  --border: #252840;
   --primary: #818cf8;
-  --text:    #e2e8f0;
-  --muted:   #64748b;
-  --font:    'Inter', system-ui, -apple-system, sans-serif;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -19,67 +28,254 @@
 /* Caixa principal do dropdown */
 .Select-control {
   background-color: var(--card2) !important;
-  border-color:     var(--border) !important;
-  border-radius:    8px !important;
-  color:            var(--text) !important;
-  box-shadow:       none !important;
-  transition:       border-color 0.15s ease !important;
+  border-color: var(--border) !important;
+  border-radius: 8px !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+  transition: border-color 0.15s ease !important;
 }
+
+/* Popup inteiro */
+.dash-dropdown-content {
+  background-color: var(--card2) !important;
+  border: 1px solid var(--primary) !important;
+  color: var(--text) !important;
+}
+
+/* Container da busca */
+.dash-dropdown-search-container {
+  background-color: var(--card2) !important;
+}
+
+/* Campo de busca */
+.dash-dropdown-search {
+  background-color: var(--card2) !important;
+  color: var(--text) !important;
+}
+
+/* Lista */
+.dash-dropdown-options {
+  background-color: var(--card2) !important;
+}
+
+/* Cada opção */
+.dash-dropdown-option,
+.dash-options-list-option {
+  background-color: var(--card2) !important;
+  color: var(--text) !important;
+}
+
+/* Caixa inteira */
+.dash-datepicker-input-wrapper {
+  background-color: var(--card2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  color: var(--text) !important;
+}
+
+/* Hover */
+.dash-datepicker-input-wrapper:hover {
+  border-color: var(--primary) !important;
+}
+
+/* Inputs */
+.dash-datepicker-input {
+  background-color: transparent !important;
+  color: var(--text) !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Placeholder */
+.dash-datepicker-input::placeholder {
+  color: var(--muted) !important;
+}
+
+/* Ícones */
+.dash-datepicker-range-arrow,
+.dash-datepicker-caret-icon {
+  color: var(--muted) !important;
+}
+
+.dash-datepicker-range-arrow path,
+.dash-datepicker-caret-icon path {
+  fill: currentColor !important;
+}
+
+/* ===== Popup ===== */
+.dash-datepicker-content {
+  background: var(--card2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  border-radius: 10px !important;
+}
+
+/* Container do calendário */
+.dash-datepicker-calendar-wrapper,
+.dash-datepicker-calendar-container {
+  background: var(--card2) !important;
+}
+
+/* Tabela do calendário */
+.dash-datepicker-calendar {
+  background: var(--card2) !important;
+  color: var(--text) !important;
+}
+
+/* Cabeçalho (June 2026, July 2026...) */
+.dash-datepicker-calendar-month-header {
+  background: var(--card2) !important;
+  color: var(--text) !important;
+}
+
+/* Dias da semana (Su Mo Tu...) */
+.dash-datepicker-calendar thead th {
+  background: var(--card2) !important;
+  color: var(--muted) !important;
+}
+
+/* Dias */
+.dash-datepicker-calendar-date-inside {
+  background: var(--card2) !important;
+  color: var(--text) !important;
+  border-radius: 6px;
+}
+
+/* Hover */
+.dash-datepicker-calendar-date-inside:hover {
+  background: rgba(129, 140, 248, .15) !important;
+}
+
+/* Dia selecionado */
+.dash-datepicker-calendar-date-selected {
+  background: var(--primary) !important;
+  color: white !important;
+}
+
+/* Intervalo selecionado */
+.dash-datepicker-calendar-date-highlighted {
+  background: rgba(129, 140, 248, .20) !important;
+}
+
+/* Espaços vazios */
+.dash-datepicker-calendar-padding {
+  background: var(--card2) !important;
+}
+
+/* Dropdown do mês */
+.dash-dropdown {
+  background: var(--card2) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* Campo do ano */
+.dash-input {
+  background: var(--card2) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.dash-input-element {
+  background: transparent !important;
+  color: var(--text) !important;
+}
+
+.dash-input-stepper {
+  background: var(--card2) !important;
+  color: var(--text) !important;
+}
+
+/* Hover */
+.dash-dropdown-option:hover,
+.dash-options-list-option:hover {
+  background-color: rgba(129, 140, 248, 0.15) !important;
+}
+
+/* Selecionado */
+.dash-dropdown-option.selected,
+.dash-options-list-option.selected {
+  background-color: rgba(129, 140, 248, 0.25) !important;
+  color: var(--primary) !important;
+}
+
 .Select-control:hover {
   border-color: var(--primary) !important;
 }
-.Select.is-open > .Select-control {
-  border-color:    var(--primary) !important;
-  border-radius:   8px 8px 0 0 !important;
+
+.Select.is-open>.Select-control {
+  border-color: var(--primary) !important;
+  border-radius: 8px 8px 0 0 !important;
 }
+
 .Select-placeholder,
 .Select-value-label {
   color: var(--text) !important;
   font-family: var(--font) !important;
   font-size: 13px !important;
 }
+
 .Select-arrow {
   border-top-color: var(--muted) !important;
 }
+
 .Select.is-open .Select-arrow {
   border-bottom-color: var(--primary) !important;
+}
+
+/* Input de busca interno do dropdown */
+.Select-input,
+.Select-input>input {
+  background-color: var(--card2) !important;
+  color: var(--text) !important;
+  font-family: var(--font) !important;
+  font-size: 13px !important;
+}
+
+/* Garante que o fundo do controle não vaze branco */
+.Select--single>.Select-control .Select-value {
+  background-color: transparent !important;
 }
 
 /* Menu de opções */
 .Select-menu-outer {
   background-color: var(--card2) !important;
-  border:           1px solid var(--primary) !important;
-  border-top:       none !important;
-  border-radius:    0 0 8px 8px !important;
-  box-shadow:       0 8px 24px rgba(0, 0, 0, 0.5) !important;
-  z-index:          9999 !important;
+  border: 1px solid var(--primary) !important;
+  border-top: none !important;
+  border-radius: 0 0 8px 8px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  z-index: 9999 !important;
 }
+
 .Select-menu {
   background-color: var(--card2) !important;
 }
+
 .Select-option {
   background-color: var(--card2) !important;
-  color:            var(--text) !important;
-  font-family:      var(--font) !important;
-  font-size:        13px !important;
-  padding:          9px 12px !important;
-  transition:       background-color 0.1s ease !important;
+  color: var(--text) !important;
+  font-family: var(--font) !important;
+  font-size: 13px !important;
+  padding: 9px 12px !important;
+  transition: background-color 0.1s ease !important;
 }
+
 .Select-option.is-focused {
   background-color: rgba(129, 140, 248, 0.15) !important;
-  color:            var(--primary) !important;
+  color: var(--primary) !important;
 }
+
 .Select-option.is-selected {
   background-color: rgba(129, 140, 248, 0.2) !important;
-  color:            var(--primary) !important;
-  font-weight:      600 !important;
+  color: var(--primary) !important;
+  font-weight: 600 !important;
 }
+
 .Select-noresults {
   background-color: var(--card2) !important;
-  color:            var(--muted) !important;
-  font-family:      var(--font) !important;
-  font-size:        13px !important;
-  padding:          10px 12px !important;
+  color: var(--muted) !important;
+  font-family: var(--font) !important;
+  font-size: 13px !important;
+  padding: 10px 12px !important;
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -90,15 +286,17 @@
 .DateInput,
 .DateInput_input {
   background-color: var(--card2) !important;
-  color:            var(--text) !important;
-  font-family:      var(--font) !important;
-  font-size:        13px !important;
-  border:           none !important;
-  border-radius:    6px !important;
+  color: var(--text) !important;
+  font-family: var(--font) !important;
+  font-size: 13px !important;
+  border: none !important;
+  border-radius: 6px !important;
 }
+
 .DateInput_input::placeholder {
   color: var(--muted) !important;
 }
+
 .DateInput_input__focused {
   border-bottom: 2px solid var(--primary) !important;
 }
@@ -106,19 +304,35 @@
 /* Container geral do date picker */
 .DateRangePickerInput {
   background-color: var(--card2) !important;
-  border:           1px solid var(--border) !important;
-  border-radius:    8px !important;
-  padding:          2px 6px !important;
-  transition:       border-color 0.15s ease !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  padding: 2px 6px !important;
+  transition: border-color 0.15s ease !important;
 }
+
 .DateRangePickerInput:hover {
   border-color: var(--primary) !important;
 }
+
 .DateRangePickerInput__withBorder {
   border-color: var(--border) !important;
 }
+
 .DateRangePickerInput_arrow {
   color: var(--muted) !important;
+}
+
+.dash-datepicker-input-wrapper {
+  background: var(--card2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+.dash-datepicker-range-container,
+.dash-datepicker-range-input {
+  background: var(--card2) !important;
+  border-radius: inherit !important;
 }
 
 /* Calendário popup */
@@ -128,7 +342,7 @@
 .CalendarMonthGrid,
 .CalendarMonth {
   background-color: var(--card) !important;
-  color:            var(--text) !important;
+  color: var(--text) !important;
 }
 
 /* Cabeçalho do calendário */
@@ -142,18 +356,21 @@
 /* Dias da semana */
 .DayPickerNavigation_button {
   background-color: var(--card2) !important;
-  border-color:     var(--border) !important;
-  color:            var(--text) !important;
-  border-radius:    6px !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+  border-radius: 6px !important;
 }
+
 .DayPickerNavigation_button:hover {
   border-color: var(--primary) !important;
 }
+
 .DayPicker_weekHeaders,
 .DayPicker_weekHeader {
   color: var(--muted) !important;
   font-family: var(--font) !important;
 }
+
 .DayPicker_weekHeader_li small {
   color: var(--muted) !important;
   font-size: 11px !important;
@@ -163,40 +380,45 @@
 /* Células de dia */
 .CalendarDay__default {
   background-color: var(--card) !important;
-  border-color:     var(--border) !important;
-  color:            var(--text) !important;
-  font-family:      var(--font) !important;
-  transition:       background-color 0.1s ease !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+  font-family: var(--font) !important;
+  transition: background-color 0.1s ease !important;
 }
+
 .CalendarDay__default:hover {
   background-color: rgba(129, 140, 248, 0.2) !important;
-  border-color:     var(--primary) !important;
-  color:            var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
 }
+
 .CalendarDay__selected,
 .CalendarDay__selected:active,
 .CalendarDay__selected:hover {
   background-color: var(--primary) !important;
-  border-color:     var(--primary) !important;
-  color:            #fff !important;
-  font-weight:      700 !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
 }
+
 .CalendarDay__selected_span {
   background-color: rgba(129, 140, 248, 0.2) !important;
-  border-color:     var(--border) !important;
-  color:            var(--primary) !important;
+  border-color: var(--border) !important;
+  color: var(--primary) !important;
 }
+
 .CalendarDay__hovered_span,
 .CalendarDay__hovered_span:hover {
   background-color: rgba(129, 140, 248, 0.15) !important;
-  border-color:     var(--border) !important;
-  color:            var(--primary) !important;
+  border-color: var(--border) !important;
+  color: var(--primary) !important;
 }
+
 .CalendarDay__blocked_out_of_range,
 .CalendarDay__blocked_out_of_range:hover {
   background-color: var(--card) !important;
-  color:            var(--muted) !important;
-  opacity:          0.4 !important;
+  color: var(--muted) !important;
+  opacity: 0.4 !important;
 }
 
 /* Separador entre os dois inputs */

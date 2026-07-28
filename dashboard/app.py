@@ -370,10 +370,16 @@ app.index_string = """
         color: #64748b !important;
         font-size: 13px !important;
       }
+      .Select-input,
       .Select-input > input {
+        background-color: #1a1d2e !important;
         color: #e2e8f0 !important;
         caret-color: #818cf8 !important;
-        background-color: transparent !important;
+      }
+      .VirtualizedSelectFocusedOption,
+      .VirtualizedSelectOption {
+        background-color: #1a1d2e !important;
+        color: #e2e8f0 !important;
       }
 
       /* ── DatePickerRange ── */

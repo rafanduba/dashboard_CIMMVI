@@ -4,6 +4,8 @@ from dash import dash_table, html
 
 from dashboard.components import section_title
 from dashboard.config import BORDER, CARD, CARD2, FONT, TEXT, TEXT_DIM
+from dashboard.layout import filtros_bar
+
 
 
 _TABLE_HEADER = {
@@ -35,7 +37,7 @@ _TABLE_COND = [
 def layout() -> html.Div:
     """Retorna o conteúdo da tela Municípios Consorciados."""
     return html.Div([
-
+        filtros_bar(),
         section_title("Lançamentos Detalhados — Apenas Movimentos"),
 
         dash_table.DataTable(
@@ -58,13 +60,9 @@ def layout() -> html.Div:
             page_size=30,
             page_action="native",
             sort_action="native",
-            filter_action="native",
             style_table={"overflowX": "auto"},
             style_header=_TABLE_HEADER,
             style_cell=_TABLE_CELL,
             style_data_conditional=_TABLE_COND,
-            style_filter={
-                "backgroundColor": CARD2, "color": TEXT, "border": f"1px solid {BORDER}",
-            },
         ),
     ])

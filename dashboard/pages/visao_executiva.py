@@ -11,6 +11,7 @@ from dashboard.config import (
 
 def layout() -> html.Div:
     """Retorna o conteúdo da tela Visão Executiva."""
+    from dashboard.layout import filtros_bar  # lazy import — evita ciclo
     return html.Div([
 
         # ── Hero: Patrimônio Total ──────────────────────────────────────────
@@ -135,6 +136,7 @@ def layout() -> html.Div:
         ], style={"display": "flex", "gap": "16px", "marginBottom": "28px", "flexWrap": "wrap"}),
 
         # ── KPIs ────────────────────────────────────────────────────────────
+        filtros_bar(),
         section_title("Movimentação no Período"),
         html.Div([
             kpi("kpi-entradas",      "Total de Entradas",    "⬆️", SUCCESS,  "no período selecionado"),

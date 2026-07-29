@@ -136,8 +136,8 @@ def _topbar() -> html.Header:
     )
 
 
-def _filtros() -> html.Div:
-    """Barra de filtros — sempre visível em todas as telas."""
+def filtros_bar() -> html.Div:
+    """Barra de filtros — pode ser inserida em qualquer página."""
     return card([
         html.Div([
             html.Div([
@@ -233,7 +233,6 @@ def criar_layout() -> html.Div:
             children=[
                 _topbar(),
                 html.Div([
-                    _filtros(),
                     # Wrapper com todas as páginas pré-renderizadas
                     html.Div(id="page-content", children=pages_content),
                 ], style={"padding": "24px"}),

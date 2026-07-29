@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS lancamentos (
 
     observacao TEXT,                   -- coluna OBSERVAÇÃO (abas CIMMVI)
 
-    parc_atual INTEGER,                -- coluna Parc.A — presente na aba Rateio BB
+    parc_atual INTEGER,                -- coluna Parc.Rest / Parc.Atual — presente na aba Rateio BB
     parc_total INTEGER,                -- coluna Parc.Tr — presente na aba Rateio BB
 
     data_pagamento DATE,
@@ -275,6 +275,42 @@ CREATE VIEW vw_valor_aguardando_aprovacao AS
             'Pagamento Realizado - Aguardando autorização Margarete'
           )
       AND tipo_lancamento = 'MOVIMENTO';
+
+
+-- Adimplência por município
+-- Considera ADIMPLENTE se as parcelas restantes (parc_atual / Parc.Rest) forem menores ou iguais a
+-- (parc_total - mes_atual + 1). Exemplo: no mês 7, ter até 6 parcelas restantes (12 - 7 + 1 = 6).
+DROP VIEW IF EXISTS vw_adimplencia_municipios;
+CREATE VIEW vw_adimplencia_municipios AS
+WITH mes_atual AS (
+    SELECT CAST(strftime('%m', 'now') AS INTEGER) AS m
+),
+ultimos_lancamentos AS (
+    SELECT
+        TRIM(descricao) AS municipio,
+        parc_atual,
+        COALESCE(parc_total, 12) AS parc_total,
+        ROW_NUMBER() OVER(
+            PARTITION BY LOWER(TRIM(descricao))
+            ORDER BY linha_planilha DESC, id DESC
+        ) AS rn
+    FROM lancamentos
+    WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
+      AND LOWER(TRIM(categoria)) = 'rateio municipal'
+      AND tipo_lancamento = 'MOVIMENTO'
+      AND descricao IS NOT NULL
+      AND TRIM(descricao) != ''
+)
+SELECT
+    u.municipio,
+    CASE
+        WHEN u.parc_atual IS NOT NULL AND u.parc_atual <= (u.parc_total - m.m + 1)
+        THEN 1
+        ELSE 0
+    END AS adimplente
+FROM ultimos_lancamentos u, mes_atual m
+WHERE u.rn = 1
+ORDER BY adimplente DESC, u.municipio;
 
 
 -- AUDITORIA DO ETL --

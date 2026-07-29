@@ -37,6 +37,7 @@ try:
         total_saidas,
         ultima_carga,
         valor_aguardando_aprovacao,
+        adimplencia_municipios,
     )
     _DB_READY = True
 except Exception as _e:
@@ -168,6 +169,8 @@ def registrar_callbacks(app):
         Output("chart-top-saidas",   "figure"),
         # Tabela — lançamentos
         Output("tabela-lancamentos", "data"),
+        # Tabela — adimplência
+        Output("tabela-adimplencia", "data"),
         # Relatórios
         Output("rel-entradas",       "children"),
         Output("rel-saidas",         "children"),
@@ -201,6 +204,7 @@ def registrar_callbacks(app):
                 EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
                 fig_v, fig_v, fig_v,
                 fig_v, fig_v, fig_v,
+                [],
                 [],
                 EMPTY, EMPTY, EMPTY, EMPTY,
                 EMPTY, EMPTY, EMPTY,
@@ -525,6 +529,19 @@ def registrar_callbacks(app):
         except Exception:
             dados_tabela = []
 
+        # ── Tabela de adimplência dos municípios ───────────────────────────
+        try:
+            df_adim = adimplencia_municipios()
+            if df_adim.empty:
+                dados_adimplencia = []
+            else:
+                df_adim["status"] = df_adim["adimplente"].apply(
+                    lambda x: "✅ Adimplente" if x == 1 else "❌ Inadimplente"
+                )
+                dados_adimplencia = df_adim[["municipio", "status"]].to_dict("records")
+        except Exception:
+            dados_adimplencia = []
+
         # ── Valores para a tela Relatórios ────────────────────────────────
         try:
             rel_ent    = formata_brl(total_entradas(data_ini, data_fim, conta))
@@ -553,6 +570,7 @@ def registrar_callbacks(app):
             fig_saldo, fig_sit, fig_mensal,
             fig_cat, fig_fp, fig_top,
             dados_tabela,
+            dados_adimplencia,
             rel_ent, rel_sai, rel_liq, rel_saldo,
             rel_ab_sai, rel_ab_ent, rel_ag,
             rel_sc1, rel_sc2, rel_sc3,

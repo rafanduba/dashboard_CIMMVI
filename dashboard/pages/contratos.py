@@ -3,7 +3,6 @@
 from dash import html
 
 from dashboard.components import card, section_title
-from dashboard.layout import filtros_bar
 from dashboard.config import (
     BORDER, CARD, CARD2, DANGER, INFO, MUTED,
     PRIMARY, SECONDARY, SUCCESS, TEXT, TEXT_DIM, WARNING,
@@ -32,7 +31,6 @@ def _stat_card(titulo: str, id_valor: str, cor: str, descricao: str = "") -> htm
 def layout() -> html.Div:
     """Retorna o conteúdo da tela Contratos."""
     return html.Div([
-        filtros_bar(),
         # ── Resumo Consolidado ───────────────────────────────────────────────
         section_title("Resumo Consolidado do Período"),
         html.Div([

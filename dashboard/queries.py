@@ -13,7 +13,7 @@ import pandas as pd
 from sqlalchemy import text
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from etl.load import get_engine
+from etl.load import get_engine, criar_schema
 
 
 # ---------------------------------------------------------------------------
@@ -655,3 +655,16 @@ def periodo_disponivel() -> dict:
     with _conn() as conn:
         row = conn.execute(text(sql)).fetchone()
     return {"data_min": row[0], "data_max": row[1]} if row else {}
+
+
+def adimplencia_municipios() -> pd.DataFrame:
+    """
+    Retorna os municípios do Rateio Municipal CIMMVI e seu status de adimplência.
+    Usa a view vw_adimplencia_municipios.
+    """
+    try:
+        criar_schema()
+    except Exception:
+        pass
+
+    return _df("SELECT * FROM vw_adimplencia_municipios")

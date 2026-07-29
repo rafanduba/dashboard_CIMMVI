@@ -1,5 +1,6 @@
 """Página: Visão Executiva — visão geral, KPIs e gráficos de saldo."""
 
+from dash import dash_table
 from dash import dcc, html
 
 from dashboard.components import card, kpi, section_title
@@ -152,6 +153,54 @@ def layout() -> html.Div:
             "marginBottom": "28px",
         }),
 
+        # Status de Adimplência dos Municípios
+        section_title("Status de Adimplência dos Municípios"),
+        html.Div([
+            dash_table.DataTable(
+                id="tabela-adimplencia",
+                columns=[
+                    {"name": "Município", "id": "municipio"},
+                    {"name": "Status", "id": "status"},
+                ],
+                data=[],
+                style_table={"overflowX": "auto"},
+                style_header={
+                    "backgroundColor": CARD2, "color": TEXT_DIM,
+                    "fontWeight": "600", "fontSize": "11px",
+                    "textTransform": "uppercase", "letterSpacing": "0.05em",
+                    "border": f"1px solid {BORDER}", "padding": "10px 14px",
+                    "fontFamily": FONT,
+                },
+                style_cell={
+                    "backgroundColor": CARD, "color": TEXT,
+                    "fontSize": "13px", "border": f"1px solid {BORDER}",
+                    "padding": "10px 14px", "fontFamily": FONT,
+                },
+                style_data_conditional=[
+                    {"if": {"row_index": "odd"}, "backgroundColor": CARD2},
+                    {"if": {"filter_query": '{status} = "✅ Adimplente"'}, "color": SUCCESS, "fontWeight": "600"},
+                    {"if": {"filter_query": '{status} = "❌ Inadimplente"'}, "color": DANGER, "fontWeight": "600"},
+                ],
+            ),
+        ], style={"marginBottom": "28px"}),
+        
+    # DESPESAS 
+        html.Div([
+            card([
+                section_title("Saídas por Categoria"),
+                dcc.Graph(id="chart-categoria", config={"displayModeBar": False}, style={"height": "360px"}),
+            ], extra={"flex": "3", "minWidth": "300px"}),
+            card([
+                section_title("Saídas por Forma de Pagamento"),
+                dcc.Graph(id="chart-forma-pgto", config={"displayModeBar": False}, style={"height": "360px"}),
+            ], extra={"flex": "2", "minWidth": "240px"}),
+        ], style={"display": "flex", "gap": "16px", "marginBottom": "20px", "flexWrap": "wrap"}),
+
+        card([
+            section_title("Top 10 Maiores Saídas Individuais"),
+            dcc.Graph(id="chart-top-saidas", config={"displayModeBar": False}, style={"height": "380px"}),
+        ]),
+
         # ── Gráficos linha 1 ────────────────────────────────────────────────
         html.Div([
             card([
@@ -169,5 +218,4 @@ def layout() -> html.Div:
             section_title("Entradas e Saídas Mensais"),
             dcc.Graph(id="chart-mensal", config={"displayModeBar": False}, style={"height": "300px"}),
         ]),
-
     ])

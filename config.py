@@ -27,7 +27,7 @@ SHEETS_CONFIG = {
         "banco": "Banco do Brasil",
         "header_row": 1,  # linha 1 em branco, cabeçalho na linha 2
         "expected_columns": [
-            "CATEGORIA", "DESCRIÇÃO", "OBSERVAÇÃO", "Parc. Atual", "Parc. Total",
+            "CATEGORIA", "DESCRIÇÃO", "OBSERVAÇÃO", "Parc. Total",
             "DATA PAGAMENTO", "SITUAÇÃO", "FORMA PAGAMENTO", "MOVIMENTAÇÃO", "SALDO ACUMULADO",
         ],
     },
@@ -55,12 +55,14 @@ SHEETS_CONFIG = {
 
 # Renomeia as colunas da planilha para facilitar o uso no código
 # Impede falhas por erros de digitação
-# Inclui variantes dos nomes antigos como fallback para compatibilidade
+# Inclui variantes dos nomes antigos e novas nomenclaturas para compatibilidade
 RENAME_MAP = {
     "CATEGORIA":          "categoria",
     "DESCRIÇÃO":          "descricao",
     "OBSERVAÇÕES":        "observacao",
     "OBSERVAÇÃO":         "observacao",
+
+    # Mapeamentos para coluna de parcela atual / restante
     "PARC.ATUAL":         "parc_atual",
     "PARC.TOTAIS":        "parc_total",
     "PARC. ATUAL":        "parc_atual",
@@ -69,6 +71,19 @@ RENAME_MAP = {
     "Parc.Totais":         "parc_total",
     "Parc. Atual":         "parc_atual",
     "Parc. Total":         "parc_total",
+
+    # Suporte à nova nomenclatura Parc.Rest / Parc. Rest
+    "PARC.REST":          "parc_atual",
+    "PARC. REST":         "parc_atual",
+    "Parc.Rest":          "parc_atual",
+    "Parc. Rest":         "parc_atual",
+    "Parc Rest":          "parc_atual",
+    "PARC REST":          "parc_atual",
+    "parc.rest":          "parc_atual",
+    "parc. rest":         "parc_atual",
+    "parc rest":          "parc_atual",
+    "Parc.A":             "parc_atual",
+
     "DATA PAGAMENTO":     "data_pagamento",
     "SITUAÇÃO":           "situacao",
     "FORMA PAGAMENTO":    "forma_pagamento",

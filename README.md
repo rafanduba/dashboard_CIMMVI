@@ -1,0 +1,1 @@
+- conferir contratos de cada município pra ver quais entraram no meio do ano e não pagam 12 parcelas

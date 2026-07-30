@@ -251,9 +251,9 @@ def registrar_callbacks(app):
             kpi_ent    = formata_brl(total_entradas(data_ini, data_fim, conta))
             kpi_sai    = formata_brl(total_saidas(data_ini, data_fim, conta))
             kpi_liq    = formata_brl(total_liquido(data_ini, data_fim, conta), show_sign=True)
-            kpi_ab_sai = formata_brl(saidas_em_aberto(conta))
-            kpi_ab_ent = formata_brl(entradas_em_aberto(conta))
-            kpi_ag     = formata_brl(valor_aguardando_aprovacao(conta))
+            kpi_ab_sai = formata_brl(saidas_em_aberto(conta, data_inicio=data_ini, data_fim=data_fim))
+            kpi_ab_ent = formata_brl(entradas_em_aberto(conta, data_inicio=data_ini, data_fim=data_fim))
+            kpi_ag     = formata_brl(valor_aguardando_aprovacao(conta, data_inicio=data_ini, data_fim=data_fim))
         except Exception:
             kpi_ent = kpi_sai = kpi_liq = kpi_ab_sai = kpi_ab_ent = kpi_ag = EMPTY
 
@@ -594,9 +594,9 @@ def registrar_callbacks(app):
             rel_sai    = formata_brl(total_saidas(data_ini, data_fim, conta))
             rel_liq    = formata_brl(total_liquido(data_ini, data_fim, conta), show_sign=True)
             rel_saldo  = formata_brl(saldo_final_geral())
-            rel_ab_sai = formata_brl(saidas_em_aberto(conta))
-            rel_ab_ent = formata_brl(entradas_em_aberto(conta))
-            rel_ag     = formata_brl(valor_aguardando_aprovacao(conta))
+            rel_ab_sai = formata_brl(saidas_em_aberto(conta, data_inicio=data_ini, data_fim=data_fim))
+            rel_ab_ent = formata_brl(entradas_em_aberto(conta, data_inicio=data_ini, data_fim=data_fim))
+            rel_ag     = formata_brl(valor_aguardando_aprovacao(conta, data_inicio=data_ini, data_fim=data_fim))
             _r1 = saldo_final_conta_1() or 0.0
             _r2 = saldo_final_conta_2() or 0.0
             _r3 = saldo_final_conta_3() or 0.0

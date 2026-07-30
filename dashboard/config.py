@@ -3,19 +3,19 @@
 # ════════════════════════════════════════════════════════════════════════════
 # Cores
 # ════════════════════════════════════════════════════════════════════════════
-BG        = "#0d0f1a"
-CARD      = "#141624"
-CARD2     = "#1a1d2e"
-BORDER    = "#252840"
-PRIMARY   = "#818cf8"
-SECONDARY = "#a78bfa"
-SUCCESS   = "#34d399"
-DANGER    = "#f87171"
-WARNING   = "#fbbf24"
-INFO      = "#38bdf8"
+BG        = "var(--bg)"
+CARD      = "var(--card)"
+CARD2     = "var(--card2)"
+BORDER    = "var(--border)"
+PRIMARY   = "#6366f1"
+SECONDARY = "#8b5cf6"
+SUCCESS   = "#10b981"
+DANGER    = "#ef4444"
+WARNING   = "#f59e0b"
+INFO      = "#06b6d4"
 MUTED     = "#64748b"
-TEXT      = "#e2e8f0"
-TEXT_DIM  = "#94a3b8"
+TEXT      = "var(--text)"
+TEXT_DIM  = "var(--text-dim)"
 FONT      = "Inter, system-ui, -apple-system, sans-serif"
 
 # ════════════════════════════════════════════════════════════════════════════

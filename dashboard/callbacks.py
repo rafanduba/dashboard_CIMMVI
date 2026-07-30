@@ -140,6 +140,26 @@ def registrar_callbacks(app):
         main_cls     = "main-area expanded" if collapsed else "main-area"
         return sidebar_cls, main_cls, collapsed
 
+    # ── 3.5. Alternar Tema Claro / Escuro ──────────────────────────────────
+    @app.callback(
+        Output("theme-store", "data"),
+        Output("btn-theme-toggle", "children"),
+        Output("app-container", "data-theme"),
+        Input("btn-theme-toggle", "n_clicks"),
+        State("theme-store", "data"),
+        prevent_initial_call=False,
+    )
+    def alternar_tema(n_clicks, tema_atual):
+        if not tema_atual:
+            tema_atual = "light"
+        if n_clicks and n_clicks > 0:
+            novo_tema = "dark" if tema_atual == "light" else "light"
+        else:
+            novo_tema = tema_atual
+
+        texto_botao = "🌙" if novo_tema == "light" else "☀️"
+        return novo_tema, texto_botao, novo_tema
+
     # ── 4. Atualização dos dados (filtros) ────────────────────────────────
     @app.callback(
         # Header ETL
@@ -185,9 +205,11 @@ def registrar_callbacks(app):
         Input("filtro-conta",        "value"),
         Input("filtro-data",         "start_date"),
         Input("filtro-data",         "end_date"),
+        Input("theme-store",         "data"),
     )
-    def atualizar(conta_sel, data_ini, data_fim):
+    def atualizar(conta_sel, data_ini, data_fim, tema=None):
         EMPTY = "—"
+        tema = tema or "light"
 
         # ── Banco indisponível ─────────────────────────────────────────────
         if not _DB_READY:
@@ -195,7 +217,7 @@ def registrar_callbacks(app):
                 "⚠️ Execute o ETL para carregar os dados.",
                 style={"color": WARNING},
             )
-            fig_v = empty_fig("Banco não inicializado — execute o ETL primeiro.")
+            fig_v = empty_fig("Banco não inicializado — execute o ETL primeiro.", theme=tema)
             return (
                 aviso,
                 EMPTY, EMPTY, EMPTY,
@@ -263,7 +285,7 @@ def registrar_callbacks(app):
                 conta=conta, data_inicio=data_ini, data_fim=data_fim,
             )
             if df_s.empty:
-                fig_saldo = empty_fig()
+                fig_saldo = empty_fig(theme=tema)
             else:
                 fig_saldo = go.Figure()
                 for nome_conta, grp in df_s.groupby("conta"):
@@ -284,14 +306,14 @@ def registrar_callbacks(app):
                         ),
                     ))
                 fig_saldo.update_layout(**chart_layout(
+                    theme=tema,
                     yaxis=dict(
                         tickprefix="R$\u00a0", tickformat=",.0f",
-                        gridcolor=BORDER, linecolor=BORDER,
-                        tickfont=dict(color=TEXT_DIM, size=11),
+                        gridcolor="rgba(150,150,150,0.2)",
                     ),
                 ))
         except Exception as ex:
-            fig_saldo = empty_fig(f"Erro: {ex}")
+            fig_saldo = empty_fig(f"Erro: {ex}", theme=tema)
 
         # ── Gráfico 2: Situação (donut) ───────────────────────────────────
         try:
@@ -300,14 +322,14 @@ def registrar_callbacks(app):
                 data_inicio=data_ini, data_fim=data_fim,
             )
             if df_sit.empty:
-                fig_sit = empty_fig()
+                fig_sit = empty_fig(theme=tema)
             else:
                 cores = [SITUACAO_CORES.get(s, PRIMARY) for s in df_sit["situacao"]]
                 fig_sit = go.Figure(go.Pie(
                     labels=df_sit["situacao"],
                     values=df_sit["total_saidas"],
                     hole=0.54,
-                    marker=dict(colors=cores, line=dict(color="#0d0f1a", width=2)),
+                    marker=dict(colors=cores, line=dict(color="rgba(0,0,0,0.1)", width=2)),
                     textinfo="percent",
                     hovertemplate=(
                         "<b>%{label}</b><br>"
@@ -315,16 +337,16 @@ def registrar_callbacks(app):
                     ),
                 ))
                 fig_sit.update_layout(**chart_layout(
+                    theme=tema,
                     margin=dict(l=12, r=12, t=12, b=12),
                     legend=dict(
                         bgcolor="rgba(0,0,0,0)", orientation="v",
-                        font=dict(color=TEXT_DIM, size=10),
                         yanchor="middle", y=0.5, xanchor="left", x=1.0,
                     ),
                     showlegend=True,
                 ))
         except Exception as ex:
-            fig_sit = empty_fig(f"Erro: {ex}")
+            fig_sit = empty_fig(f"Erro: {ex}", theme=tema)
 
         # ── Gráfico 3: Entradas e saídas mensais ──────────────────────────
         try:
@@ -333,7 +355,7 @@ def registrar_callbacks(app):
                 data_inicio=data_ini, data_fim=data_fim,
             )
             if df_m.empty:
-                fig_mensal = empty_fig()
+                fig_mensal = empty_fig(theme=tema)
             else:
                 agg = (
                     df_m.groupby("ano_mes", as_index=False)
@@ -359,15 +381,15 @@ def registrar_callbacks(app):
                     ),
                 ])
                 fig_mensal.update_layout(**chart_layout(
+                    theme=tema,
                     barmode="group", bargap=0.2,
                     yaxis=dict(
                         tickprefix="R$\u00a0", tickformat=",.0f",
-                        gridcolor=BORDER, linecolor=BORDER,
-                        tickfont=dict(color=TEXT_DIM, size=11),
+                        gridcolor="rgba(150,150,150,0.2)",
                     ),
                 ))
         except Exception as ex:
-            fig_mensal = empty_fig(f"Erro: {ex}")
+            fig_mensal = empty_fig(f"Erro: {ex}", theme=tema)
 
         # ── Gráfico 4: Saídas por categoria (Barras e Pizza) ─────────────
         try:
@@ -377,8 +399,8 @@ def registrar_callbacks(app):
             )
             df_cat = df_cat[df_cat["total_saidas"] > 0].head(12)
             if df_cat.empty:
-                fig_cat = empty_fig()
-                fig_cat_pizza = empty_fig()
+                fig_cat = empty_fig(theme=tema)
+                fig_cat_pizza = empty_fig(theme=tema)
             else:
                 df_cat = df_cat.sort_values("total_saidas", ascending=True)
                 cores_cat = (PALETA * 4)[:len(df_cat)]
@@ -393,15 +415,11 @@ def registrar_callbacks(app):
                         .replace(".", ",").replace("X", ".")
                     ),
                     textposition="outside",
-                    textfont=dict(color=TEXT_DIM, size=10),
                 ))
                 fig_cat.update_layout(**chart_layout(
+                    theme=tema,
                     margin=dict(l=12, r=110, t=20, b=12),
-                    xaxis=dict(visible=False, gridcolor=BORDER),
-                    yaxis=dict(
-                        tickfont=dict(color=TEXT_DIM, size=11),
-                        gridcolor=BORDER, linecolor=BORDER,
-                    ),
+                    xaxis=dict(visible=False),
                     showlegend=False,
                     hovermode="y unified",
                 ))
@@ -424,10 +442,10 @@ def registrar_callbacks(app):
                     hovertemplate="<b>%{label}</b><br>R$\u00a0%{value:,.2f}<extra></extra>",
                 ))
                 fig_cat_pizza.update_layout(**chart_layout(
+                    theme=tema,
                     margin=dict(l=10, r=20, t=20, b=20),
                     showlegend=True,
                     legend=dict(
-                        font=dict(color=TEXT_DIM, size=10),
                         orientation="v",
                         y=0.5,
                         yanchor="middle",
@@ -436,8 +454,8 @@ def registrar_callbacks(app):
                     ),
                 ))
         except Exception as ex:
-            fig_cat = empty_fig(f"Erro: {ex}")
-            fig_cat_pizza = empty_fig(f"Erro: {ex}")
+            fig_cat = empty_fig(f"Erro: {ex}", theme=tema)
+            fig_cat_pizza = empty_fig(f"Erro: {ex}", theme=tema)
 
         # ── Gráfico 5: Forma de pagamento ─────────────────────────────────
         try:

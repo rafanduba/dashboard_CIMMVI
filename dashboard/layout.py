@@ -121,16 +121,39 @@ def _sidebar() -> html.Aside:
 
 
 def _topbar() -> html.Header:
-    """Barra superior com título da página ativa e status do ETL."""
+    """Barra superior com título da página ativa, botão de tema e status do ETL."""
     return html.Header(
         id="topbar",
         className="topbar",
         children=[
             html.Div([
                 html.Div(id="topbar-title", className="topbar-title", children="Visão Executiva"),
-                html.Div(id="header-etl", style={
-                    "fontSize": "12px", "color": TEXT_DIM, "textAlign": "right",
-                }),
+                html.Div([
+                    html.Button(
+                        id="btn-theme-toggle",
+                        className="theme-toggle-btn",
+                        children="🌙 Modo Escuro",
+                        n_clicks=0,
+                        style={
+                            "background": "var(--card2)",
+                            "border": "1px solid var(--border)",
+                            "color": "var(--text)",
+                            "padding": "6px 14px",
+                            "borderRadius": "8px",
+                            "cursor": "pointer",
+                            "fontSize": "12px",
+                            "fontWeight": "600",
+                            "display": "flex",
+                            "alignItems": "center",
+                            "gap": "6px",
+                            "marginRight": "16px",
+                            "transition": "all 0.2s ease",
+                        },
+                    ),
+                    html.Div(id="header-etl", style={
+                        "fontSize": "12px", "color": TEXT_DIM, "textAlign": "right",
+                    }),
+                ], style={"display": "flex", "alignItems": "center"}),
             ], className="topbar-inner"),
         ],
     )
@@ -217,7 +240,8 @@ def criar_layout() -> html.Div:
             href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap",
         ),
 
-        # Estado do sidebar (colapsado ou não)
+        # Estado do tema e do sidebar
+        dcc.Store(id="theme-store", data="light", storage_type="local"),
         dcc.Store(id="sidebar-collapsed", data=False),
 
         # Navegação por URL interna
@@ -239,10 +263,13 @@ def criar_layout() -> html.Div:
             ],
         ),
 
-    ], style={
-        "background": BG,
+    ],
+    id="app-container",
+    **{"data-theme": "light"},
+    style={
+        "background": "var(--bg)",
         "minHeight": "100vh",
         "fontFamily": FONT,
-        "color": TEXT,
+        "color": "var(--text)",
         "display": "flex",
     })

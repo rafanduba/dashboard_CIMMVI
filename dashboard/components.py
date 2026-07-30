@@ -25,23 +25,28 @@ def formata_brl(value, show_sign: bool = False) -> str:
         return "—"
 
 
-def chart_layout(**kwargs) -> dict:
-    """Layout base para gráficos Plotly."""
+def chart_layout(theme: str = "light", **kwargs) -> dict:
+    """Layout base para gráficos Plotly com suporte a tema claro e escuro."""
+    is_dark = (theme == "dark")
+    text_color = "#f8fafc" if is_dark else "#1e293b"
+    text_dim_color = "#94a3b8" if is_dark else "#475569"
+    border_color = "#1e2333" if is_dark else "#cbd5e1"
+
     base = dict(
-        paper_bgcolor=CARD,
-        plot_bgcolor=CARD,
-        font=dict(family=FONT, color=TEXT, size=12),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family=FONT, color=text_color, size=12),
         margin=dict(l=12, r=12, t=36, b=12),
         legend=dict(
             bgcolor="rgba(0,0,0,0)",
-            bordercolor=BORDER,
-            font=dict(color=TEXT_DIM, size=11),
+            bordercolor=border_color,
+            font=dict(color=text_dim_color, size=11),
             orientation="h",
             yanchor="bottom", y=1.02,
             xanchor="left", x=0,
         ),
-        xaxis=dict(gridcolor=BORDER, linecolor=BORDER, tickfont=dict(color=TEXT_DIM, size=11)),
-        yaxis=dict(gridcolor=BORDER, linecolor=BORDER, tickfont=dict(color=TEXT_DIM, size=11)),
+        xaxis=dict(gridcolor=border_color, linecolor=border_color, tickfont=dict(color=text_dim_color, size=11)),
+        yaxis=dict(gridcolor=border_color, linecolor=border_color, tickfont=dict(color=text_dim_color, size=11)),
         colorway=PALETA,
         hovermode="x unified",
     )
@@ -49,11 +54,11 @@ def chart_layout(**kwargs) -> dict:
     return base
 
 
-def empty_fig(msg: str = "Sem dados para exibir") -> go.Figure:
+def empty_fig(msg: str = "Sem dados para exibir", theme: str = "light") -> go.Figure:
     """Figura vazia com mensagem."""
     fig = go.Figure()
     fig.update_layout(
-        paper_bgcolor=CARD, plot_bgcolor=CARD,
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         annotations=[dict(
             text=msg, x=0.5, y=0.5, xref="paper", yref="paper",
             showarrow=False, font=dict(color=MUTED, size=13, family=FONT),
@@ -65,12 +70,14 @@ def empty_fig(msg: str = "Sem dados para exibir") -> go.Figure:
 
 
 def card(children, extra: dict | None = None, **kwargs) -> html.Div:
-    """Card padrão."""
+    """Card padrão com borda demarcada e elevação."""
     style = {
         "background": CARD,
         "border": f"1px solid {BORDER}",
         "borderRadius": "14px",
-        "padding": "20px",
+        "padding": "24px",
+        "boxShadow": "0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)",
+        "transition": "all 0.2s ease",
     }
     if extra:
         style.update(extra)
@@ -80,7 +87,7 @@ def card(children, extra: dict | None = None, **kwargs) -> html.Div:
 def label(text: str) -> html.Div:
     """Label em caixa alta."""
     return html.Div(text, style={
-        "fontSize": "11px", "color": TEXT_DIM, "fontWeight": "600",
+        "fontSize": "12px", "color": TEXT_DIM, "fontWeight": "600",
         "textTransform": "uppercase", "letterSpacing": "0.06em",
         "marginBottom": "6px",
     })
@@ -90,13 +97,13 @@ def section_title(text: str) -> html.Div:
     """Título de seção com barra e linha."""
     return html.Div([
         html.Div([
-            html.Span("\u258c ", style={"color": PRIMARY, "fontSize": "15px", "lineHeight": "1"}),
+            html.Span("\u258c ", style={"color": PRIMARY, "fontSize": "18px", "lineHeight": "1"}),
             html.Span(text, style={
-                "fontSize": "11px", "fontWeight": "700",
-                "color": TEXT_DIM, "textTransform": "uppercase", "letterSpacing": "0.1em",
+                "fontSize": "14px", "fontWeight": "700",
+                "color": TEXT, "textTransform": "uppercase", "letterSpacing": "0.08em",
             }),
         ], style={"display": "flex", "alignItems": "center"}),
-        html.Hr(style={"borderColor": BORDER, "margin": "8px 0 16px 0", "opacity": "0.5"}),
+        html.Hr(style={"borderColor": BORDER, "margin": "10px 0 20px 0", "opacity": "0.6"}),
     ])
 
 

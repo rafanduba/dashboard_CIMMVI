@@ -12,35 +12,62 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #0d0f1a;
+  background: var(--bg);
+  color: var(--text);
   overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Tokens do tema
+   Tokens do tema — Modo Claro (Soft Platinum) e Modo Escuro (Obsidian)
    ═══════════════════════════════════════════════════════════ */
 
-
-:root {
-  /* Cores base */
-  --bg: #0d0f1a;
-  --card: #141624;
-  --card2: #1a1d2e;
-  --calendar-day-bg: #1e2235;
-  --border: #252840;
-  --primary: #818cf8;
-  --text: #e2e8f0;
+:root,
+[data-theme="light"] {
+  /* Cores base — Modo Claro */
+  --bg: #e2e8f0;
+  --card: #f1f5f9;
+  --card2: #e2e8f0;
+  --calendar-day-bg: #cbd5e1;
+  --border: #cbd5e1;
+  --primary: #6366f1;
+  --text: #1e293b;
+  --text-dim: #475569;
   --muted: #64748b;
   --font: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* Aliases para compatibilidade com Dash */
+  /* Aliases Dash */
   --Dash-Fill-Inverse-Strong: var(--card2);
   --Dash-Fill-Inverse: var(--card2);
   --Dash-Fill-Strong: var(--card2);
   --Dash-Text: var(--text);
   --Dash-Border: var(--border);
 
-  /* Estados reutilizáveis */
+  --hover-bg: rgba(99, 102, 241, 0.08);
+  --selected-bg: rgba(99, 102, 241, 0.12);
+  --selected-span-bg: rgba(99, 102, 241, 0.12);
+}
+
+[data-theme="dark"] {
+  /* Cores base — Modo Escuro */
+  --bg: #07080c;
+  --card: #0e1017;
+  --card2: #141722;
+  --calendar-day-bg: #1c2233;
+  --border: #1e2333;
+  --primary: #818cf8;
+  --text: #f8fafc;
+  --text-dim: #94a3b8;
+  --muted: #64748b;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Aliases Dash */
+  --Dash-Fill-Inverse-Strong: var(--card2);
+  --Dash-Fill-Inverse: var(--card2);
+  --Dash-Fill-Strong: var(--card2);
+  --Dash-Text: var(--text);
+  --Dash-Border: var(--border);
+
   --hover-bg: rgba(129, 140, 248, 0.15);
   --selected-bg: rgba(129, 140, 248, 0.2);
   --selected-span-bg: rgba(129, 140, 248, 0.2);
@@ -265,7 +292,7 @@ DatePickerRange
 .CalendarDay__default,
 .CalendarDay__default:not(.CalendarDay__selected):not(.CalendarDay__selected_span):not(.CalendarDay__hovered_span),
 .dash-datepicker-calendar-date-inside {
-  background-color: #252840 !important;
+  background-color: var(--calendar-day-bg) !important;
   /* Cor clara fixa - mude aqui */
   border: 1px solid var(--border) !important;
   color: var(--text) !important;
@@ -581,24 +608,36 @@ DatePickerRange
 }
 
 .topbar-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.01em;
 }
 
 /* ── Área principal ──────────────────────────────────────── */
+#app-container {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
 .main-area {
   margin-left: var(--sidebar-w);
+  width: calc(100% - var(--sidebar-w));
+  max-width: calc(100% - var(--sidebar-w));
+  min-width: 0;
   min-height: 100vh;
-  flex: 1;
-  transition: margin-left var(--sidebar-transition);
+  transition: margin-left var(--sidebar-transition), width var(--sidebar-transition), max-width var(--sidebar-transition);
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .main-area.expanded {
   margin-left: var(--sidebar-w-collapsed);
+  width: calc(100% - var(--sidebar-w-collapsed));
+  max-width: calc(100% - var(--sidebar-w-collapsed));
 }
 
 /* ── Scrollbar do sidebar ───────────────────────────────── */

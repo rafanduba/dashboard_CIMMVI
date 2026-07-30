@@ -134,7 +134,7 @@ def layout() -> html.Div:
                     "fontSize": "11px", "color": MUTED, "marginTop": "6px",
                 }),
             ], extra={"borderTop": f"3px solid {INFO}", "flex": "1", "minWidth": "200px"}),
-        ], style={"display": "flex", "gap": "16px", "marginBottom": "28px", "flexWrap": "wrap"}),
+        ], style={"display": "flex", "gap": "20px", "marginBottom": "36px", "flexWrap": "wrap"}),
 
         # ── KPIs ────────────────────────────────────────────────────────────
         filtros_bar(),
@@ -149,8 +149,8 @@ def layout() -> html.Div:
         ], style={
             "display": "grid",
             "gridTemplateColumns": "repeat(auto-fit, minmax(160px, 1fr))",
-            "gap": "16px",
-            "marginBottom": "28px",
+            "gap": "20px",
+            "marginBottom": "36px",
         }),
 
         # Status de Adimplência dos Municípios
@@ -169,13 +169,13 @@ def layout() -> html.Div:
                     "backgroundColor": CARD2, "color": TEXT_DIM,
                     "fontWeight": "600", "fontSize": "11px",
                     "textTransform": "uppercase", "letterSpacing": "0.05em",
-                    "border": f"1px solid {BORDER}", "padding": "10px 14px",
+                    "border": f"1px solid {BORDER}", "padding": "12px 16px",
                     "fontFamily": FONT,
                 },
                 style_cell={
                     "backgroundColor": CARD, "color": TEXT,
                     "fontSize": "13px", "border": f"1px solid {BORDER}",
-                    "padding": "10px 14px", "fontFamily": FONT,
+                    "padding": "12px 16px", "fontFamily": FONT,
                 },
                 style_data_conditional=[
                     {"if": {"row_index": "odd"}, "backgroundColor": CARD2},
@@ -183,9 +183,9 @@ def layout() -> html.Div:
                     {"if": {"filter_query": '{status} = "❌ Inadimplente"'}, "color": DANGER, "fontWeight": "600"},
                 ],
             ),
-        ], style={"marginBottom": "28px"}),
-        
-    # DESPESAS 
+        ], style={"marginBottom": "36px"}),
+
+        # DESPESAS 
         html.Div([
             card([
                 section_title("Saídas por Categoria"),
@@ -195,11 +195,14 @@ def layout() -> html.Div:
                 section_title("Distribuição por Categoria (%)"),
                 dcc.Graph(id="chart-categoria-pizza", config={"displayModeBar": False}, style={"height": "360px"}),
             ], extra={"flex": "2", "minWidth": "280px"}),
-        ], style={"display": "flex", "gap": "16px", "marginBottom": "20px", "flexWrap": "wrap"}),
-        card([
-            section_title("Entradas e Saídas Mensais"),
-            dcc.Graph(id="chart-mensal", config={"displayModeBar": False}, style={"height": "300px"}),
-        ], extra={"flex": "3", "minWidth": "300px"}),
+        ], style={"display": "flex", "gap": "24px", "marginBottom": "28px", "flexWrap": "wrap"}),
+
+        html.Div([
+            card([
+                section_title("Entradas e Saídas Mensais"),
+                dcc.Graph(id="chart-mensal", config={"displayModeBar": False}, style={"height": "300px"}),
+            ], extra={"flex": "3", "minWidth": "300px"}),
+        ], style={"marginBottom": "28px"}),
 
         # ── Gráficos linha 1 ────────────────────────────────────────────────
         html.Div([
@@ -211,5 +214,5 @@ def layout() -> html.Div:
                 section_title("Distribuição por Situação"),
                 dcc.Graph(id="chart-situacao", config={"displayModeBar": False}, style={"height": "300px"}),
             ], extra={"flex": "1", "minWidth": "260px"}),
-        ], style={"display": "flex", "gap": "16px", "marginBottom": "20px", "flexWrap": "wrap"}),
+        ], style={"display": "flex", "gap": "24px", "marginBottom": "28px", "flexWrap": "wrap"}),
     ])

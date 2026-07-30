@@ -161,6 +161,7 @@ def layout() -> html.Div:
                 columns=[
                     {"name": "Município", "id": "municipio"},
                     {"name": "Status", "id": "status"},
+                    {"name": "Parcelas Pagas", "id": "parcelas"},
                 ],
                 data=[],
                 style_table={"overflowX": "auto"},
@@ -191,15 +192,14 @@ def layout() -> html.Div:
                 dcc.Graph(id="chart-categoria", config={"displayModeBar": False}, style={"height": "360px"}),
             ], extra={"flex": "3", "minWidth": "300px"}),
             card([
-                section_title("Saídas por Forma de Pagamento"),
-                dcc.Graph(id="chart-forma-pgto", config={"displayModeBar": False}, style={"height": "360px"}),
-            ], extra={"flex": "2", "minWidth": "240px"}),
+                section_title("Distribuição por Categoria (%)"),
+                dcc.Graph(id="chart-categoria-pizza", config={"displayModeBar": False}, style={"height": "360px"}),
+            ], extra={"flex": "2", "minWidth": "280px"}),
         ], style={"display": "flex", "gap": "16px", "marginBottom": "20px", "flexWrap": "wrap"}),
-
         card([
-            section_title("Top 10 Maiores Saídas Individuais"),
-            dcc.Graph(id="chart-top-saidas", config={"displayModeBar": False}, style={"height": "380px"}),
-        ]),
+            section_title("Entradas e Saídas Mensais"),
+            dcc.Graph(id="chart-mensal", config={"displayModeBar": False}, style={"height": "300px"}),
+        ], extra={"flex": "3", "minWidth": "300px"}),
 
         # ── Gráficos linha 1 ────────────────────────────────────────────────
         html.Div([
@@ -212,10 +212,4 @@ def layout() -> html.Div:
                 dcc.Graph(id="chart-situacao", config={"displayModeBar": False}, style={"height": "300px"}),
             ], extra={"flex": "1", "minWidth": "260px"}),
         ], style={"display": "flex", "gap": "16px", "marginBottom": "20px", "flexWrap": "wrap"}),
-
-        # ── Gráfico linha 2 ─────────────────────────────────────────────────
-        card([
-            section_title("Entradas e Saídas Mensais"),
-            dcc.Graph(id="chart-mensal", config={"displayModeBar": False}, style={"height": "300px"}),
-        ]),
     ])

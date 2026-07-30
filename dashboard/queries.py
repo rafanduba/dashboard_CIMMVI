@@ -317,7 +317,7 @@ def lancamentos_detalhados(
             id, conta, entidade, banco,
             data_pagamento, descricao, categoria, nf_doc,
             situacao, forma_pagamento,
-            parc_atual, parc_total,
+            parc_atual, parc_restante, parc_total,
             entradas, saidas, saldo_acumulado, valor_liquido,
             tipo_lancamento, observacao
         FROM lancamentos

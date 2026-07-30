@@ -139,7 +139,7 @@ def transform_sheet(df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
         df["situacao"] = df["situacao"].apply(_normalizar_situacao)
 
     # Parcelas: converte para inteiro (nullable)
-    for col in ["parc_atual", "parc_total"]:
+    for col in ["parc_atual", "parc_restante", "parc_total"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce").where(pd.notna(df[col]), None)
             df[col] = df[col].apply(lambda v: int(v) if v is not None and not pd.isna(v) else None)
@@ -154,7 +154,7 @@ def transform_sheet(df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
     colunas_finais = [
         "conta", "entidade", "banco", "linha_planilha",
         "categoria", "descricao", "nf_doc", "observacao",
-        "parc_atual", "parc_total",
+        "parc_atual", "parc_restante", "parc_total",
         "data_pagamento", "situacao", "forma_pagamento",
         "entradas", "saidas", "saldo_acumulado",
         "tipo_lancamento", "valor_liquido", "hash_linha",

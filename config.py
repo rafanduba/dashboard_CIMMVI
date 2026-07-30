@@ -27,7 +27,7 @@ SHEETS_CONFIG = {
         "banco": "Banco do Brasil",
         "header_row": 1,  # linha 1 em branco, cabeçalho na linha 2
         "expected_columns": [
-            "CATEGORIA", "DESCRIÇÃO", "OBSERVAÇÃO", "Parc. Total",
+            "CATEGORIA", "DESCRIÇÃO", "OBSERVAÇÃO", "Parc. Atual", "Parc. Rest", "Parc. Total",
             "DATA PAGAMENTO", "SITUAÇÃO", "FORMA PAGAMENTO", "MOVIMENTAÇÃO", "SALDO ACUMULADO",
         ],
     },
@@ -73,15 +73,15 @@ RENAME_MAP = {
     "Parc. Total":         "parc_total",
 
     # Suporte à nova nomenclatura Parc.Rest / Parc. Rest
-    "PARC.REST":          "parc_atual",
-    "PARC. REST":         "parc_atual",
-    "Parc.Rest":          "parc_atual",
-    "Parc. Rest":         "parc_atual",
-    "Parc Rest":          "parc_atual",
-    "PARC REST":          "parc_atual",
-    "parc.rest":          "parc_atual",
-    "parc. rest":         "parc_atual",
-    "parc rest":          "parc_atual",
+    "PARC.REST":          "parc_restante",
+    "PARC. REST":         "parc_restante",
+    "Parc.Rest":          "parc_restante",
+    "Parc. Rest":         "parc_restante",
+    "Parc Rest":          "parc_restante",
+    "PARC REST":          "parc_restante",
+    "parc.rest":          "parc_restante",
+    "parc. rest":         "parc_restante",
+    "parc rest":          "parc_restante",
     "Parc.A":             "parc_atual",
 
     "DATA PAGAMENTO":     "data_pagamento",

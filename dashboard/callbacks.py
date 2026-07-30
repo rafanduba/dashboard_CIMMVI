@@ -164,9 +164,8 @@ def registrar_callbacks(app):
         Output("chart-situacao",     "figure"),
         Output("chart-mensal",       "figure"),
         # Gráficos — análise
-        Output("chart-categoria",    "figure"),
-        Output("chart-forma-pgto",   "figure"),
-        Output("chart-top-saidas",   "figure"),
+        Output("chart-categoria",        "figure"),
+        Output("chart-categoria-pizza",  "figure"),
         # Tabela — lançamentos
         Output("tabela-lancamentos", "data"),
         # Tabela — adimplência
@@ -203,7 +202,7 @@ def registrar_callbacks(app):
                 EMPTY, EMPTY, EMPTY,
                 EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
                 fig_v, fig_v, fig_v,
-                fig_v, fig_v, fig_v,
+                fig_v, fig_v,
                 [],
                 [],
                 EMPTY, EMPTY, EMPTY, EMPTY,
@@ -370,7 +369,7 @@ def registrar_callbacks(app):
         except Exception as ex:
             fig_mensal = empty_fig(f"Erro: {ex}")
 
-        # ── Gráfico 4: Saídas por categoria ───────────────────────────────
+        # ── Gráfico 4: Saídas por categoria (Barras e Pizza) ─────────────
         try:
             df_cat = saidas_por_categoria(
                 conta=conta,
@@ -379,6 +378,7 @@ def registrar_callbacks(app):
             df_cat = df_cat[df_cat["total_saidas"] > 0].head(12)
             if df_cat.empty:
                 fig_cat = empty_fig()
+                fig_cat_pizza = empty_fig()
             else:
                 df_cat = df_cat.sort_values("total_saidas", ascending=True)
                 cores_cat = (PALETA * 4)[:len(df_cat)]
@@ -405,8 +405,39 @@ def registrar_callbacks(app):
                     showlegend=False,
                     hovermode="y unified",
                 ))
+
+                # Rótulos para a legenda com a porcentagem ao lado do nome
+                total_saidas_cat = df_cat["total_saidas"].sum()
+                labels_legenda = [
+                    f"{cat} ({val / total_saidas_cat * 100:.1f}%)" if total_saidas_cat > 0 else str(cat)
+                    for cat, val in zip(df_cat["categoria"], df_cat["total_saidas"])
+                ]
+
+                # Gráfico de Pizza/Rosca com Porcentagens
+                fig_cat_pizza = go.Figure(go.Pie(
+                    labels=labels_legenda,
+                    values=df_cat["total_saidas"],
+                    hole=0.4,
+                    marker=dict(colors=cores_cat),
+                    textinfo="percent",
+                    textposition="inside",
+                    hovertemplate="<b>%{label}</b><br>R$\u00a0%{value:,.2f}<extra></extra>",
+                ))
+                fig_cat_pizza.update_layout(**chart_layout(
+                    margin=dict(l=10, r=20, t=20, b=20),
+                    showlegend=True,
+                    legend=dict(
+                        font=dict(color=TEXT_DIM, size=10),
+                        orientation="v",
+                        y=0.5,
+                        yanchor="middle",
+                        x=1.02,
+                        xanchor="left",
+                    ),
+                ))
         except Exception as ex:
             fig_cat = empty_fig(f"Erro: {ex}")
+            fig_cat_pizza = empty_fig(f"Erro: {ex}")
 
         # ── Gráfico 5: Forma de pagamento ─────────────────────────────────
         try:
@@ -514,9 +545,10 @@ def registrar_callbacks(app):
                     df_tab["data_pagamento"] = df_tab["data_pagamento"].apply(
                         lambda v: str(v)[:10] if v else "",
                     )
-                if "parc_atual" in df_tab.columns and "parc_total" in df_tab.columns:
+                if ("parc_atual" in df_tab.columns or "parc_restante" in df_tab.columns) and "parc_total" in df_tab.columns:
                     def _fmt_parc(row):
-                        pa, pt = row.get("parc_atual"), row.get("parc_total")
+                        pa = row.get("parc_atual") if pd.notna(row.get("parc_atual")) else row.get("parc_restante")
+                        pt = row.get("parc_total")
                         if pd.notna(pa) and pd.notna(pt) and pa > 0:
                             return f"{int(pa)}/{int(pt)}"
                         return ""
@@ -538,7 +570,21 @@ def registrar_callbacks(app):
                 df_adim["status"] = df_adim["adimplente"].apply(
                     lambda x: "✅ Adimplente" if x == 1 else "❌ Inadimplente"
                 )
-                dados_adimplencia = df_adim[["municipio", "status"]].to_dict("records")
+
+                def _fmt_adim_parc(row):
+                    pa = row.get("parc_atual")
+                    pr = row.get("parc_restante")
+                    pt = row.get("parc_total")
+                    if pd.notna(pa) and pd.notna(pt):
+                        return f"{int(pa)}/{int(pt)}"
+                    elif pd.notna(pr) and pd.notna(pt):
+                        # Se não tiver parc_atual explícito, calcula parcela paga = total - restante
+                        p_paga = pt - pr
+                        return f"{int(p_paga)}/{int(pt)}"
+                    return ""
+
+                df_adim["parcelas"] = df_adim.apply(_fmt_adim_parc, axis=1)
+                dados_adimplencia = df_adim[["municipio", "status", "parcelas"]].to_dict("records")
         except Exception:
             dados_adimplencia = []
 
@@ -568,7 +614,7 @@ def registrar_callbacks(app):
             sc1, sc2, sc3,
             kpi_ent, kpi_sai, kpi_liq, kpi_ab_sai, kpi_ab_ent, kpi_ag,
             fig_saldo, fig_sit, fig_mensal,
-            fig_cat, fig_fp, fig_top,
+            fig_cat, fig_cat_pizza,
             dados_tabela,
             dados_adimplencia,
             rel_ent, rel_sai, rel_liq, rel_saldo,

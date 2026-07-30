@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS lancamentos (
 
     observacao TEXT,                   -- coluna OBSERVAÇÃO (abas CIMMVI)
 
-    parc_atual INTEGER,                -- coluna Parc.Rest / Parc.Atual — presente na aba Rateio BB
+    parc_atual INTEGER,
+    parc_restante INTEGER,                -- coluna Parc.Rest / Parc.Atual — presente na aba Rateio BB
     parc_total INTEGER,                -- coluna Parc.Tr — presente na aba Rateio BB
 
     data_pagamento DATE,
@@ -278,7 +279,7 @@ CREATE VIEW vw_valor_aguardando_aprovacao AS
 
 
 -- Adimplência por município
--- Considera ADIMPLENTE se as parcelas restantes (parc_atual / Parc.Rest) forem menores ou iguais a
+-- Considera ADIMPLENTE se as parcelas restantes forem menores ou iguais a
 -- (parc_total - mes_atual + 1). Exemplo: no mês 7, ter até 6 parcelas restantes (12 - 7 + 1 = 6).
 DROP VIEW IF EXISTS vw_adimplencia_municipios;
 CREATE VIEW vw_adimplencia_municipios AS
@@ -289,6 +290,7 @@ ultimos_lancamentos AS (
     SELECT
         TRIM(descricao) AS municipio,
         parc_atual,
+        parc_restante,
         COALESCE(parc_total, 12) AS parc_total,
         ROW_NUMBER() OVER(
             PARTITION BY LOWER(TRIM(descricao))
@@ -303,8 +305,11 @@ ultimos_lancamentos AS (
 )
 SELECT
     u.municipio,
+    u.parc_atual,
+    u.parc_restante,
+    u.parc_total,
     CASE
-        WHEN u.parc_atual IS NOT NULL AND u.parc_atual <= (u.parc_total - m.m + 1)
+        WHEN u.parc_restante IS NOT NULL AND u.parc_restante <= (u.parc_total - m.m + 1)
         THEN 1
         ELSE 0
     END AS adimplente

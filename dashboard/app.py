@@ -15,13 +15,18 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from dash import Dash
 
 from dashboard.callbacks import registrar_callbacks
-from dashboard.layout import criar_layout
+from etl.load import garantir_dados_carregados
 
 logger = logging.getLogger(__name__)
 
 
 def criar_app() -> Dash:
     """Cria e configura a aplicação Dash."""
+    # Garante que o banco exista e esteja povoado com os dados da planilha
+    garantir_dados_carregados()
+
+    from dashboard.layout import criar_layout
+
     app = Dash(
         __name__,
         title="Dashboard CIMMVI / AMVI",

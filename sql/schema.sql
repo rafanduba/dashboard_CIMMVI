@@ -287,10 +287,10 @@ ultimos_lancamentos AS (
         ) AS rn
     FROM lancamentos
     WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
-      AND LOWER(TRIM(categoria)) = 'rateio municipal'
       AND tipo_lancamento = 'MOVIMENTO'
       AND descricao IS NOT NULL
       AND TRIM(descricao) != ''
+      AND LOWER(TRIM(descricao)) NOT IN ('saldo do dia', 'saldo dia', 'saldo inicial')
 )
 SELECT
     u.municipio,

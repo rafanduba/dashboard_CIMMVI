@@ -45,15 +45,40 @@ def _validar_colunas(df: pd.DataFrame, aba: str) -> None:
             f"Colunas encontradas: {list(df.columns)}"
         )
 
+def _encontrar_nome_aba_real(path: Path, nome_aba_config: str) -> str:
+    """Encontra a aba na planilha correspondente ao nome em SHEETS_CONFIG,
+    permitindo pequenas divergências de espaços ou hífens no final.
+    """
+    try:
+        excel_file = pd.ExcelFile(path, engine="openpyxl")
+        sheet_names = excel_file.sheet_names
+    except Exception as e:
+        logger.error("Erro ao ler abas da planilha %s: %s", path, e)
+        return nome_aba_config
+
+    if nome_aba_config in sheet_names:
+        return nome_aba_config
+
+    norm_target = nome_aba_config.strip().lower().rstrip(" -_")
+    for s in sheet_names:
+        norm_s = s.strip().lower().rstrip(" -_")
+        if norm_s == norm_target or norm_s.startswith(norm_target) or norm_target.startswith(norm_s):
+            logger.info("Aba configurada '%s' mapeada para a aba real '%s'", nome_aba_config, s)
+            return s
+
+    return nome_aba_config
+
+
 # Extração de dados
 def extrair_dados(nome_aba: str, caminho: str = EXCEL_PATH) -> pd.DataFrame:
     path = Path(caminho)
     _validar_arquivo(path)
 
+    aba_real = _encontrar_nome_aba_real(path, nome_aba)
     header_row = SHEETS_CONFIG[nome_aba].get("header_row", 0)
 
-    logger.info("Lendo aba '%s' de %s", nome_aba, path)
-    df = pd.read_excel(path, sheet_name=nome_aba, header=header_row, engine="openpyxl")
+    logger.info("Lendo aba '%s' (aba real: '%s') de %s", nome_aba, aba_real, path)
+    df = pd.read_excel(path, sheet_name=aba_real, header=header_row, engine="openpyxl")
 
     _validar_colunas(df, nome_aba)
 

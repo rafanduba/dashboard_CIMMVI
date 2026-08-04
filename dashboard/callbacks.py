@@ -8,8 +8,8 @@ from dash import Input, Output, State, html, no_update
 
 from dashboard.components import formata_brl, chart_layout, empty_fig
 from dashboard.config import (
-    BORDER, CONTA_ESTILOS, DANGER, MUTED,
-    PALETA, PRIMARY, SITUACAO_CORES, SUCCESS, TEXT_DIM, WARNING,
+    BORDER, CONTA_ESTILOS, DANGER, FONT, MUTED,
+    PALETA, PRIMARY, SITUACAO_CORES, SUCCESS, TEXT, TEXT_DIM, WARNING,
 )
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 # Queries (com fallback caso o banco não exista)
 # ════════════════════════════════════════════════════════════════════════════
 try:
+    from etl.load import garantir_dados_carregados
+    garantir_dados_carregados()
     from dashboard.queries import (
         contagem_por_situacao,
         entradas_em_aberto,
@@ -186,6 +188,15 @@ def registrar_callbacks(app):
         # Gráficos — análise
         Output("chart-categoria",        "figure"),
         Output("chart-categoria-pizza",  "figure"),
+        # KPIs — Municípios Consorciados
+        Output("kpi-muni-total",         "children"),
+        Output("kpi-muni-previsto",      "children"),
+        Output("kpi-muni-recebido",      "children"),
+        Output("kpi-muni-saldo",         "children"),
+        # Gráficos — Municípios Consorciados
+        Output("chart-municipios-arrecadacao", "figure"),
+        Output("chart-municipios-adimplencia", "figure"),
+        Output("chart-municipios-ranking",     "figure"),
         # Tabela — lançamentos
         Output("tabela-lancamentos", "data"),
         # Tabela — adimplência
@@ -225,6 +236,8 @@ def registrar_callbacks(app):
                 EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
                 fig_v, fig_v, fig_v,
                 fig_v, fig_v,
+                "0", EMPTY, EMPTY, EMPTY,
+                fig_v, fig_v, fig_v,
                 [],
                 [],
                 EMPTY, EMPTY, EMPTY, EMPTY,
@@ -579,32 +592,189 @@ def registrar_callbacks(app):
         except Exception:
             dados_tabela = []
 
-        # ── Tabela de adimplência dos municípios ───────────────────────────
+        # ── Municípios Consorciados (KPIs, Tabela Resumo e 3 Gráficos Indicadores) ──
         try:
-            df_adim = adimplencia_municipios()
+            df_adim = adimplencia_municipios(data_inicio=data_ini, data_fim=data_fim)
             if df_adim.empty:
+                kpi_muni_total = "0"
+                kpi_muni_previsto = EMPTY
+                kpi_muni_recebido = EMPTY
+                kpi_muni_saldo = EMPTY
                 dados_adimplencia = []
+                fig_muni_arr = empty_fig("Sem dados de arrecadação", theme=tema)
+                fig_muni_adim = empty_fig("Sem dados de adimplência", theme=tema)
+                fig_muni_rank = empty_fig("Sem dados de ranking", theme=tema)
             else:
-                df_adim["status"] = df_adim["adimplente"].apply(
-                    lambda x: "✅ Adimplente" if x == 1 else "❌ Inadimplente"
-                )
+                total_munis = len(df_adim)
+                records = []
+                tot_prev = 0.0
+                tot_rec = 0.0
+                tot_saldo = 0.0
+                c_adim = 0
+                c_inadim = 0
 
-                def _fmt_adim_parc(row):
-                    pa = row.get("parc_atual")
-                    pr = row.get("parc_restante")
-                    pt = row.get("parc_total")
+                for _, r in df_adim.iterrows():
+                    muni = str(r["municipio"])
+                    rec = float(r.get("recebido") or 0.0)
+                    pt = int(r.get("parc_total") or 12)
+                    pr = r.get("parc_restante")
+                    pa = r.get("parc_atual")
+                    adim = int(r.get("adimplente") or 0)
+                    qp = int(r.get("qtd_pagas") or 0)
+
+                    if pd.notna(pr):
+                        p_pagas = max(1, pt - int(pr))
+                    elif pd.notna(pa):
+                        p_pagas = max(1, int(pa))
+                    else:
+                        p_pagas = max(1, qp)
+
+                    if rec > 0:
+                        val_parc = rec / p_pagas
+                        prev = max(rec, val_parc * pt)
+                    else:
+                        prev = 0.0
+
+                    saldo = max(0.0, prev - rec)
+
+                    tot_rec += rec
+                    tot_prev += prev
+                    tot_saldo += saldo
+
+                    if adim == 1:
+                        c_adim += 1
+                    else:
+                        c_inadim += 1
+
                     if pd.notna(pa) and pd.notna(pt):
-                        return f"{int(pa)}/{int(pt)}"
+                        p_info = f"{int(pa)}/{int(pt)}"
                     elif pd.notna(pr) and pd.notna(pt):
-                        # Se não tiver parc_atual explícito, calcula parcela paga = total - restante
-                        p_paga = pt - pr
-                        return f"{int(p_paga)}/{int(pt)}"
-                    return ""
+                        p_info = f"{int(pt - pr)}/{int(pt)}"
+                    else:
+                        p_info = f"{p_pagas}/{pt}"
 
-                df_adim["parcelas"] = df_adim.apply(_fmt_adim_parc, axis=1)
-                dados_adimplencia = df_adim[["municipio", "status", "parcelas"]].to_dict("records")
-        except Exception:
+                    status_str = "✅ Adimplente" if adim == 1 else "❌ Inadimplente"
+
+                    records.append({
+                        "municipio": muni,
+                        "previsto": prev,
+                        "recebido": rec,
+                        "saldo": saldo,
+                        "previsto_fmt": formata_brl(prev),
+                        "recebido_fmt": formata_brl(rec),
+                        "saldo_fmt": formata_brl(saldo),
+                        "parcelas": p_info,
+                        "status": status_str,
+                        "adimplente": adim,
+                    })
+
+                kpi_muni_total = str(total_munis)
+                kpi_muni_previsto = formata_brl(tot_prev)
+                kpi_muni_recebido = formata_brl(tot_rec)
+                kpi_muni_saldo = formata_brl(tot_saldo)
+                dados_adimplencia = records
+
+                # Gráfico 1: Valor arrecadado por município (Horizontal Bar Chart)
+                df_rec_sort = pd.DataFrame(records).sort_values("recebido", ascending=True)
+                fig_muni_arr = go.Figure(go.Bar(
+                    x=df_rec_sort["recebido"],
+                    y=df_rec_sort["municipio"],
+                    orientation="h",
+                    marker=dict(
+                        color=df_rec_sort["recebido"],
+                        colorscale=[[0, "#818cf8"], [1, "#10b981"]],
+                        line=dict(color="rgba(0,0,0,0.15)", width=1)
+                    ),
+                    text=df_rec_sort["recebido"].apply(formata_brl),
+                    textposition="outside",
+                    textfont=dict(size=10, color=TEXT_DIM),
+                    cliponaxis=False,
+                    hovertemplate="<b>%{y}</b><br>Arrecadado: R$\u00a0%{x:,.2f}<extra></extra>",
+                ))
+                fig_muni_arr.update_layout(**chart_layout(
+                    theme=tema,
+                    margin=dict(l=10, r=220, t=10, b=10),
+                    xaxis=dict(visible=False, range=[0, df_rec_sort["recebido"].max() * 1.35]),
+                    yaxis=dict(tickfont=dict(size=11, color=TEXT_DIM)),
+                    showlegend=False
+                ))
+
+                # Gráfico 2: % de Adimplência e Inadimplência (Donut Chart)
+                pct_adim = (c_adim / total_munis * 100) if total_munis > 0 else 0
+                fig_muni_adim = go.Figure(go.Pie(
+                    labels=["Adimplente", "Inadimplente"],
+                    values=[c_adim, c_inadim],
+                    hole=0.62,
+                    marker=dict(colors=[SUCCESS, DANGER], line=dict(color="rgba(0,0,0,0.1)", width=2)),
+                    textinfo="percent+label",
+                    hovertemplate="<b>%{label}</b><br>%{value} município(s) (%{percent})<extra></extra>",
+                ))
+                fig_muni_adim.update_layout(**chart_layout(
+                    theme=tema,
+                    margin=dict(l=10, r=10, t=10, b=10),
+                    annotations=[dict(
+                        text=f"<b>{pct_adim:.0f}%</b><br><span style='font-size:10px;color:{TEXT_DIM}'>Adimplência</span>",
+                        x=0.5, y=0.5, font=dict(size=18, family=FONT, color=TEXT), showarrow=False
+                    )],
+                    legend=dict(orientation="h", yanchor="top", y=-0.05, xanchor="center", x=0.5),
+                    showlegend=True
+                ))
+
+                # Gráfico 3: Ranking de maior arrecadação (Ranked Bar Chart with badges)
+                df_rank = pd.DataFrame(records).sort_values("recebido", ascending=False).reset_index(drop=True)
+                df_rank["pct_total"] = (df_rank["recebido"] / tot_rec * 100) if tot_rec > 0 else 0
+
+                def _get_rank_label(idx):
+                    muni = df_rank.loc[idx, "municipio"]
+                    if idx == 0:
+                        return f"🥇 #1 {muni}"
+                    elif idx == 1:
+                        return f"🥈 #2 {muni}"
+                    elif idx == 2:
+                        return f"🥉 #3 {muni}"
+                    else:
+                        return f"#{idx+1} {muni}"
+
+                df_rank["rank_label"] = [_get_rank_label(i) for i in range(len(df_rank))]
+                df_rank_sorted = df_rank.sort_values("recebido", ascending=True)
+
+                cores_rank = []
+                for lbl in df_rank_sorted["rank_label"]:
+                    if "🥇" in lbl:
+                        cores_rank.append("#f59e0b")
+                    elif "🥈" in lbl:
+                        cores_rank.append("#94a3b8")
+                    elif "🥉" in lbl:
+                        cores_rank.append("#d97706")
+                    else:
+                        cores_rank.append("#6366f1")
+
+                fig_muni_rank = go.Figure(go.Bar(
+                    x=df_rank_sorted["recebido"],
+                    y=df_rank_sorted["rank_label"],
+                    orientation="h",
+                    marker_color=cores_rank,
+                    text=df_rank_sorted.apply(lambda r: f"{formata_brl(r['recebido'])} ({r['pct_total']:.1f}%)", axis=1),
+                    textposition="outside",
+                    textfont=dict(size=10, color=TEXT_DIM),
+                    cliponaxis=False,
+                    hovertemplate="<b>%{y}</b><br>Arrecadação: R$\u00a0%{x:,.2f}<extra></extra>",
+                ))
+                fig_muni_rank.update_layout(**chart_layout(
+                    theme=tema,
+                    margin=dict(l=10, r=240, t=10, b=10),
+                    xaxis=dict(visible=False, range=[0, df_rank_sorted["recebido"].max() * 1.45]),
+                    yaxis=dict(tickfont=dict(size=11, color=TEXT)),
+                    showlegend=False
+                ))
+
+        except Exception as ex:
+            kpi_muni_total = "0"
+            kpi_muni_previsto = kpi_muni_recebido = kpi_muni_saldo = EMPTY
             dados_adimplencia = []
+            fig_muni_arr = empty_fig(f"Erro: {ex}", theme=tema)
+            fig_muni_adim = empty_fig(f"Erro: {ex}", theme=tema)
+            fig_muni_rank = empty_fig(f"Erro: {ex}", theme=tema)
 
         # ── Valores para a tela Relatórios ────────────────────────────────
         try:
@@ -633,6 +803,8 @@ def registrar_callbacks(app):
             kpi_ent, kpi_sai, kpi_liq, kpi_ab_sai, kpi_ab_ent, kpi_ag,
             fig_saldo, fig_sit, fig_mensal,
             fig_cat, fig_cat_pizza,
+            kpi_muni_total, kpi_muni_previsto, kpi_muni_recebido, kpi_muni_saldo,
+            fig_muni_arr, fig_muni_adim, fig_muni_rank,
             dados_tabela,
             dados_adimplencia,
             rel_ent, rel_sai, rel_liq, rel_saldo,

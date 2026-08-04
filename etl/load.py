@@ -54,6 +54,40 @@ def criar_schema(engine: Engine | None = None) -> None:
     logger.info("Schema pronto.")
 
 
+def garantir_dados_carregados(engine: Engine | None = None) -> None:
+    """Verifica se o banco de dados possui lançamentos.
+    Se estiver vazio, executa o schema e roda a carga a partir da planilha Excel.
+    """
+    from config import EXCEL_PATH
+    engine = engine or get_engine()
+    criar_schema(engine)
+
+    try:
+        with engine.connect() as conn:
+            count = conn.execute(text("SELECT COUNT(*) FROM lancamentos")).scalar()
+            if count and count > 0:
+                return
+    except Exception:
+        pass
+
+    path = Path(EXCEL_PATH)
+    if not path.exists():
+        logger.warning("Planilha %s não encontrada. O banco continuará sem dados.", path)
+        return
+
+    logger.info("Banco de dados vazio. Executando ETL automático a partir de %s...", path)
+    try:
+        from etl.extract import extrair_todos_os_dados
+        from etl.transform import transform_all
+
+        brutos = extrair_todos_os_dados(str(path))
+        final = transform_all(brutos)
+        carregar_dados(final, arquivo_origem=str(path), engine=engine)
+        logger.info("ETL automático concluído com sucesso!")
+    except Exception as exc:
+        logger.error("Erro no ETL automático: %s", exc, exc_info=True)
+
+
 def _registrar_execucao(engine: Engine, arquivo_origem: str) -> int | None:
     #Insere uma linha na tabela de auditoria com status EM_ANDAMENTO e retorna o id gerado
     with engine.begin() as conn:

@@ -13,7 +13,7 @@ import pandas as pd
 from sqlalchemy import text
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from etl.load import get_engine, criar_schema
+from etl.load import get_engine, criar_schema, garantir_dados_carregados
 
 
 # ---------------------------------------------------------------------------
@@ -21,7 +21,8 @@ from etl.load import get_engine, criar_schema
 # ---------------------------------------------------------------------------
 
 def _conn():
-    """Retorna uma conexão a partir da engine singleton."""
+    """Retorna uma conexão a partir da engine singleton (garantindo dados)."""
+    garantir_dados_carregados()
     return get_engine().connect()
 
 
@@ -651,14 +652,79 @@ def periodo_disponivel() -> dict:
     return {"data_min": row[0], "data_max": row[1]} if row else {}
 
 
-def adimplencia_municipios() -> pd.DataFrame:
+def adimplencia_municipios(data_inicio: str | None = None, data_fim: str | None = None) -> pd.DataFrame:
     """
-    Retorna os municípios do Rateio Municipal CIMMVI e seu status de adimplência.
-    Usa a view vw_adimplencia_municipios.
+    Retorna os municípios do Rateio Municipal CIMMVI e seu status de adimplência,
+    juntamente com o total de entradas arrecadadas e contagem de parcelas.
+
+    Filtra por categoria = 'Rateio Municipal' para garantir que apenas lançamentos
+    de municípios consorciados sejam considerados.
     """
     try:
         criar_schema()
     except Exception:
         pass
 
-    return _df("SELECT * FROM vw_adimplencia_municipios")
+    filtros = ""
+    params = {}
+    if data_inicio:
+        filtros += " AND data_pagamento >= :data_inicio"
+        params["data_inicio"] = data_inicio
+    if data_fim:
+        filtros += " AND data_pagamento <= :data_fim"
+        params["data_fim"] = data_fim
+
+    sql = f"""
+        WITH mes_atual AS (
+            SELECT CAST(strftime('%m', 'now') AS INTEGER) AS m
+        ),
+        ultimos_lancamentos AS (
+            SELECT
+                TRIM(descricao) AS municipio,
+                parc_atual,
+                parc_restante,
+                COALESCE(parc_total, 12) AS parc_total,
+                ROW_NUMBER() OVER(
+                    PARTITION BY LOWER(TRIM(descricao))
+                    ORDER BY linha_planilha DESC, id DESC
+                ) AS rn
+            FROM lancamentos
+            WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
+              AND tipo_lancamento = 'MOVIMENTO'
+              AND categoria = 'Rateio Municipal'
+              AND descricao IS NOT NULL
+              AND TRIM(descricao) != ''
+        ),
+        totais_arrecadados AS (
+            SELECT
+                TRIM(descricao) AS municipio,
+                COALESCE(SUM(entradas), 0) AS recebido,
+                COUNT(CASE WHEN (situacao = 'Pago' OR entradas > 0) THEN 1 END) AS qtd_pagas
+            FROM lancamentos
+            WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
+              AND tipo_lancamento = 'MOVIMENTO'
+              AND categoria = 'Rateio Municipal'
+              AND descricao IS NOT NULL
+              AND TRIM(descricao) != ''
+              {filtros}
+            GROUP BY LOWER(TRIM(descricao))
+        )
+        SELECT
+            u.municipio,
+            u.parc_atual,
+            u.parc_restante,
+            u.parc_total,
+            CASE
+                WHEN u.parc_restante IS NOT NULL AND u.parc_restante <= (u.parc_total - m.m + 1)
+                THEN 1
+                ELSE 0
+            END AS adimplente,
+            COALESCE(t.recebido, 0) AS recebido,
+            COALESCE(t.qtd_pagas, 0) AS qtd_pagas
+        FROM ultimos_lancamentos u
+        CROSS JOIN mes_atual m
+        LEFT JOIN totais_arrecadados t ON LOWER(TRIM(u.municipio)) = LOWER(TRIM(t.municipio))
+        WHERE u.rn = 1
+        ORDER BY adimplente DESC, recebido DESC, u.municipio
+    """
+    return _df(sql, params)

@@ -28,6 +28,8 @@ _hoje       = str(date.today())
 _ano_inicio = str(date.today().replace(month=1, day=1))
 
 try:
+    from etl.load import garantir_dados_carregados
+    garantir_dados_carregados()
     from dashboard.queries import (
         contas_disponiveis, periodo_disponivel,
     )

@@ -54,8 +54,12 @@ def _gerar_hash(row: pd.Series) -> str:
     campos = [
         str(row.get("conta")),
         str(row.get("linha_planilha")),
+        str(row.get("categoria")),
         str(row.get("descricao")),
+        str(row.get("observacao")),
         str(row.get("data_pagamento")),
+        str(row.get("situacao")),
+        str(row.get("forma_pagamento")),
         str(row.get("entradas")),
         str(row.get("saidas")),
         str(row.get("saldo_acumulado")),

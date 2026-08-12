@@ -54,11 +54,29 @@ def criar_schema(engine: Engine | None = None) -> None:
     logger.info("Schema pronto.")
 
 
+def executar_etl_completo(fonte: str = "google_sheets", engine: Engine | None = None) -> dict:
+    """Executa o pipeline ETL completo (Extract -> Transform -> Load) a partir da fonte especificada."""
+    from config import DATA_SOURCE
+    fonte_usada = fonte or DATA_SOURCE
+    engine = engine or get_engine()
+    criar_schema(engine)
+
+    logger.info("Executando ETL completo a partir de '%s'...", fonte_usada)
+    from etl.extract import extrair_todos_os_dados
+    from etl.transform import transform_all
+
+    brutos = extrair_todos_os_dados(fonte_usada)
+    final = transform_all(brutos)
+    resumo = carregar_dados(final, arquivo_origem=str(fonte_usada), engine=engine)
+    logger.info("ETL completo concluído com sucesso!")
+    return resumo
+
+
 def garantir_dados_carregados(engine: Engine | None = None) -> None:
     """Verifica se o banco de dados possui lançamentos.
-    Se estiver vazio, executa o schema e roda a carga a partir da planilha Excel.
+    Se estiver vazio, executa o schema e roda a carga a partir do Google Sheets (ou local).
     """
-    from config import EXCEL_PATH
+    from config import DATA_SOURCE
     engine = engine or get_engine()
     criar_schema(engine)
 
@@ -70,20 +88,9 @@ def garantir_dados_carregados(engine: Engine | None = None) -> None:
     except Exception:
         pass
 
-    path = Path(EXCEL_PATH)
-    if not path.exists():
-        logger.warning("Planilha %s não encontrada. O banco continuará sem dados.", path)
-        return
-
-    logger.info("Banco de dados vazio. Executando ETL automático a partir de %s...", path)
+    logger.info("Banco de dados vazio. Executando ETL automático...")
     try:
-        from etl.extract import extrair_todos_os_dados
-        from etl.transform import transform_all
-
-        brutos = extrair_todos_os_dados(str(path))
-        final = transform_all(brutos)
-        carregar_dados(final, arquivo_origem=str(path), engine=engine)
-        logger.info("ETL automático concluído com sucesso!")
+        executar_etl_completo(fonte=DATA_SOURCE, engine=engine)
     except Exception as exc:
         logger.error("Erro no ETL automático: %s", exc, exc_info=True)
 
@@ -118,12 +125,14 @@ def carregar_dados(
     df: pd.DataFrame,
     arquivo_origem: str = "planilha.xlsx",
     engine: Engine | None = None,
+    substituir: bool = True,
 ) -> dict:
     """
     Insere as linhas de `df` na tabela `lancamentos`.
 
-    A deduplicação é feita pelo `hash_linha` (UNIQUE no schema): linhas já
-    existentes são ignoradas, permitindo rodar o ETL várias vezes sem duplicar dados.
+    Se `substituir=True` (padrão), limpa a tabela `lancamentos` antes de inserir,
+    garantindo que qualquer alteração de status ou valor feita no Google Sheets
+    seja refletida 100% no banco de dados.
 
     Retorna um resumo com linhas_lidas, linhas_inseridas e linhas_ignoradas.
     """
@@ -133,24 +142,27 @@ def carregar_dados(
     try:
         linhas_lidas = len(df)
 
-        # Busca hashes já presentes no banco para filtrar apenas as linhas novas
+        df_para_inserir = df.drop(
+            columns=["entradas_old", "saidas_old", "obs2_ignorado",
+                     "entidade_planilha", "banco_planilha"],
+            errors="ignore",
+        )
+
         with engine.begin() as conn:
-            hashes_existentes = {
-                row[0]
-                for row in conn.execute(text("SELECT hash_linha FROM lancamentos"))
-            }
+            if substituir:
+                conn.execute(text("DELETE FROM lancamentos"))
+                df_novo = df_para_inserir
+                linhas_ignoradas = 0
+            else:
+                hashes_existentes = {
+                    row[0]
+                    for row in conn.execute(text("SELECT hash_linha FROM lancamentos"))
+                }
+                df_novo = df_para_inserir[~df_para_inserir["hash_linha"].isin(hashes_existentes)]
+                linhas_ignoradas = linhas_lidas - len(df_novo)
 
-        df_novo = df[~df["hash_linha"].isin(hashes_existentes)]
-        linhas_ignoradas = linhas_lidas - len(df_novo)
-
-        if len(df_novo) > 0:
-            # Remove colunas auxiliares que não pertencem ao schema da tabela
-            df_para_inserir = df_novo.drop(
-                columns=["entradas_old", "saidas_old", "obs2_ignorado",
-                         "entidade_planilha", "banco_planilha"],
-                errors="ignore",
-            )
-            df_para_inserir.to_sql("lancamentos", engine, if_exists="append", index=False)
+            if len(df_novo) > 0:
+                df_novo.to_sql("lancamentos", conn, if_exists="append", index=False)
 
         linhas_inseridas = len(df_novo)
 

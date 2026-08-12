@@ -217,10 +217,23 @@ def registrar_callbacks(app):
         Input("filtro-data",         "start_date"),
         Input("filtro-data",         "end_date"),
         Input("theme-store",         "data"),
+        Input("btn-sync-sheets",     "n_clicks"),
     )
-    def atualizar(conta_sel, data_ini, data_fim, tema=None):
+    def atualizar(conta_sel, data_ini, data_fim, tema=None, n_clicks_sync=0):
+        from dash import ctx
+        from etl.load import executar_etl_completo
+
         EMPTY = "—"
         tema = tema or "light"
+
+        # Se o botão de sincronização foi clicado, executa o ETL do Google Sheets
+        if ctx.triggered_id == "btn-sync-sheets" and n_clicks_sync and n_clicks_sync > 0:
+            try:
+                executar_etl_completo("google_sheets")
+                global _DB_READY
+                _DB_READY = True
+            except Exception as exc:
+                logger.error("Erro ao sincronizar com Google Sheets: %s", exc)
 
         # ── Banco indisponível ─────────────────────────────────────────────
         if not _DB_READY:
@@ -252,18 +265,18 @@ def registrar_callbacks(app):
             uc = ultima_carga()
             if uc:
                 ts = str(uc["iniciado_em"])[:16].replace("T", " ")
+                origem = uc.get("arquivo_origem", "")
+                label_origem = "Google Sheets" if "google_sheets" in str(origem).lower() or "http" in str(origem).lower() else "Planilha Excel"
                 header_etl = [
-                    html.Span("✅ ", style={"color": SUCCESS}),
-                    html.Span(f"Última carga: {ts}  ·  "),
-                    html.Span(
-                        f"{uc['linhas_inseridas']} linhas inseridas",
-                        style={"color": TEXT_DIM},
-                    ),
+                    html.Span(className="status-dot-pulse"),
+                    html.Span(f"{label_origem}: {ts}", style={"fontWeight": "600"}),
+                    html.Span(f" • {uc['linhas_inseridas']} linhas", style={"opacity": "0.8", "fontSize": "11px", "marginLeft": "4px"}),
                 ]
             else:
-                header_etl = html.Span(
-                    "Nenhuma carga registrada", style={"color": WARNING},
-                )
+                header_etl = [
+                    html.Span("⚠️", style={"marginRight": "6px"}),
+                    html.Span("Nenhuma carga registrada", style={"fontWeight": "500"}),
+                ]
         except Exception:
             header_etl = EMPTY
 

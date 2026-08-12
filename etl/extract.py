@@ -1,9 +1,12 @@
-# Extrai os dados da planilha
+# Extrai os dados da planilha (Google Sheets ou Excel Local)
 
+import io
+import logging
+import urllib.request
 from pathlib import Path
 import pandas as pd
-import logging
-from config import EXCEL_PATH, SHEETS_CONFIG
+
+from config import EXCEL_PATH, GOOGLE_SHEETS_EXPORT_URL, SHEETS_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -14,12 +17,70 @@ class PlanilhaNaoEncontradaError(FileNotFoundError):  # excel no caminho errado 
 class EstruturaInvalidaError(ValueError):  # dispara quando as colunas não batem com o esperado
     pass
 
+
 def _validar_arquivo(caminho: Path) -> None:
     if not caminho.exists():
         raise PlanilhaNaoEncontradaError(
             f"Arquivo não encontrado: {caminho}\n"
             f"Coloque a planilha em '{caminho}'"
         )
+
+
+import time
+
+
+def baixar_planilha_google_sheets(url: str = GOOGLE_SHEETS_EXPORT_URL) -> bytes:
+    """Baixa o conteúdo em bytes da planilha exportada do Google Sheets (sem cache)."""
+    sep = "&" if "?" in url else "?"
+    url_nocache = f"{url}{sep}_t={int(time.time())}"
+    logger.info("Baixando planilha atualizada diretamente do Google Sheets: %s", url_nocache)
+    req = urllib.request.Request(
+        url_nocache,
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        content = resp.read()
+
+    # Salva cópia em cache local (data/planilha.xlsx) como backup offline
+    try:
+        EXCEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+        EXCEL_PATH.write_bytes(content)
+        logger.info("Cópia da planilha salva em cache local: %s", EXCEL_PATH)
+    except Exception as exc:
+        logger.warning("Não foi possível salvar o cache local da planilha: %s", exc)
+
+    return content
+
+
+def _obter_excel_file(fonte: str | Path | bytes | io.BytesIO) -> pd.ExcelFile:
+    """Retorna um objeto pd.ExcelFile a partir de um caminho, URL, bytes ou BytesIO."""
+    if isinstance(fonte, pd.ExcelFile):
+        return fonte
+
+    if isinstance(fonte, (bytes, io.BytesIO)):
+        bio = io.BytesIO(fonte) if isinstance(fonte, bytes) else fonte
+        return pd.ExcelFile(bio, engine="openpyxl")
+
+    fonte_str = str(fonte)
+
+    if fonte_str == "google_sheets" or fonte_str.startswith("http://") or fonte_str.startswith("https://"):
+        target_url = GOOGLE_SHEETS_EXPORT_URL if fonte_str == "google_sheets" else fonte_str
+        try:
+            content = baixar_planilha_google_sheets(target_url)
+            return pd.ExcelFile(io.BytesIO(content), engine="openpyxl")
+        except Exception as exc:
+            logger.warning("Falha ao baixar do Google Sheets (%s). Tentando arquivo local %s...", exc, EXCEL_PATH)
+            _validar_arquivo(EXCEL_PATH)
+            return pd.ExcelFile(EXCEL_PATH, engine="openpyxl")
+
+    path = Path(fonte)
+    _validar_arquivo(path)
+    return pd.ExcelFile(path, engine="openpyxl")
+
 
 def _validar_colunas(df: pd.DataFrame, aba: str) -> None:
     """Valida se as colunas esperadas para a aba estão presentes no DataFrame.
@@ -45,17 +106,12 @@ def _validar_colunas(df: pd.DataFrame, aba: str) -> None:
             f"Colunas encontradas: {list(df.columns)}"
         )
 
-def _encontrar_nome_aba_real(path: Path, nome_aba_config: str) -> str:
+
+def _encontrar_nome_aba_real(excel_file: pd.ExcelFile, nome_aba_config: str) -> str:
     """Encontra a aba na planilha correspondente ao nome em SHEETS_CONFIG,
     permitindo pequenas divergências de espaços ou hífens no final.
     """
-    try:
-        excel_file = pd.ExcelFile(path, engine="openpyxl")
-        sheet_names = excel_file.sheet_names
-    except Exception as e:
-        logger.error("Erro ao ler abas da planilha %s: %s", path, e)
-        return nome_aba_config
-
+    sheet_names = excel_file.sheet_names
     if nome_aba_config in sheet_names:
         return nome_aba_config
 
@@ -70,15 +126,14 @@ def _encontrar_nome_aba_real(path: Path, nome_aba_config: str) -> str:
 
 
 # Extração de dados
-def extrair_dados(nome_aba: str, caminho: str = EXCEL_PATH) -> pd.DataFrame:
-    path = Path(caminho)
-    _validar_arquivo(path)
+def extrair_dados(nome_aba: str, fonte: str | Path | pd.ExcelFile = EXCEL_PATH) -> pd.DataFrame:
+    excel_file = fonte if isinstance(fonte, pd.ExcelFile) else _obter_excel_file(fonte)
 
-    aba_real = _encontrar_nome_aba_real(path, nome_aba)
+    aba_real = _encontrar_nome_aba_real(excel_file, nome_aba)
     header_row = SHEETS_CONFIG[nome_aba].get("header_row", 0)
 
-    logger.info("Lendo aba '%s' (aba real: '%s') de %s", nome_aba, aba_real, path)
-    df = pd.read_excel(path, sheet_name=aba_real, header=header_row, engine="openpyxl")
+    logger.info("Lendo aba '%s' (aba real: '%s')", nome_aba, aba_real)
+    df = pd.read_excel(excel_file, sheet_name=aba_real, header=header_row, engine="openpyxl")
 
     _validar_colunas(df, nome_aba)
 
@@ -91,21 +146,21 @@ def extrair_dados(nome_aba: str, caminho: str = EXCEL_PATH) -> pd.DataFrame:
     return df
 
 
-def extrair_todos_os_dados(caminho: str = EXCEL_PATH) -> dict[str, pd.DataFrame]:
-    """Extrai todas as abas configuradas em SHEETS_CONFIG, uma por vez.
-    Chama extrair_dados() para cada aba listada em SHEETS_CONFIG e retorna
-    um dicionário {nome_da_aba: DataFrame}.
+def extrair_todos_os_dados(fonte: str | Path = "google_sheets") -> dict[str, pd.DataFrame]:
+    """Extrai todas as abas configuradas em SHEETS_CONFIG a partir do Google Sheets ou planilha local.
+    Retorna um dicionário {nome_da_aba: DataFrame}.
     """
+    excel_file = _obter_excel_file(fonte)
     resultado: dict[str, pd.DataFrame] = {}
     for nome_aba in SHEETS_CONFIG:
-        resultado[nome_aba] = extrair_dados(nome_aba, caminho)
+        resultado[nome_aba] = extrair_dados(nome_aba, fonte=excel_file)
     return resultado
 
 
 if __name__ == "__main__":  # esse bloco só roda se executar o arquivo diretamente, pra testes
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    dados = extrair_todos_os_dados()
+    dados = extrair_todos_os_dados("google_sheets")
     for nome, df in dados.items():
         print(f"\n=== {nome} ===")
         print(df.head())
-        print(f"Total de linhas: {len(df)}")
+        print(f"Total de linhas: {len(df)}")

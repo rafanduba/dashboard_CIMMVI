@@ -123,7 +123,7 @@ def _sidebar() -> html.Aside:
 
 
 def _topbar() -> html.Header:
-    """Barra superior com título da página ativa, botão de tema e status do ETL."""
+    """Barra superior com título da página ativa, botões de ação e status do ETL."""
     return html.Header(
         id="topbar",
         className="topbar",
@@ -140,17 +140,47 @@ def _topbar() -> html.Header:
                             "background": "var(--card2)",
                             "border": "1px solid var(--border)",
                             "color": "var(--text)",
-                            "padding": "6px 14px",
-                            "borderRadius": "8px",
+                            "padding": "7px 14px",
+                            "borderRadius": "20px",
                             "cursor": "pointer",
                             "fontSize": "12px",
                             "fontWeight": "600",
                             "display": "flex",
                             "alignItems": "center",
                             "gap": "6px",
-                            "marginRight": "16px",
+                            "marginRight": "12px",
                             "transition": "all 0.2s ease",
                         },
+                    ),
+                    dcc.Loading(
+                        id="loading-sync",
+                        type="dot",
+                        color="var(--primary)",
+                        children=html.Button(
+                            id="btn-sync-sheets",
+                            className="sync-sheets-btn",
+                            n_clicks=0,
+                            children=[
+                                html.Span("🔄", className="sync-icon"),
+                                html.Span("Sincronizar Google Sheets", className="sync-text"),
+                            ],
+                            style={
+                                "background": "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+                                "border": "none",
+                                "color": "#ffffff",
+                                "padding": "8px 16px",
+                                "borderRadius": "20px",
+                                "cursor": "pointer",
+                                "fontSize": "12px",
+                                "fontWeight": "600",
+                                "display": "flex",
+                                "alignItems": "center",
+                                "gap": "8px",
+                                "marginRight": "12px",
+                                "boxShadow": "0 2px 6px rgba(99, 102, 241, 0.25)",
+                                "transition": "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                            },
+                        ),
                     ),
                     html.Div(id="header-etl", style={
                         "fontSize": "12px", "color": TEXT_DIM, "textAlign": "right",

@@ -4,6 +4,7 @@
 #
 # Uso:
 #     python -m etl.run_etl
+#     python -m etl.run_etl --google-sheets
 #     python -m etl.run_etl --excel /caminho/outra_planilha.xlsx
 #
 # A carga é incremental (deduplicada por hash), então rodar várias vezes é seguro.
@@ -17,7 +18,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from config import EXCEL_PATH, LOG_LEVEL
 from etl.extract import EstruturaInvalidaError, PlanilhaNaoEncontradaError, extrair_todos_os_dados
-from etl.load import carregar_dados, criar_schema
+from etl.load import carregar_dados, criar_schema, executar_etl_completo
 from etl.transform import transform_all
 
 logger = logging.getLogger(__name__)
@@ -27,9 +28,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="ETL da planilha financeira CIMMVI/AMVI")
     parser.add_argument(
         "--excel",
-        type=Path,
-        default=EXCEL_PATH,
-        help=f"Caminho da planilha Excel de origem (padrão: {EXCEL_PATH})",
+        type=str,
+        default=None,
+        help="Caminho da planilha Excel local de origem",
+    )
+    parser.add_argument(
+        "--google-sheets",
+        action="store_true",
+        help="Executar ETL baixando diretamente do Google Sheets",
     )
     args = parser.parse_args()
 
@@ -39,19 +45,13 @@ def main() -> int:
     )
 
     inicio = time.time()
+    fonte = "google_sheets" if args.google_sheets or not args.excel else args.excel
+
     logger.info("========== Iniciando pipeline ETL ==========")
-    logger.info("Arquivo de origem: %s", args.excel)
+    logger.info("Fonte de origem: %s", fonte)
 
     try:
-        logger.info("Passo 1/3: criando schema do banco (se necessário)...")
-        criar_schema()
-
-        logger.info("Passo 2/3: extraindo dados da planilha...")
-        dados_brutos = extrair_todos_os_dados(caminho=str(args.excel))
-
-        logger.info("Passo 3/3: transformando e carregando dados...")
-        df_final = transform_all(dados_brutos)
-        resumo = carregar_dados(df_final, arquivo_origem=str(args.excel))
+        resumo = executar_etl_completo(fonte=fonte)
 
         duracao = time.time() - inicio
         logger.info("========== Pipeline concluído em %.1fs ==========", duracao)
@@ -71,3 +71,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

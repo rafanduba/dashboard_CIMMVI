@@ -29,6 +29,7 @@ def build() -> None:
         "--name=Dashboard_CIMMVI",
         "--noconfirm",
         "--onedir",  # Gera uma pasta com o executável e dependências
+        "--noconsole",  # Oculta a janela de terminal/prompt de comando ao abrir
         "--clean",
         # Inclui a pasta de scripts SQL no executável
         f"--add-data={BASE_DIR / 'sql'}{sep}sql",

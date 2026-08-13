@@ -728,3 +728,78 @@ def adimplencia_municipios(data_inicio: str | None = None, data_fim: str | None 
         ORDER BY adimplente DESC, recebido DESC, u.municipio
     """
     return _df(sql, params)
+
+
+def contratos_rateio_parcelas(data_inicio: str | None = None, data_fim: str | None = None) -> pd.DataFrame:
+    """
+    Retorna os contratos da conta 'CIMMVI - Rateio Banco do Brasil' (categoria = 'Contratos')
+    junto com a parcela atual, restante e total obtidas da última ocorrência de cada contrato.
+    """
+    try:
+        criar_schema()
+    except Exception:
+        pass
+
+    filtros = ""
+    params = {}
+    if data_inicio:
+        filtros += " AND data_pagamento >= :data_inicio"
+        params["data_inicio"] = data_inicio
+    if data_fim:
+        filtros += " AND data_pagamento <= :data_fim"
+        params["data_fim"] = data_fim
+
+    sql = f"""
+        WITH ultimos_contratos AS (
+            SELECT
+                TRIM(descricao) AS contrato,
+                categoria,
+                parc_atual,
+                parc_restante,
+                COALESCE(parc_total, 12) AS parc_total,
+                data_pagamento,
+                situacao,
+                ROW_NUMBER() OVER(
+                    PARTITION BY LOWER(TRIM(descricao))
+                    ORDER BY linha_planilha DESC, id DESC
+                ) AS rn
+            FROM lancamentos
+            WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
+              AND tipo_lancamento = 'MOVIMENTO'
+              AND (LOWER(TRIM(categoria)) = 'contratos' OR LOWER(TRIM(categoria)) LIKE '%contrato%')
+              AND descricao IS NOT NULL
+              AND TRIM(descricao) != ''
+        ),
+        totais_contratos AS (
+            SELECT
+                TRIM(descricao) AS contrato,
+                COALESCE(SUM(saidas), 0) AS total_saidas,
+                COALESCE(SUM(entradas), 0) AS total_entradas,
+                COUNT(*) AS qtd_lancamentos
+            FROM lancamentos
+            WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
+              AND tipo_lancamento = 'MOVIMENTO'
+              AND (LOWER(TRIM(categoria)) = 'contratos' OR LOWER(TRIM(categoria)) LIKE '%contrato%')
+              AND descricao IS NOT NULL
+              AND TRIM(descricao) != ''
+              {filtros}
+            GROUP BY LOWER(TRIM(descricao))
+        )
+        SELECT
+            u.contrato,
+            u.categoria,
+            u.parc_atual,
+            u.parc_restante,
+            u.parc_total,
+            u.data_pagamento,
+            u.situacao,
+            COALESCE(t.total_saidas, 0) AS total_saidas,
+            COALESCE(t.total_entradas, 0) AS total_entradas,
+            COALESCE(t.qtd_lancamentos, 0) AS qtd_lancamentos
+        FROM ultimos_contratos u
+        LEFT JOIN totais_contratos t ON LOWER(TRIM(u.contrato)) = LOWER(TRIM(t.contrato))
+        WHERE u.rn = 1
+        ORDER BY u.contrato
+    """
+    return _df(sql, params)
+

@@ -1,12 +1,36 @@
 """Página: Contratos — resumos consolidados por período e entidade."""
 
-from dash import html
+from dash import dash_table, html
 
 from dashboard.components import card, section_title
 from dashboard.config import (
-    BORDER, CARD, CARD2, DANGER, INFO, MUTED,
+    BORDER, CARD, CARD2, DANGER, FONT, INFO, MUTED,
     PRIMARY, SECONDARY, SUCCESS, TEXT, TEXT_DIM, WARNING,
 )
+
+_TABLE_HEADER = {
+    "backgroundColor": CARD2, "color": TEXT_DIM,
+    "fontWeight": "600", "fontSize": "10px",
+    "textTransform": "uppercase", "letterSpacing": "0.05em",
+    "border": f"1px solid {BORDER}", "padding": "10px 12px",
+    "fontFamily": FONT,
+}
+
+_TABLE_CELL = {
+    "backgroundColor": CARD, "color": TEXT,
+    "fontSize": "12px", "border": f"1px solid {BORDER}",
+    "padding": "8px 12px", "fontFamily": FONT,
+    "textOverflow": "ellipsis", "overflow": "hidden", "maxWidth": "200px",
+}
+
+_TABLE_COND_CONTRATOS = [
+    {"if": {"row_index": "odd"}, "backgroundColor": CARD2},
+    {"if": {"filter_query": '{situacao} = "Pago"'}, "color": "#34d399", "fontWeight": "600"},
+    {"if": {"filter_query": '{situacao} = "Em aberto"'}, "color": "#f87171", "fontWeight": "600"},
+    {"if": {"column_id": "total_saidas_fmt"}, "color": "#f87171", "fontWeight": "600"},
+    {"if": {"column_id": "parc_info"}, "color": "#38bdf8", "fontWeight": "600"},
+    {"if": {"column_id": "parc_restante"}, "color": "#fbbf24", "fontWeight": "600"},
+]
 
 
 def _stat_card(titulo: str, id_valor: str, cor: str, descricao: str = "") -> html.Div:
@@ -29,44 +53,38 @@ def _stat_card(titulo: str, id_valor: str, cor: str, descricao: str = "") -> htm
 
 
 def layout() -> html.Div:
-    """Retorna o conteúdo da tela Contratos."""
     return html.Div([
-        # ── Resumo Consolidado ───────────────────────────────────────────────
-        section_title("Resumo Consolidado do Período"),
+        # ── Contratos de Rateio (Parcelas e Situação) ────────────────────────
+        section_title("Contratos de Rateio — Parcelas e Situação (Última Ocorrência)"),
         html.Div([
-            _stat_card("Total de Entradas",    "rel-entradas",  SUCCESS, "no período filtrado"),
-            _stat_card("Total de Saídas",      "rel-saidas",    DANGER,  "no período filtrado"),
-            _stat_card("Resultado Líquido",    "rel-liquido",   WARNING, "entradas − saídas"),
-            _stat_card("Saldo Atual Total",    "rel-saldo",     PRIMARY, "todas as contas"),
-        ], style={
-            "display": "flex", "gap": "16px", "marginBottom": "28px", "flexWrap": "wrap",
-        }),
-
-        # ── Pendências ───────────────────────────────────────────────────────
-        section_title("Pendências Financeiras"),
-        html.Div([
-            _stat_card("Saídas em Aberto",       "rel-ab-saidas",   DANGER,    "pendentes de pagamento"),
-            _stat_card("Entradas em Aberto",      "rel-ab-ent",      SUCCESS,   "pendentes de recebimento"),
-            _stat_card("Aguardando Aprovação",    "rel-aguardando",  WARNING,   "saídas em análise"),
-        ], style={
-            "display": "flex", "gap": "16px", "marginBottom": "28px", "flexWrap": "wrap",
-        }),
-
-        # ── Saldo por Conta ──────────────────────────────────────────────────
-        section_title("Saldo Atual por Conta"),
-        html.Div([
-            _stat_card("CIMMVI · Banco do Brasil", "rel-saldo-c1", PRIMARY,   "Rateio BB"),
-            _stat_card("CIMMVI · Caixa Econômica", "rel-saldo-c2", SECONDARY, "Licenciamento Caixa"),
-            _stat_card("AMVI · Banco do Brasil",   "rel-saldo-c3", INFO,      "Conta Corrente 439"),
-        ], style={
-            "display": "flex", "gap": "16px", "marginBottom": "28px", "flexWrap": "wrap",
-        }),
+            dash_table.DataTable(
+                id="tabela-contratos-rateio",
+                columns=[
+                    {"name": "Contrato", "id": "contrato"},
+                    {"name": "Parc. Pagas", "id": "parc_atual"},
+                    {"name": "Parc. Restantes", "id": "parc_restante"},
+                    {"name": "Parc. Total", "id": "parc_total"},
+                    {"name": "Situação Parcelas", "id": "parc_info"},
+                    {"name": "Total Saídas", "id": "total_saidas_fmt"},
+                    {"name": "Último Pagamento", "id": "data_pagamento"},
+                    {"name": "Situação", "id": "situacao"},
+                ],
+                data=[],
+                page_size=15,
+                page_action="native",
+                sort_action="native",
+                style_table={"overflowX": "auto"},
+                style_header=_TABLE_HEADER,
+                style_cell=_TABLE_CELL,
+                style_data_conditional=_TABLE_COND_CONTRATOS,
+            ),
+        ], style={"marginBottom": "28px"}),
 
         # ── Nota informativa ────────────────────────────────────────────────
         html.Div([
             html.Div("ℹ️", style={"fontSize": "20px", "marginRight": "12px"}),
             html.Div([
-                html.Div("Esta tela consolida os principais indicadores financeiros.", style={
+                html.Div("Esta tela consolida os principais indicadores financeiros e parcelas de contratos.", style={
                     "fontSize": "13px", "color": TEXT, "fontWeight": "500",
                 }),
                 html.Div(
@@ -84,3 +102,4 @@ def layout() -> html.Div:
         }),
 
     ])
+

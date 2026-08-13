@@ -1,4 +1,4 @@
-"""Callbacks do dashboard — toda a lógica de atualização."""
+"""Callbacks do dashboard — toda a lógica de atualização modularizada."""
 
 import logging
 
@@ -40,6 +40,7 @@ try:
         ultima_carga,
         valor_aguardando_aprovacao,
         adimplencia_municipios,
+        contratos_rateio_parcelas,
     )
     _DB_READY = True
 except Exception as _e:
@@ -58,6 +59,7 @@ _PAGE_TITLES = {
 }
 
 _NAV_PAGES = ["visao_executiva", "execucao_orcamentaria", "municipios_consorciados", "contratos"]
+EMPTY = "—"
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -78,8 +80,32 @@ def _page_from_url(pathname: str) -> str:
     return "visao_executiva"
 
 
+def _get_header_etl_info():
+    """Gera os elementos de status do ETL para o cabeçalho."""
+    if not _DB_READY:
+        return html.Span("⚠️ Execute o ETL para carregar os dados.", style={"color": WARNING})
+    try:
+        uc = ultima_carga()
+        if uc:
+            ts = str(uc["iniciado_em"])[:16].replace("T", " ")
+            origem = uc.get("arquivo_origem", "")
+            label_origem = "Google Sheets" if "google_sheets" in str(origem).lower() or "http" in str(origem).lower() else "Planilha Excel"
+            return [
+                html.Span(className="status-dot-pulse"),
+                html.Span(f"{label_origem}: {ts}", style={"fontWeight": "600"}),
+                html.Span(f" • {uc['linhas_inseridas']} linhas", style={"opacity": "0.8", "fontSize": "11px", "marginLeft": "4px"}),
+            ]
+        else:
+            return [
+                html.Span("⚠️", style={"marginRight": "6px"}),
+                html.Span("Nenhuma carga registrada", style={"fontWeight": "500"}),
+            ]
+    except Exception:
+        return EMPTY
+
+
 # ════════════════════════════════════════════════════════════════════════════
-# Registro dos callbacks
+# Registro dos callbacks modularizados
 # ════════════════════════════════════════════════════════════════════════════
 
 def registrar_callbacks(app):
@@ -95,16 +121,13 @@ def registrar_callbacks(app):
         from dash import ctx
         if not ctx.triggered_id:
             return no_update
-        # ID format: "nav-<page>"
         page = ctx.triggered_id.replace("nav-", "")
         return f"/{page}"
 
     # ── 2. Renderização da página ativa — show/hide ───────────────────────
     @app.callback(
         Output("topbar-title", "children"),
-        # Alterna display de cada página
         *[Output(f"page-{p}", "style") for p in _NAV_PAGES],
-        # Destaca item ativo no sidebar
         *[Output(f"nav-{p}", "className") for p in _NAV_PAGES],
         Input("url", "pathname"),
     )
@@ -112,20 +135,15 @@ def registrar_callbacks(app):
         page = _page_from_url(pathname)
         title = _PAGE_TITLES.get(page, "🏠  Visão Executiva")
 
-        # Exibe apenas a página ativa; oculta as demais
         styles = [
             {"display": "block"} if p == page else {"display": "none"}
             for p in _NAV_PAGES
         ]
-
-        # Classes CSS dos itens de nav (ativo vs. normal)
         classes = [
             "sidebar-nav-item active" if p == page else "sidebar-nav-item"
             for p in _NAV_PAGES
         ]
-
         return title, *styles, *classes
-
 
     # ── 3. Toggle do sidebar (colapso / expansão) ─────────────────────────
     @app.callback(
@@ -142,7 +160,7 @@ def registrar_callbacks(app):
         main_cls     = "main-area expanded" if collapsed else "main-area"
         return sidebar_cls, main_cls, collapsed
 
-    # ── 3.5. Alternar Tema Claro / Escuro ──────────────────────────────────
+    # ── 4. Alternar Tema Claro / Escuro ──────────────────────────────────
     @app.callback(
         Output("theme-store", "data"),
         Output("btn-theme-toggle", "children"),
@@ -162,71 +180,15 @@ def registrar_callbacks(app):
         texto_botao = "🌙" if novo_tema == "light" else "☀️"
         return novo_tema, texto_botao, novo_tema
 
-    # ── 4. Atualização dos dados (filtros) ────────────────────────────────
+    # ── 5. Sincronização Google Sheets & Status no Header ────────────────
     @app.callback(
-        # Header ETL
-        Output("header-etl",         "children"),
-        # Saldos globais (Painel)
-        Output("saldo-geral",        "children"),
-        Output("saldo-cimmvi",       "children"),
-        Output("saldo-amvi",         "children"),
-        # Saldo por conta individual (Painel)
-        Output("saldo-c1",           "children"),
-        Output("saldo-c2",           "children"),
-        Output("saldo-c3",           "children"),
-        # KPIs (Painel)
-        Output("kpi-entradas",       "children"),
-        Output("kpi-saidas",         "children"),
-        Output("kpi-liquido",        "children"),
-        Output("kpi-aberto-saidas",  "children"),
-        Output("kpi-aberto-ent",     "children"),
-        Output("kpi-aguardando",     "children"),
-        # Gráficos — painel
-        Output("chart-saldo",        "figure"),
-        Output("chart-situacao",     "figure"),
-        Output("chart-mensal",       "figure"),
-        # Gráficos — análise
-        Output("chart-categoria",        "figure"),
-        Output("chart-categoria-pizza",  "figure"),
-        # KPIs — Municípios Consorciados
-        Output("kpi-muni-total",         "children"),
-        Output("kpi-muni-previsto",      "children"),
-        Output("kpi-muni-recebido",      "children"),
-        Output("kpi-muni-saldo",         "children"),
-        # Gráficos — Municípios Consorciados
-        Output("chart-municipios-arrecadacao", "figure"),
-        Output("chart-municipios-adimplencia", "figure"),
-        Output("chart-municipios-ranking",     "figure"),
-        # Tabela — lançamentos
-        Output("tabela-lancamentos", "data"),
-        # Tabela — adimplência
-        Output("tabela-adimplencia", "data"),
-        # Relatórios
-        Output("rel-entradas",       "children"),
-        Output("rel-saidas",         "children"),
-        Output("rel-liquido",        "children"),
-        Output("rel-saldo",          "children"),
-        Output("rel-ab-saidas",      "children"),
-        Output("rel-ab-ent",         "children"),
-        Output("rel-aguardando",     "children"),
-        Output("rel-saldo-c1",       "children"),
-        Output("rel-saldo-c2",       "children"),
-        Output("rel-saldo-c3",       "children"),
-        # Inputs
-        Input("filtro-conta",        "value"),
-        Input("filtro-data",         "start_date"),
-        Input("filtro-data",         "end_date"),
-        Input("theme-store",         "data"),
-        Input("btn-sync-sheets",     "n_clicks"),
+        Output("header-etl", "children"),
+        Input("btn-sync-sheets", "n_clicks"),
+        prevent_initial_call=False,
     )
-    def atualizar(conta_sel, data_ini, data_fim, tema=None, n_clicks_sync=0):
+    def sincronizar_e_atualizar_header(n_clicks_sync):
         from dash import ctx
         from etl.load import executar_etl_completo
-
-        EMPTY = "—"
-        tema = tema or "light"
-
-        # Se o botão de sincronização foi clicado, executa o ETL do Google Sheets
         if ctx.triggered_id == "btn-sync-sheets" and n_clicks_sync and n_clicks_sync > 0:
             try:
                 executar_etl_completo("google_sheets")
@@ -234,53 +196,50 @@ def registrar_callbacks(app):
                 _DB_READY = True
             except Exception as exc:
                 logger.error("Erro ao sincronizar com Google Sheets: %s", exc)
+        return _get_header_etl_info()
 
-        # ── Banco indisponível ─────────────────────────────────────────────
+    # ── 6. Visão Executiva: Saldos, KPIs e Gráficos ─────────────────────
+    @app.callback(
+        # Saldos globais
+        Output("saldo-geral",        "children"),
+        Output("saldo-cimmvi",       "children"),
+        Output("saldo-amvi",         "children"),
+        # Saldo por conta
+        Output("saldo-c1",           "children"),
+        Output("saldo-c2",           "children"),
+        Output("saldo-c3",           "children"),
+        # KPIs
+        Output("kpi-entradas",       "children"),
+        Output("kpi-saidas",         "children"),
+        Output("kpi-liquido",        "children"),
+        Output("kpi-aberto-saidas",  "children"),
+        Output("kpi-aberto-ent",     "children"),
+        Output("kpi-aguardando",     "children"),
+        # Gráficos
+        Output("chart-saldo",        "figure"),
+        Output("chart-situacao",     "figure"),
+        Output("chart-mensal",       "figure"),
+        Output("chart-categoria",        "figure"),
+        Output("chart-categoria-pizza",  "figure"),
+        Input("filtro-conta",        "value"),
+        Input("filtro-data",         "start_date"),
+        Input("filtro-data",         "end_date"),
+        Input("theme-store",         "data"),
+    )
+    def atualizar_visao_executiva(conta_sel, data_ini, data_fim, tema=None):
+        tema = tema or "light"
         if not _DB_READY:
-            aviso = html.Span(
-                "⚠️ Execute o ETL para carregar os dados.",
-                style={"color": WARNING},
-            )
             fig_v = empty_fig("Banco não inicializado — execute o ETL primeiro.", theme=tema)
             return (
-                aviso,
                 EMPTY, EMPTY, EMPTY,
                 EMPTY, EMPTY, EMPTY,
                 EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-                fig_v, fig_v, fig_v,
-                fig_v, fig_v,
-                "0", EMPTY, EMPTY, EMPTY,
-                fig_v, fig_v, fig_v,
-                [],
-                [],
-                EMPTY, EMPTY, EMPTY, EMPTY,
-                EMPTY, EMPTY, EMPTY,
-                EMPTY, EMPTY, EMPTY,
+                fig_v, fig_v, fig_v, fig_v, fig_v,
             )
 
         conta = conta_sel or None
 
-        # ── Info do ETL ───────────────────────────────────────────────────
-        try:
-            uc = ultima_carga()
-            if uc:
-                ts = str(uc["iniciado_em"])[:16].replace("T", " ")
-                origem = uc.get("arquivo_origem", "")
-                label_origem = "Google Sheets" if "google_sheets" in str(origem).lower() or "http" in str(origem).lower() else "Planilha Excel"
-                header_etl = [
-                    html.Span(className="status-dot-pulse"),
-                    html.Span(f"{label_origem}: {ts}", style={"fontWeight": "600"}),
-                    html.Span(f" • {uc['linhas_inseridas']} linhas", style={"opacity": "0.8", "fontSize": "11px", "marginLeft": "4px"}),
-                ]
-            else:
-                header_etl = [
-                    html.Span("⚠️", style={"marginRight": "6px"}),
-                    html.Span("Nenhuma carga registrada", style={"fontWeight": "500"}),
-                ]
-        except Exception:
-            header_etl = EMPTY
-
-        # ── Saldos ────────────────────────────────────────────────────────
+        # Saldos
         try:
             _v1 = saldo_final_conta_1() or 0.0
             _v2 = saldo_final_conta_2() or 0.0
@@ -294,7 +253,7 @@ def registrar_callbacks(app):
         except Exception:
             sg = sc1 = sc2 = sc3 = s_cimmvi = s_amvi = EMPTY
 
-        # ── KPIs ──────────────────────────────────────────────────────────
+        # KPIs
         try:
             kpi_ent    = formata_brl(total_entradas(data_ini, data_fim, conta))
             kpi_sai    = formata_brl(total_saidas(data_ini, data_fim, conta))
@@ -305,19 +264,15 @@ def registrar_callbacks(app):
         except Exception:
             kpi_ent = kpi_sai = kpi_liq = kpi_ab_sai = kpi_ab_ent = kpi_ag = EMPTY
 
-        # ── Gráfico 1: Evolução do saldo mensal ───────────────────────────
+        # Gráfico: Evolução saldo mensal
         try:
-            df_s = evolucao_saldo_mensal(
-                conta=conta, data_inicio=data_ini, data_fim=data_fim,
-            )
+            df_s = evolucao_saldo_mensal(conta=conta, data_inicio=data_ini, data_fim=data_fim)
             if df_s.empty:
                 fig_saldo = empty_fig(theme=tema)
             else:
                 fig_saldo = go.Figure()
                 for nome_conta, grp in df_s.groupby("conta"):
-                    cor_linha, cor_fill = CONTA_ESTILOS.get(
-                        nome_conta, (PRIMARY, "rgba(129,140,248,0.08)"),
-                    )
+                    cor_linha, cor_fill = CONTA_ESTILOS.get(nome_conta, (PRIMARY, "rgba(129,140,248,0.08)"))
                     grp = grp.sort_values("ano_mes")
                     fig_saldo.add_trace(go.Scatter(
                         x=grp["ano_mes"], y=grp["saldo_acumulado"],
@@ -326,27 +281,18 @@ def registrar_callbacks(app):
                         line=dict(color=cor_linha, width=2.5),
                         marker=dict(size=5, color=cor_linha),
                         fill="tozeroy", fillcolor=cor_fill,
-                        hovertemplate=(
-                            "<b>%{x}</b><br>"
-                            "Saldo: R$\u00a0%{y:,.2f}<extra></extra>"
-                        ),
+                        hovertemplate="<b>%{x}</b><br>Saldo: R$\u00a0%{y:,.2f}<extra></extra>",
                     ))
                 fig_saldo.update_layout(**chart_layout(
                     theme=tema,
-                    yaxis=dict(
-                        tickprefix="R$\u00a0", tickformat=",.0f",
-                        gridcolor="rgba(150,150,150,0.2)",
-                    ),
+                    yaxis=dict(tickprefix="R$\u00a0", tickformat=",.0f", gridcolor="rgba(150,150,150,0.2)"),
                 ))
         except Exception as ex:
             fig_saldo = empty_fig(f"Erro: {ex}", theme=tema)
 
-        # ── Gráfico 2: Situação (donut) ───────────────────────────────────
+        # Gráfico: Situação
         try:
-            df_sit = contagem_por_situacao(
-                conta=conta,
-                data_inicio=data_ini, data_fim=data_fim,
-            )
+            df_sit = contagem_por_situacao(conta=conta, data_inicio=data_ini, data_fim=data_fim)
             if df_sit.empty:
                 fig_sit = empty_fig(theme=tema)
             else:
@@ -357,29 +303,20 @@ def registrar_callbacks(app):
                     hole=0.54,
                     marker=dict(colors=cores, line=dict(color="rgba(0,0,0,0.1)", width=2)),
                     textinfo="percent",
-                    hovertemplate=(
-                        "<b>%{label}</b><br>"
-                        "R$\u00a0%{value:,.2f}  (%{percent})<extra></extra>"
-                    ),
+                    hovertemplate="<b>%{label}</b><br>R$\u00a0%{value:,.2f}  (%{percent})<extra></extra>",
                 ))
                 fig_sit.update_layout(**chart_layout(
                     theme=tema,
                     margin=dict(l=12, r=12, t=12, b=12),
-                    legend=dict(
-                        bgcolor="rgba(0,0,0,0)", orientation="v",
-                        yanchor="middle", y=0.5, xanchor="left", x=1.0,
-                    ),
+                    legend=dict(bgcolor="rgba(0,0,0,0)", orientation="v", yanchor="middle", y=0.5, xanchor="left", x=1.0),
                     showlegend=True,
                 ))
         except Exception as ex:
             fig_sit = empty_fig(f"Erro: {ex}", theme=tema)
 
-        # ── Gráfico 3: Entradas e saídas mensais ──────────────────────────
+        # Gráfico: Entradas e Saídas mensais
         try:
-            df_m = entradas_saidas_mensais(
-                conta=conta,
-                data_inicio=data_ini, data_fim=data_fim,
-            )
+            df_m = entradas_saidas_mensais(conta=conta, data_inicio=data_ini, data_fim=data_fim)
             if df_m.empty:
                 fig_mensal = empty_fig(theme=tema)
             else:
@@ -392,37 +329,25 @@ def registrar_callbacks(app):
                     go.Bar(
                         name="Entradas", x=agg["ano_mes"], y=agg["entradas"],
                         marker_color=SUCCESS, opacity=0.85,
-                        hovertemplate=(
-                            "Entradas · <b>%{x}</b><br>"
-                            "R$\u00a0%{y:,.2f}<extra></extra>"
-                        ),
+                        hovertemplate="Entradas · <b>%{x}</b><br>R$\u00a0%{y:,.2f}<extra></extra>",
                     ),
                     go.Bar(
                         name="Saídas", x=agg["ano_mes"], y=agg["saidas"],
                         marker_color=DANGER, opacity=0.85,
-                        hovertemplate=(
-                            "Saídas · <b>%{x}</b><br>"
-                            "R$\u00a0%{y:,.2f}<extra></extra>"
-                        ),
+                        hovertemplate="Saídas · <b>%{x}</b><br>R$\u00a0%{y:,.2f}<extra></extra>",
                     ),
                 ])
                 fig_mensal.update_layout(**chart_layout(
                     theme=tema,
                     barmode="group", bargap=0.2,
-                    yaxis=dict(
-                        tickprefix="R$\u00a0", tickformat=",.0f",
-                        gridcolor="rgba(150,150,150,0.2)",
-                    ),
+                    yaxis=dict(tickprefix="R$\u00a0", tickformat=",.0f", gridcolor="rgba(150,150,150,0.2)"),
                 ))
         except Exception as ex:
             fig_mensal = empty_fig(f"Erro: {ex}", theme=tema)
 
-        # ── Gráfico 4: Saídas por categoria (Barras e Pizza) ─────────────
+        # Gráfico: Saídas por categoria
         try:
-            df_cat = saidas_por_categoria(
-                conta=conta,
-                data_inicio=data_ini, data_fim=data_fim,
-            )
+            df_cat = saidas_por_categoria(conta=conta, data_inicio=data_ini, data_fim=data_fim)
             df_cat = df_cat[df_cat["total_saidas"] > 0].head(12)
             if df_cat.empty:
                 fig_cat = empty_fig(theme=tema)
@@ -437,8 +362,7 @@ def registrar_callbacks(app):
                     marker_color=cores_cat,
                     hovertemplate="<b>%{y}</b><br>R$\u00a0%{x:,.2f}<extra></extra>",
                     text=df_cat["total_saidas"].apply(
-                        lambda v: f"R$\u00a0{v:,.0f}".replace(",", "X")
-                        .replace(".", ",").replace("X", ".")
+                        lambda v: f"R$\u00a0{v:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
                     ),
                     textposition="outside",
                 ))
@@ -450,14 +374,12 @@ def registrar_callbacks(app):
                     hovermode="y unified",
                 ))
 
-                # Rótulos para a legenda com a porcentagem ao lado do nome
                 total_saidas_cat = df_cat["total_saidas"].sum()
                 labels_legenda = [
                     f"{cat} ({val / total_saidas_cat * 100:.1f}%)" if total_saidas_cat > 0 else str(cat)
                     for cat, val in zip(df_cat["categoria"], df_cat["total_saidas"])
                 ]
 
-                # Gráfico de Pizza/Rosca com Porcentagens
                 fig_cat_pizza = go.Figure(go.Pie(
                     labels=labels_legenda,
                     values=df_cat["total_saidas"],
@@ -471,111 +393,46 @@ def registrar_callbacks(app):
                     theme=tema,
                     margin=dict(l=10, r=20, t=20, b=20),
                     showlegend=True,
-                    legend=dict(
-                        orientation="v",
-                        y=0.5,
-                        yanchor="middle",
-                        x=1.02,
-                        xanchor="left",
-                    ),
+                    legend=dict(orientation="v", y=0.5, yanchor="middle", x=1.02, xanchor="left"),
                 ))
         except Exception as ex:
             fig_cat = empty_fig(f"Erro: {ex}", theme=tema)
             fig_cat_pizza = empty_fig(f"Erro: {ex}", theme=tema)
 
-        # ── Gráfico 5: Forma de pagamento ─────────────────────────────────
-        try:
-            df_fp = saidas_por_forma_pagamento(
-                conta=conta,
-                data_inicio=data_ini, data_fim=data_fim,
-            )
-            if df_fp.empty:
-                fig_fp = empty_fig()
-            else:
-                cores_fp = (PALETA * 4)[:len(df_fp)]
-                fig_fp = go.Figure(go.Bar(
-                    x=df_fp["total_saidas"],
-                    y=df_fp["forma_pagamento"],
-                    orientation="h",
-                    marker_color=cores_fp,
-                    hovertemplate="<b>%{y}</b><br>R$\u00a0%{x:,.2f}<extra></extra>",
-                    text=df_fp["total_saidas"].apply(
-                        lambda v: f"R$\u00a0{v:,.0f}".replace(",", "X")
-                        .replace(".", ",").replace("X", ".")
-                    ),
-                    textposition="outside",
-                    textfont=dict(color=TEXT_DIM, size=11),
-                ))
-                fig_fp.update_layout(**chart_layout(
-                    margin=dict(l=12, r=100, t=20, b=12),
-                    xaxis=dict(visible=False, gridcolor=BORDER),
-                    yaxis=dict(
-                        autorange="reversed",
-                        tickfont=dict(color=TEXT_DIM, size=12),
-                        gridcolor=BORDER, linecolor=BORDER,
-                    ),
-                    showlegend=False,
-                    hovermode="y unified",
-                ))
-        except Exception as ex:
-            fig_fp = empty_fig(f"Erro: {ex}")
+        return (
+            sg, s_cimmvi, s_amvi,
+            sc1, sc2, sc3,
+            kpi_ent, kpi_sai, kpi_liq, kpi_ab_sai, kpi_ab_ent, kpi_ag,
+            fig_saldo, fig_sit, fig_mensal,
+            fig_cat, fig_cat_pizza,
+        )
 
-        # ── Gráfico 6: Top 10 maiores saídas ──────────────────────────────
-        try:
-            df_top = top_saidas(
-                n=10, conta=conta,
-                data_inicio=data_ini, data_fim=data_fim,
-            )
-            if df_top.empty:
-                fig_top = empty_fig()
-            else:
-                df_top = df_top.sort_values("saidas", ascending=True)
-                df_top["label"] = df_top.apply(
-                    lambda r: (
-                        str(r.get("descricao") or "—")
-                    )[:40].rstrip()
-                    + ("…" if len(str(r.get("descricao") or "")) > 40 else ""),
-                    axis=1,
-                )
-                cores_top = [
-                    CONTA_ESTILOS.get(c, (DANGER, ""))[0] for c in df_top["conta"]
-                ]
-                fig_top = go.Figure(go.Bar(
-                    x=df_top["saidas"],
-                    y=df_top["label"],
-                    orientation="h",
-                    marker_color=cores_top,
-                    hovertemplate=(
-                        "<b>%{y}</b><br>"
-                        "Saída: R$\u00a0%{x:,.2f}<extra></extra>"
-                    ),
-                    text=df_top["saidas"].apply(
-                        lambda v: f"R$\u00a0{v:,.0f}".replace(",", "X")
-                        .replace(".", ",").replace("X", ".")
-                    ),
-                    textposition="outside",
-                    textfont=dict(color=TEXT_DIM, size=10),
-                ))
-                fig_top.update_layout(**chart_layout(
-                    margin=dict(l=12, r=120, t=20, b=12),
-                    xaxis=dict(visible=False, gridcolor=BORDER),
-                    yaxis=dict(
-                        tickfont=dict(color=TEXT_DIM, size=11),
-                        gridcolor=BORDER, linecolor=BORDER,
-                    ),
-                    showlegend=False,
-                    hovermode="y unified",
-                ))
-        except Exception as ex:
-            fig_top = empty_fig(f"Erro: {ex}")
+    # ── 7. Municípios Consorciados ─────────────────────────────────────────
+    @app.callback(
+        Output("kpi-muni-total",         "children"),
+        Output("kpi-muni-previsto",      "children"),
+        Output("kpi-muni-recebido",      "children"),
+        Output("kpi-muni-saldo",         "children"),
+        Output("chart-municipios-arrecadacao", "figure"),
+        Output("chart-municipios-adimplencia", "figure"),
+        Output("chart-municipios-ranking",     "figure"),
+        Output("tabela-adimplencia", "data"),
+        Output("tabela-lancamentos", "data"),
+        Input("filtro-data",         "start_date"),
+        Input("filtro-data",         "end_date"),
+        Input("theme-store",         "data"),
+    )
+    def atualizar_municipios_consorciados(data_ini, data_fim, tema=None):
+        tema = tema or "light"
+        if not _DB_READY:
+            fig_v = empty_fig("Banco não inicializado — execute o ETL primeiro.", theme=tema)
+            return "0", EMPTY, EMPTY, EMPTY, fig_v, fig_v, fig_v, [], []
 
-        # ── Tabela de lançamentos ──────────────────────────────────────────
+        # Tabela lançamentos
         try:
             df_tab = lancamentos_detalhados(
-                conta=conta,
-                data_inicio=data_ini, data_fim=data_fim,
-                tipo_lancamento="MOVIMENTO",
-                limit=500,
+                conta=None, data_inicio=data_ini, data_fim=data_fim,
+                tipo_lancamento="MOVIMENTO", limit=500,
             )
             if df_tab.empty:
                 dados_tabela = []
@@ -586,9 +443,14 @@ def registrar_callbacks(app):
                             lambda v: round(float(v), 2) if pd.notna(v) else None,
                         )
                 if "data_pagamento" in df_tab.columns:
-                    df_tab["data_pagamento"] = df_tab["data_pagamento"].apply(
-                        lambda v: str(v)[:10] if v else "",
-                    )
+                    def _fmt_dt(v):
+                        if pd.notna(v) and v:
+                            try:
+                                return pd.to_datetime(v).strftime("%d/%m/%Y")
+                            except Exception:
+                                return str(v)[:10]
+                        return ""
+                    df_tab["data_pagamento"] = df_tab["data_pagamento"].apply(_fmt_dt)
                 if ("parc_atual" in df_tab.columns or "parc_restante" in df_tab.columns) and "parc_total" in df_tab.columns:
                     def _fmt_parc(row):
                         pa = row.get("parc_atual") if pd.notna(row.get("parc_atual")) else row.get("parc_restante")
@@ -605,14 +467,12 @@ def registrar_callbacks(app):
         except Exception:
             dados_tabela = []
 
-        # ── Municípios Consorciados (KPIs, Tabela Resumo e 3 Gráficos Indicadores) ──
+        # Municípios
         try:
             df_adim = adimplencia_municipios(data_inicio=data_ini, data_fim=data_fim)
             if df_adim.empty:
                 kpi_muni_total = "0"
-                kpi_muni_previsto = EMPTY
-                kpi_muni_recebido = EMPTY
-                kpi_muni_saldo = EMPTY
+                kpi_muni_previsto = kpi_muni_recebido = kpi_muni_saldo = EMPTY
                 dados_adimplencia = []
                 fig_muni_arr = empty_fig("Sem dados de arrecadação", theme=tema)
                 fig_muni_adim = empty_fig("Sem dados de adimplência", theme=tema)
@@ -687,7 +547,7 @@ def registrar_callbacks(app):
                 kpi_muni_saldo = formata_brl(tot_saldo)
                 dados_adimplencia = records
 
-                # Gráfico 1: Valor arrecadado por município (Horizontal Bar Chart)
+                # Gráfico 1: Arrecadação
                 df_rec_sort = pd.DataFrame(records).sort_values("recebido", ascending=True)
                 fig_muni_arr = go.Figure(go.Bar(
                     x=df_rec_sort["recebido"],
@@ -712,7 +572,7 @@ def registrar_callbacks(app):
                     showlegend=False
                 ))
 
-                # Gráfico 2: % de Adimplência e Inadimplência (Donut Chart)
+                # Gráfico 2: % Adimplência
                 pct_adim = (c_adim / total_munis * 100) if total_munis > 0 else 0
                 fig_muni_adim = go.Figure(go.Pie(
                     labels=["Adimplente", "Inadimplente"],
@@ -733,7 +593,7 @@ def registrar_callbacks(app):
                     showlegend=True
                 ))
 
-                # Gráfico 3: Ranking de maior arrecadação (Ranked Bar Chart with badges)
+                # Gráfico 3: Ranking
                 df_rank = pd.DataFrame(records).sort_values("recebido", ascending=False).reset_index(drop=True)
                 df_rank["pct_total"] = (df_rank["recebido"] / tot_rec * 100) if tot_rec > 0 else 0
 
@@ -789,38 +649,75 @@ def registrar_callbacks(app):
             fig_muni_adim = empty_fig(f"Erro: {ex}", theme=tema)
             fig_muni_rank = empty_fig(f"Erro: {ex}", theme=tema)
 
-        # ── Valores para a tela Relatórios ────────────────────────────────
-        try:
-            rel_ent    = formata_brl(total_entradas(data_ini, data_fim, conta))
-            rel_sai    = formata_brl(total_saidas(data_ini, data_fim, conta))
-            rel_liq    = formata_brl(total_liquido(data_ini, data_fim, conta), show_sign=True)
-            rel_saldo  = formata_brl(saldo_final_geral())
-            rel_ab_sai = formata_brl(saidas_em_aberto(conta, data_inicio=data_ini, data_fim=data_fim))
-            rel_ab_ent = formata_brl(entradas_em_aberto(conta, data_inicio=data_ini, data_fim=data_fim))
-            rel_ag     = formata_brl(valor_aguardando_aprovacao(conta, data_inicio=data_ini, data_fim=data_fim))
-            _r1 = saldo_final_conta_1() or 0.0
-            _r2 = saldo_final_conta_2() or 0.0
-            _r3 = saldo_final_conta_3() or 0.0
-            rel_sc1 = formata_brl(_r1)
-            rel_sc2 = formata_brl(_r2)
-            rel_sc3 = formata_brl(_r3)
-        except Exception:
-            rel_ent = rel_sai = rel_liq = rel_saldo = EMPTY
-            rel_ab_sai = rel_ab_ent = rel_ag = EMPTY
-            rel_sc1 = rel_sc2 = rel_sc3 = EMPTY
-
         return (
-            header_etl,
-            sg, s_cimmvi, s_amvi,
-            sc1, sc2, sc3,
-            kpi_ent, kpi_sai, kpi_liq, kpi_ab_sai, kpi_ab_ent, kpi_ag,
-            fig_saldo, fig_sit, fig_mensal,
-            fig_cat, fig_cat_pizza,
             kpi_muni_total, kpi_muni_previsto, kpi_muni_recebido, kpi_muni_saldo,
             fig_muni_arr, fig_muni_adim, fig_muni_rank,
-            dados_tabela,
-            dados_adimplencia,
-            rel_ent, rel_sai, rel_liq, rel_saldo,
-            rel_ab_sai, rel_ab_ent, rel_ag,
-            rel_sc1, rel_sc2, rel_sc3,
+            dados_adimplencia, dados_tabela,
         )
+
+    # ── 8. Contratos Rateio (Tabela da Tela Contratos) ────────────────────
+    @app.callback(
+        Output("tabela-contratos-rateio", "data"),
+        Input("filtro-data", "start_date"),
+        Input("filtro-data", "end_date"),
+    )
+    def atualizar_contratos_rateio(data_ini, data_fim):
+        if not _DB_READY:
+            return []
+        try:
+            df_cr = contratos_rateio_parcelas(data_inicio=data_ini, data_fim=data_fim)
+            if df_cr.empty:
+                return []
+
+            rec_cr = []
+            for _, r in df_cr.iterrows():
+                contrato_nome = str(r.get("contrato") or "")
+                cat_nome = str(r.get("categoria") or "")
+                pa = r.get("parc_atual")
+                pr = r.get("parc_restante")
+                pt = r.get("parc_total")
+                sit = str(r.get("situacao") or "—")
+                dt_pag = r.get("data_pagamento")
+                if pd.notna(dt_pag) and dt_pag:
+                    try:
+                        dt_str = pd.to_datetime(dt_pag).strftime("%d/%m/%Y")
+                    except Exception:
+                        dt_str = str(dt_pag)
+                else:
+                    dt_str = "—"
+                tot_sai = float(r.get("total_saidas") or 0.0)
+
+                pa_num = int(pa) if pd.notna(pa) else None
+                pr_num = int(pr) if pd.notna(pr) else None
+                pt_num = int(pt) if pd.notna(pt) else 12
+
+                if pa_num is not None:
+                    pagas = pa_num
+                elif pr_num is not None:
+                    pagas = max(0, pt_num - pr_num)
+                else:
+                    pagas = "—"
+
+                restantes = pr_num if pr_num is not None else (max(0, pt_num - pagas) if isinstance(pagas, int) else "—")
+
+                if isinstance(pagas, int):
+                    p_info = f"{pagas}/{pt_num} ({restantes} restantes)"
+                else:
+                    p_info = "—"
+
+                rec_cr.append({
+                    "contrato": contrato_nome,
+                    "categoria": cat_nome,
+                    "parc_atual": pagas,
+                    "parc_restante": restantes,
+                    "parc_total": pt_num,
+                    "parc_info": p_info,
+                    "total_saidas": tot_sai,
+                    "total_saidas_fmt": formata_brl(tot_sai),
+                    "data_pagamento": dt_str,
+                    "situacao": sit,
+                })
+            return rec_cr
+        except Exception as ex_cr:
+            logger.error("Erro ao carregar contratos de rateio: %s", ex_cr)
+            return []

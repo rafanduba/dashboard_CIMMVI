@@ -62,12 +62,11 @@ _TABLE_CELL = {
 }
 
 _TABLE_CELL_COND = [
-    {"if": {"column_id": "categoria"}, "textAlign": "left", "width": "15%", "fontSize": "12px", "color": MUTED, "fontWeight": "500"},
-    {"if": {"column_id": "contrato"}, "textAlign": "left", "width": "29%", "fontWeight": "600", "color": TEXT},
-    {"if": {"column_id": "parc_info"}, "textAlign": "center", "width": "18%", "fontWeight": "600", "color": INFO, "fontVariantNumeric": "tabular-nums"},
-    {"if": {"column_id": "total_saidas_fmt"}, "textAlign": "right", "width": "15%", "fontWeight": "700", "color": DANGER, "fontVariantNumeric": "tabular-nums"},
+    {"if": {"column_id": "contrato"}, "textAlign": "left", "width": "40%", "fontWeight": "600", "color": TEXT},
+    {"if": {"column_id": "parc_info"}, "textAlign": "center", "width": "22%", "fontWeight": "600", "color": INFO, "fontVariantNumeric": "tabular-nums"},
+    {"if": {"column_id": "total_saidas_fmt"}, "textAlign": "right", "width": "16%", "fontWeight": "700", "color": DANGER, "fontVariantNumeric": "tabular-nums"},
     {"if": {"column_id": "data_pagamento"}, "textAlign": "center", "width": "11%", "color": TEXT_DIM, "fontVariantNumeric": "tabular-nums"},
-    {"if": {"column_id": "situacao"}, "textAlign": "center", "width": "12%"},
+    {"if": {"column_id": "situacao"}, "textAlign": "center", "width": "11%"},
 ]
 
 _TABLE_COND_CONTRATOS = [
@@ -203,6 +202,7 @@ def layout() -> html.Div:
                     ),
                 ], style={"flex": "1", "minWidth": "180px"}),
 
+
             ], style={
                 "display": "flex",
                 "gap": "20px",
@@ -231,7 +231,6 @@ def layout() -> html.Div:
             dash_table.DataTable(
                 id="tabela-contratos-rateio",
                 columns=[
-                    {"name": "Categoria", "id": "categoria"},
                     {"name": "Contrato / Objeto", "id": "contrato"},
                     {"name": "Parcelas (Pagas/Total)", "id": "parc_info"},
                     {"name": "Total Saídas", "id": "total_saidas_fmt"},

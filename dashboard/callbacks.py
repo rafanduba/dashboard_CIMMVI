@@ -669,30 +669,43 @@ def registrar_callbacks(app):
             dados_adimplencia, dados_tabela,
         )
 
-    # ── 8. Contratos Rateio (Tabela da Tela Contratos com Filtros Interativos) ────────
+    # ── 8a. Contratos Rateio — carrega do banco APENAS quando o período muda ──────────
     @app.callback(
-        Output("tabela-contratos-rateio", "data"),
-        Output("filtro-contrato-categoria", "options"),
+        Output("store-contratos-rateio", "data"),
         Input("filtro-contrato-periodo", "start_date"),
         Input("filtro-contrato-periodo", "end_date"),
-        Input("filtro-contrato-categoria", "value"),
-        Input("filtro-contrato-parcelas", "value"),
-        Input("filtro-contrato-busca", "value"),
         Input("filtro-data", "start_date"),
         Input("filtro-data", "end_date"),
     )
-    def atualizar_contratos_rateio(dt_ini_c, dt_fim_c, cat_sel, parc_sel, busca_txt, dt_ini_g, dt_fim_g):
-        default_opts = [{"label": "Todas as categorias", "value": ""}]
+    def carregar_contratos_rateio(dt_ini_c, dt_fim_c, dt_ini_g, dt_fim_g):
         if not _DB_READY:
-            return [], default_opts
+            return []
         try:
-            # Prioriza o filtro de data específico da tela de contratos; fallback para o global do topo
             data_ini = dt_ini_c or dt_ini_g
             data_fim = dt_fim_c or dt_fim_g
-
             df_cr = contratos_rateio_parcelas(data_inicio=data_ini, data_fim=data_fim)
             if df_cr.empty:
-                return [], default_opts
+                return []
+            return df_cr.to_dict("records")
+        except Exception as ex_cr:
+            logger.error("Erro ao carregar contratos de rateio: %s", ex_cr)
+            return []
+
+    # ── 8b. Contratos Rateio — aplica filtros locais em memória (sem bater no banco) ──
+    @app.callback(
+        Output("tabela-contratos-rateio", "data"),
+        Output("filtro-contrato-categoria", "options"),
+        Input("store-contratos-rateio", "data"),
+        Input("filtro-contrato-categoria", "value"),
+        Input("filtro-contrato-parcelas", "value"),
+        Input("filtro-contrato-busca", "value"),
+    )
+    def atualizar_contratos_rateio(dados_brutos, cat_sel, parc_sel, busca_txt):
+        default_opts = [{"label": "Todas as categorias", "value": ""}]
+        if not dados_brutos:
+            return [], default_opts
+        try:
+            df_cr = pd.DataFrame(dados_brutos)
 
             # ── 1. Atualiza dinamicamente as Opções de Categoria (Sem hardcoding) ──
             if "categoria" in df_cr.columns:
@@ -711,9 +724,7 @@ def registrar_callbacks(app):
             # ── 3. Filtra por Texto de Busca ─────────────────────────────────
             if busca_txt and str(busca_txt).strip():
                 txt = str(busca_txt).strip().lower()
-                cond_contrato = df_cr["contrato"].astype(str).str.lower().str.contains(txt, regex=False, na=False)
-                cond_cat = df_cr["categoria"].astype(str).str.lower().str.contains(txt, regex=False, na=False)
-                df_cr = df_cr[cond_contrato | cond_cat]
+                df_cr = df_cr[df_cr["contrato"].astype(str).str.lower().str.contains(txt, regex=False, na=False)]
 
             rec_cr = []
             for _, r in df_cr.iterrows():
@@ -722,7 +733,7 @@ def registrar_callbacks(app):
                 pa = r.get("parc_atual")
                 pr = r.get("parc_restante")
                 pt = r.get("parc_total")
-                sit = str(r.get("situacao") or "—")
+                sit = str(r.get("situacao") or "\u2014")
                 dt_pag = r.get("data_pagamento")
                 if pd.notna(dt_pag) and dt_pag:
                     try:
@@ -730,7 +741,7 @@ def registrar_callbacks(app):
                     except Exception:
                         dt_str = str(dt_pag)
                 else:
-                    dt_str = "—"
+                    dt_str = "\u2014"
                 tot_sai = float(r.get("total_saidas") or 0.0)
 
                 pa_num = int(pa) if pd.notna(pa) else None
@@ -742,14 +753,14 @@ def registrar_callbacks(app):
                 elif pr_num is not None:
                     pagas = max(0, pt_num - pr_num)
                 else:
-                    pagas = "—"
+                    pagas = "\u2014"
 
-                restantes = pr_num if pr_num is not None else (max(0, pt_num - pagas) if isinstance(pagas, int) else "—")
+                restantes = pr_num if pr_num is not None else (max(0, pt_num - pagas) if isinstance(pagas, int) else "\u2014")
 
                 if isinstance(pagas, int):
                     p_info = f"{pagas}/{pt_num} ({restantes} restantes)"
                 else:
-                    p_info = "—"
+                    p_info = "\u2014"
 
                 # ── 4. Filtra por Situação de Parcelas ──────────────────────
                 if parc_sel == "pendentes":
@@ -761,12 +772,8 @@ def registrar_callbacks(app):
                     if not has_pending:
                         continue
                 elif parc_sel == "quitadas":
-                    is_paid = False
-                    if isinstance(restantes, int) and restantes == 0:
-                        is_paid = True
-                    elif sit == "Pago":
-                        is_paid = True
-                    if not is_paid:
+                    # Só passa quem tem parc_restante explicitamente igual a 0
+                    if not (isinstance(restantes, int) and restantes == 0):
                         continue
                 elif parc_sel == "sem_parcela":
                     if p_info != "—":

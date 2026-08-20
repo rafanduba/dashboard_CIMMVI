@@ -788,6 +788,7 @@ def contratos_rateio_parcelas(data_inicio: str | None = None, data_fim: str | No
               AND (LOWER(TRIM(categoria)) = 'contratos' OR LOWER(TRIM(categoria)) LIKE '%contrato%')
               AND descricao IS NOT NULL
               AND TRIM(descricao) != ''
+              {filtros}
         ),
         totais_contratos AS (
             SELECT

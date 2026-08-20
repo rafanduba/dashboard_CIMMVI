@@ -126,13 +126,44 @@ def _encontrar_nome_aba_real(excel_file: pd.ExcelFile, nome_aba_config: str) -> 
 
 
 # Extração de dados
+def _detectar_header_row(excel_file: pd.ExcelFile, aba_real: str, expected_columns: list[str], max_scan: int = 15) -> int:
+    """
+    Varre as primeiras `max_scan` linhas da aba para encontrar a linha que contém
+    as colunas obrigatórias (ex: CATEGORIA, MOVIMENTAÇÃO). Retorna o índice (0-based)
+    da linha de cabeçalho detectada. Se não encontrar, retorna 0.
+
+    Isso torna o ETL imune a linhas extras inseridas antes do cabeçalho na planilha.
+    """
+    if not expected_columns:
+        return 0
+
+    # Lê sem cabeçalho para poder inspecionar linha a linha
+    df_raw = pd.read_excel(excel_file, sheet_name=aba_real, header=None, nrows=max_scan, engine="openpyxl")
+
+    col_targets = [c.lower().strip() for c in expected_columns]
+
+    for i, row in df_raw.iterrows():
+        row_values = [str(v).lower().strip() for v in row.values if pd.notna(v)]
+        # Considera encontrado quando pelo menos metade das colunas esperadas está na linha
+        matches = sum(1 for c in col_targets if any(c in rv for rv in row_values))
+        if matches >= max(1, len(col_targets) // 2):
+            logger.info("Header detectado automaticamente na linha %d (0-based) da aba '%s'.", i, aba_real)
+            return int(i)
+
+    logger.warning("Header não detectado automaticamente em '%s'. Usando linha 0 como fallback.", aba_real)
+    return 0
+
+
 def extrair_dados(nome_aba: str, fonte: str | Path | pd.ExcelFile = EXCEL_PATH) -> pd.DataFrame:
     excel_file = fonte if isinstance(fonte, pd.ExcelFile) else _obter_excel_file(fonte)
 
     aba_real = _encontrar_nome_aba_real(excel_file, nome_aba)
-    header_row = SHEETS_CONFIG[nome_aba].get("header_row", 0)
+    expected_columns = SHEETS_CONFIG[nome_aba].get("expected_columns", [])
 
-    logger.info("Lendo aba '%s' (aba real: '%s')", nome_aba, aba_real)
+    # Detecta automaticamente a linha do cabeçalho (imune a linhas extras inseridas antes)
+    header_row = _detectar_header_row(excel_file, aba_real, expected_columns)
+
+    logger.info("Lendo aba '%s' (aba real: '%s', header na linha %d)", nome_aba, aba_real, header_row)
     df = pd.read_excel(excel_file, sheet_name=aba_real, header=header_row, engine="openpyxl")
 
     _validar_colunas(df, nome_aba)

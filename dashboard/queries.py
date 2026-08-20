@@ -654,11 +654,11 @@ def periodo_disponivel() -> dict:
 
 def adimplencia_municipios(data_inicio: str | None = None, data_fim: str | None = None) -> pd.DataFrame:
     """
-    Retorna os municípios do Rateio Municipal CIMMVI e seu status de adimplência,
-    juntamente com o total de entradas arrecadadas e contagem de parcelas.
+    Retorna os municípios do Rateio Municipal CIMMVI e seu status de adimplência.
 
-    Filtra por categoria = 'Rateio Municipal' para garantir que apenas lançamentos
-    de municípios consorciados sejam considerados.
+    - recebido: soma real das entradas dentro do período filtrado (valores exatos da planilha).
+    - previsto_total: soma de TODOS os lançamentos registrados na planilha (sem filtro de data),
+      representando o valor total previsto para o ciclo completo do município.
     """
     try:
         criar_schema()
@@ -678,6 +678,7 @@ def adimplencia_municipios(data_inicio: str | None = None, data_fim: str | None 
         WITH mes_atual AS (
             SELECT CAST(strftime('%m', 'now') AS INTEGER) AS m
         ),
+        -- Última linha de cada município (para pegar parc_atual, parc_restante, parc_total)
         ultimos_lancamentos AS (
             SELECT
                 TRIM(descricao) AS municipio,
@@ -691,22 +692,38 @@ def adimplencia_municipios(data_inicio: str | None = None, data_fim: str | None 
             FROM lancamentos
             WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
               AND tipo_lancamento = 'MOVIMENTO'
-              AND categoria = 'Rateio Municipal'
+              AND LOWER(TRIM(categoria)) LIKE '%rateio%'
               AND descricao IS NOT NULL
               AND TRIM(descricao) != ''
         ),
+        -- Recebido: soma das entradas efetivamente recebidas no período selecionado
         totais_arrecadados AS (
             SELECT
-                TRIM(descricao) AS municipio,
+                LOWER(TRIM(descricao)) AS municipio_key,
                 COALESCE(SUM(entradas), 0) AS recebido,
                 COUNT(CASE WHEN (situacao = 'Pago' OR entradas > 0) THEN 1 END) AS qtd_pagas
             FROM lancamentos
             WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
               AND tipo_lancamento = 'MOVIMENTO'
-              AND categoria = 'Rateio Municipal'
+              AND LOWER(TRIM(categoria)) LIKE '%rateio%'
               AND descricao IS NOT NULL
               AND TRIM(descricao) != ''
               {filtros}
+            GROUP BY LOWER(TRIM(descricao))
+        ),
+        -- Previsto: soma de TODOS os lançamentos registrados na planilha (sem filtro de data).
+        -- Cada linha da planilha tem seu valor real — mesmo que "Em aberto" com entradas=0,
+        -- o que já está registrado é usado. Isso evita qualquer fórmula de estimativa no Python.
+        totais_previstos AS (
+            SELECT
+                LOWER(TRIM(descricao)) AS municipio_key,
+                COALESCE(SUM(entradas), 0) AS previsto_total
+            FROM lancamentos
+            WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
+              AND tipo_lancamento = 'MOVIMENTO'
+              AND LOWER(TRIM(categoria)) LIKE '%rateio%'
+              AND descricao IS NOT NULL
+              AND TRIM(descricao) != ''
             GROUP BY LOWER(TRIM(descricao))
         )
         SELECT
@@ -720,10 +737,12 @@ def adimplencia_municipios(data_inicio: str | None = None, data_fim: str | None 
                 ELSE 0
             END AS adimplente,
             COALESCE(t.recebido, 0) AS recebido,
-            COALESCE(t.qtd_pagas, 0) AS qtd_pagas
+            COALESCE(t.qtd_pagas, 0) AS qtd_pagas,
+            COALESCE(p.previsto_total, 0) AS previsto_total
         FROM ultimos_lancamentos u
         CROSS JOIN mes_atual m
-        LEFT JOIN totais_arrecadados t ON LOWER(TRIM(u.municipio)) = LOWER(TRIM(t.municipio))
+        LEFT JOIN totais_arrecadados t ON LOWER(TRIM(u.municipio)) = t.municipio_key
+        LEFT JOIN totais_previstos p ON LOWER(TRIM(u.municipio)) = p.municipio_key
         WHERE u.rn = 1
         ORDER BY adimplente DESC, recebido DESC, u.municipio
     """

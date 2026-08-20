@@ -495,16 +495,28 @@ def registrar_callbacks(app):
                     adim = int(r.get("adimplente") or 0)
                     qp = int(r.get("qtd_pagas") or 0)
 
-                    if pd.notna(pr):
+                    # Determina quantas parcelas foram pagas (com base nos dados da planilha)
+                    if pd.notna(pa) and int(pa) > 0:
+                        p_pagas = int(pa)
+                    elif pd.notna(pr):
                         p_pagas = max(1, pt - int(pr))
-                    elif pd.notna(pa):
-                        p_pagas = max(1, int(pa))
+                    elif qp > 0:
+                        p_pagas = qp
                     else:
-                        p_pagas = max(1, qp)
+                        p_pagas = 1
 
-                    if rec > 0:
-                        val_parc = rec / p_pagas
-                        prev = max(rec, val_parc * pt)
+                    # previsto_sql = soma de TODOS os lançamentos no DB para o município (sem filtro de data).
+                    # Pode incluir parcelas que o filtro de categoria do recebido perdeu.
+                    previsto_sql = float(r.get("previsto_total") or 0.0)
+
+                    # Usa o maior entre recebido e previsto_sql como base para a média por parcela,
+                    # garantindo que parcelas com categoria levemente diferente não sejam perdidas.
+                    base_ref = max(rec, previsto_sql)
+
+                    if base_ref > 0 and p_pagas > 0:
+                        # Média real por parcela (derivada dos valores reais da planilha) × total do contrato
+                        media_parc = base_ref / p_pagas
+                        prev = media_parc * pt
                     else:
                         prev = 0.0
 
@@ -522,9 +534,11 @@ def registrar_callbacks(app):
                     if pd.notna(pa) and pd.notna(pt):
                         p_info = f"{int(pa)}/{int(pt)}"
                     elif pd.notna(pr) and pd.notna(pt):
-                        p_info = f"{int(pt - pr)}/{int(pt)}"
+                        p_info = f"{int(pt) - int(pr)}/{int(pt)}"
+                    elif qp > 0:
+                        p_info = f"{qp}/{pt}"
                     else:
-                        p_info = f"{p_pagas}/{pt}"
+                        p_info = f"—/{pt}"
 
                     status_str = "✅ Adimplente" if adim == 1 else "❌ Inadimplente"
 
@@ -655,19 +669,51 @@ def registrar_callbacks(app):
             dados_adimplencia, dados_tabela,
         )
 
-    # ── 8. Contratos Rateio (Tabela da Tela Contratos) ────────────────────
+    # ── 8. Contratos Rateio (Tabela da Tela Contratos com Filtros Interativos) ────────
     @app.callback(
         Output("tabela-contratos-rateio", "data"),
+        Output("filtro-contrato-categoria", "options"),
+        Input("filtro-contrato-periodo", "start_date"),
+        Input("filtro-contrato-periodo", "end_date"),
+        Input("filtro-contrato-categoria", "value"),
+        Input("filtro-contrato-parcelas", "value"),
+        Input("filtro-contrato-busca", "value"),
         Input("filtro-data", "start_date"),
         Input("filtro-data", "end_date"),
     )
-    def atualizar_contratos_rateio(data_ini, data_fim):
+    def atualizar_contratos_rateio(dt_ini_c, dt_fim_c, cat_sel, parc_sel, busca_txt, dt_ini_g, dt_fim_g):
+        default_opts = [{"label": "Todas as categorias", "value": ""}]
         if not _DB_READY:
-            return []
+            return [], default_opts
         try:
+            # Prioriza o filtro de data específico da tela de contratos; fallback para o global do topo
+            data_ini = dt_ini_c or dt_ini_g
+            data_fim = dt_fim_c or dt_fim_g
+
             df_cr = contratos_rateio_parcelas(data_inicio=data_ini, data_fim=data_fim)
             if df_cr.empty:
-                return []
+                return [], default_opts
+
+            # ── 1. Atualiza dinamicamente as Opções de Categoria (Sem hardcoding) ──
+            if "categoria" in df_cr.columns:
+                raw_cats = df_cr["categoria"].dropna().unique()
+                cats_unicas = sorted(list(set(str(c).strip() for c in raw_cats if str(c).strip())))
+            else:
+                cats_unicas = []
+
+            cat_options = default_opts + [{"label": c, "value": c} for c in cats_unicas]
+
+            # ── 2. Filtra por Categoria Selecionada ─────────────────────────
+            if cat_sel and str(cat_sel).strip():
+                cat_target = str(cat_sel).strip().lower()
+                df_cr = df_cr[df_cr["categoria"].astype(str).str.strip().str.lower() == cat_target]
+
+            # ── 3. Filtra por Texto de Busca ─────────────────────────────────
+            if busca_txt and str(busca_txt).strip():
+                txt = str(busca_txt).strip().lower()
+                cond_contrato = df_cr["contrato"].astype(str).str.lower().str.contains(txt, regex=False, na=False)
+                cond_cat = df_cr["categoria"].astype(str).str.lower().str.contains(txt, regex=False, na=False)
+                df_cr = df_cr[cond_contrato | cond_cat]
 
             rec_cr = []
             for _, r in df_cr.iterrows():
@@ -705,6 +751,27 @@ def registrar_callbacks(app):
                 else:
                     p_info = "—"
 
+                # ── 4. Filtra por Situação de Parcelas ──────────────────────
+                if parc_sel == "pendentes":
+                    has_pending = False
+                    if isinstance(restantes, int) and restantes > 0:
+                        has_pending = True
+                    elif sit != "Pago" and sit != "—":
+                        has_pending = True
+                    if not has_pending:
+                        continue
+                elif parc_sel == "quitadas":
+                    is_paid = False
+                    if isinstance(restantes, int) and restantes == 0:
+                        is_paid = True
+                    elif sit == "Pago":
+                        is_paid = True
+                    if not is_paid:
+                        continue
+                elif parc_sel == "sem_parcela":
+                    if p_info != "—":
+                        continue
+
                 rec_cr.append({
                     "contrato": contrato_nome,
                     "categoria": cat_nome,
@@ -717,7 +784,10 @@ def registrar_callbacks(app):
                     "data_pagamento": dt_str,
                     "situacao": sit,
                 })
-            return rec_cr
+
+            return rec_cr, cat_options
+
         except Exception as ex_cr:
             logger.error("Erro ao carregar contratos de rateio: %s", ex_cr)
-            return []
+            return [], default_opts
+

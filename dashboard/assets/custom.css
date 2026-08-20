@@ -829,4 +829,89 @@ DatePickerRange
   100% {
     box-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
   }
-}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Estilização Moderna para Tabelas Dash (DataTable)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Container geral com bordas suaves e sombra fluida */
+.dash-spreadsheet-container {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  font-family: var(--font) !important;
+}
+
+.dash-spreadsheet-inner {
+  background-color: var(--card) !important;
+}
+
+.dash-spreadsheet-inner table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+/* Transição de hover elegante nas linhas */
+.dash-spreadsheet-inner tr:hover td {
+  background-color: var(--hover-bg) !important;
+  transition: background-color 0.15s ease-in-out;
+}
+
+/* Inputs de Filtro por coluna */
+.dash-spreadsheet-inner .dash-filter input {
+  background-color: var(--card2) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  font-family: var(--font) !important;
+  transition: all 0.2s ease;
+}
+
+.dash-spreadsheet-inner .dash-filter input:focus {
+  border-color: var(--primary) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Paginação com botões elegantes */
+.dash-spreadsheet-container .previous-next-container {
+  padding: 12px 18px !important;
+  background-color: var(--card2) !important;
+  border-top: 1px solid var(--border) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  font-family: var(--font) !important;
+  font-size: 12px !important;
+  color: var(--text-dim) !important;
+}
+
+.dash-spreadsheet-container .previous-next-container button {
+  background-color: var(--card) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  padding: 5px 14px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.dash-spreadsheet-container .previous-next-container button:hover:not(:disabled) {
+  background-color: var(--primary) !important;
+  color: #ffffff !important;
+  border-color: var(--primary) !important;
+  transform: translateY(-1px);
+}
+
+.dash-spreadsheet-container .previous-next-container button:disabled {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+}
+

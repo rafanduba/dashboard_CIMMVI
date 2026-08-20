@@ -41,6 +41,8 @@ try:
         valor_aguardando_aprovacao,
         adimplencia_municipios,
         contratos_rateio_parcelas,
+        contratos_vigencia,
+        invalidar_cache_vigencia,
     )
     _DB_READY = True
 except Exception as _e:
@@ -192,6 +194,10 @@ def registrar_callbacks(app):
         if ctx.triggered_id == "btn-sync-sheets" and n_clicks_sync and n_clicks_sync > 0:
             try:
                 executar_etl_completo("google_sheets")
+                try:
+                    invalidar_cache_vigencia()
+                except Exception:
+                    pass
                 global _DB_READY
                 _DB_READY = True
             except Exception as exc:
@@ -691,6 +697,50 @@ def registrar_callbacks(app):
             logger.error("Erro ao carregar contratos de rateio: %s", ex_cr)
             return []
 
+    def _obter_info_vigencia(contrato_nome: str, mapa_vig: dict) -> tuple[int | None, str, str]:
+        """Retorna (dias_vencer, dias_vencer_fmt, dias_status)."""
+        if not contrato_nome or not mapa_vig:
+            return None, "—", ""
+
+        nome_clean = contrato_nome.strip().lower()
+
+        # 1. Match direto exato
+        info = mapa_vig.get(nome_clean)
+
+        # 2. Substring match (chave contida no nome ou nome contido na chave)
+        if not info:
+            for chave, dados in mapa_vig.items():
+                if chave in nome_clean or nome_clean in chave:
+                    info = dados
+                    break
+
+        # 3. Match por palavras-chave principais
+        if not info:
+            stopwords = {"contrato", "administrativo", "empresa", "programa", "termo", "aditivo", "para", "com", "dos", "das", "entre", "si"}
+            palavras = [p for p in nome_clean.replace("-", " ").replace("/", " ").replace("º", " ").replace("n°", " ").split() if len(p) >= 3 and p not in stopwords]
+            for chave, dados in mapa_vig.items():
+                chave_palavras = [p for p in chave.replace("-", " ").replace("/", " ").replace("º", " ").replace("n°", " ").split() if len(p) >= 3 and p not in stopwords]
+                inter = set(palavras) & set(chave_palavras)
+                if inter:
+                    info = dados
+                    break
+
+        if not info or info.get("dias_vencer") is None:
+            return None, "—", ""
+
+        dias = info["dias_vencer"]
+        if dias < 0:
+            dias_fmt = f"{dias} d (Vencido)"
+            status = "vencido"
+        elif dias <= 30:
+            dias_fmt = f"{dias} d (Crítico)"
+            status = "alerta"
+        else:
+            dias_fmt = f"{dias} dias"
+            status = "ok"
+
+        return dias, dias_fmt, status
+
     # ── 8b. Contratos Rateio — aplica filtros locais em memória (sem bater no banco) ──
     @app.callback(
         Output("tabela-contratos-rateio", "data"),
@@ -706,6 +756,13 @@ def registrar_callbacks(app):
             return [], default_opts
         try:
             df_cr = pd.DataFrame(dados_brutos)
+
+            # Busca dados de vigência da planilha externa Google Sheets
+            try:
+                mapa_vig = contratos_vigencia() or {}
+            except Exception as e_vig:
+                logger.warning("Não foi possível carregar vigência dos contratos: %s", e_vig)
+                mapa_vig = {}
 
             # ── 1. Atualiza dinamicamente as Opções de Categoria (Sem hardcoding) ──
             if "categoria" in df_cr.columns:
@@ -779,6 +836,9 @@ def registrar_callbacks(app):
                     if p_info != "—":
                         continue
 
+                # ── 5. Obtém Vigência (Dias para Vencer) ───────────────────
+                dias_num, dias_fmt, dias_st = _obter_info_vigencia(contrato_nome, mapa_vig)
+
                 rec_cr.append({
                     "contrato": contrato_nome,
                     "categoria": cat_nome,
@@ -786,6 +846,9 @@ def registrar_callbacks(app):
                     "parc_restante": restantes,
                     "parc_total": pt_num,
                     "parc_info": p_info,
+                    "dias_vencer": dias_num,
+                    "dias_vencer_fmt": dias_fmt,
+                    "dias_status": dias_st,
                     "total_saidas": tot_sai,
                     "total_saidas_fmt": formata_brl(tot_sai),
                     "data_pagamento": dt_str,

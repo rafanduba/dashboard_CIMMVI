@@ -62,11 +62,12 @@ _TABLE_CELL = {
 }
 
 _TABLE_CELL_COND = [
-    {"if": {"column_id": "contrato"}, "textAlign": "left", "width": "40%", "fontWeight": "600", "color": TEXT},
-    {"if": {"column_id": "parc_info"}, "textAlign": "center", "width": "22%", "fontWeight": "600", "color": INFO, "fontVariantNumeric": "tabular-nums"},
-    {"if": {"column_id": "total_saidas_fmt"}, "textAlign": "right", "width": "16%", "fontWeight": "700", "color": DANGER, "fontVariantNumeric": "tabular-nums"},
-    {"if": {"column_id": "data_pagamento"}, "textAlign": "center", "width": "11%", "color": TEXT_DIM, "fontVariantNumeric": "tabular-nums"},
-    {"if": {"column_id": "situacao"}, "textAlign": "center", "width": "11%"},
+    {"if": {"column_id": "contrato"}, "textAlign": "left", "width": "34%", "fontWeight": "600", "color": TEXT},
+    {"if": {"column_id": "parc_info"}, "textAlign": "center", "width": "18%", "fontWeight": "600", "color": INFO, "fontVariantNumeric": "tabular-nums"},
+    {"if": {"column_id": "dias_vencer_fmt"}, "textAlign": "center", "width": "16%", "fontWeight": "700", "fontVariantNumeric": "tabular-nums"},
+    {"if": {"column_id": "total_saidas_fmt"}, "textAlign": "right", "width": "14%", "fontWeight": "700", "color": DANGER, "fontVariantNumeric": "tabular-nums"},
+    {"if": {"column_id": "data_pagamento"}, "textAlign": "center", "width": "9%", "color": TEXT_DIM, "fontVariantNumeric": "tabular-nums"},
+    {"if": {"column_id": "situacao"}, "textAlign": "center", "width": "9%"},
 ]
 
 _TABLE_COND_CONTRATOS = [
@@ -105,6 +106,27 @@ _TABLE_COND_CONTRATOS = [
         "color": MUTED,
         "fontWeight": "600",
         "borderRadius": "20px",
+    },
+    {
+        "if": {"column_id": "dias_vencer_fmt", "filter_query": '{dias_status} = "vencido"'},
+        "backgroundColor": "rgba(239, 68, 68, 0.18)",
+        "color": DANGER,
+        "fontWeight": "700",
+        "borderRadius": "6px",
+    },
+    {
+        "if": {"column_id": "dias_vencer_fmt", "filter_query": '{dias_status} = "alerta"'},
+        "backgroundColor": "rgba(245, 158, 11, 0.18)",
+        "color": WARNING,
+        "fontWeight": "700",
+        "borderRadius": "6px",
+    },
+    {
+        "if": {"column_id": "dias_vencer_fmt", "filter_query": '{dias_status} = "ok"'},
+        "backgroundColor": "rgba(16, 185, 129, 0.15)",
+        "color": SUCCESS,
+        "fontWeight": "700",
+        "borderRadius": "6px",
     },
 ]
 
@@ -233,6 +255,7 @@ def layout() -> html.Div:
                 columns=[
                     {"name": "Contrato / Objeto", "id": "contrato"},
                     {"name": "Parcelas (Pagas/Total)", "id": "parc_info"},
+                    {"name": "Dias p/ Vencer", "id": "dias_vencer_fmt"},
                     {"name": "Total Saídas", "id": "total_saidas_fmt"},
                     {"name": "Último Pagamento", "id": "data_pagamento"},
                     {"name": "Situação", "id": "situacao"},

@@ -821,3 +821,120 @@ def contratos_rateio_parcelas(data_inicio: str | None = None, data_fim: str | No
         ORDER BY u.contrato
     """
     return _df(sql, params)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# 11. Vigência de Contratos e Atas (Google Sheets)
+# ════════════════════════════════════════════════════════════════════════════
+
+_VIGENCIA_CACHE: dict = {"ts": 0.0, "data": {}}
+_VIGENCIA_TTL_SECONDS = 1800  # 30 minutos
+
+
+def contratos_vigencia() -> dict:
+    """
+    Carrega os dados de vigência da planilha externa de Contratos/Atas no Google Sheets.
+
+    Retorna um dicionário indexado pelo Objeto do Contrato (em minúsculas) contendo:
+      - dias_vencer: int | None (quantidade de dias para vencer)
+      - data_vencimento: str
+      - situacao: str
+      - num_contrato: str
+      - objeto_original: str
+    """
+    import time
+    from config import GOOGLE_SHEETS_CONTRATOS_URL
+
+    agora = time.time()
+    if agora - _VIGENCIA_CACHE.get("ts", 0) < _VIGENCIA_TTL_SECONDS and _VIGENCIA_CACHE.get("data"):
+        return _VIGENCIA_CACHE["data"]
+
+    url = GOOGLE_SHEETS_CONTRATOS_URL
+    try:
+        # Lê a planilha via export CSV do Google Sheets
+        df_raw = pd.read_csv(url, header=None, dtype=str)
+        if df_raw.empty:
+            return _VIGENCIA_CACHE.get("data", {})
+
+        # Localiza a linha do cabeçalho que contém 'Objeto do Contrato/Ata' ou 'Dias para Vencer'
+        header_idx = None
+        for idx, row in df_raw.iterrows():
+            row_str = " ".join([str(v) for v in row.values if pd.notna(v)]).lower()
+            if "objeto do contrato" in row_str or "dias para vencer" in row_str:
+                header_idx = idx
+                break
+
+        if header_idx is None:
+            header_idx = 9  # Fallback padrão (linha 10)
+
+        df = pd.read_csv(url, skiprows=header_idx, header=0, dtype=str)
+        df.columns = [str(c).strip() for c in df.columns]
+
+        col_objeto = None
+        col_dias = None
+        col_venc = None
+        col_sit = None
+        col_num = None
+
+        for c in df.columns:
+            c_norm = c.lower()
+            if "objeto" in c_norm:
+                col_objeto = c
+            elif "dias para vencer" in c_norm or "dias p/ vencer" in c_norm:
+                col_dias = c
+            elif "vencimento" in c_norm and "data" in c_norm:
+                col_venc = c
+            elif "situa" in c_norm:
+                col_sit = c
+            elif "nº" in c_norm or "numero" in c_norm or "contrato/ata" in c_norm:
+                col_num = c
+
+        if not col_objeto or not col_dias:
+            return _VIGENCIA_CACHE.get("data", {})
+
+        mapa_vigencia = {}
+        for _, row in df.iterrows():
+            obj_val = row.get(col_objeto)
+            if pd.isna(obj_val) or not str(obj_val).strip():
+                continue
+
+            obj_str = str(obj_val).strip()
+            dias_raw = row.get(col_dias)
+
+            dias_num = None
+            if pd.notna(dias_raw):
+                try:
+                    # Limpa e converte para inteiro
+                    d_clean = str(dias_raw).strip().replace(".", "").replace(",", ".")
+                    dias_num = int(float(d_clean))
+                except Exception:
+                    dias_num = None
+
+            venc_str = str(row.get(col_venc)).strip() if col_venc and pd.notna(row.get(col_venc)) else ""
+            sit_str = str(row.get(col_sit)).strip() if col_sit and pd.notna(row.get(col_sit)) else ""
+            num_str = str(row.get(col_num)).strip() if col_num and pd.notna(row.get(col_num)) else ""
+
+            info = {
+                "dias_vencer": dias_num,
+                "data_vencimento": venc_str,
+                "situacao_vigencia": sit_str,
+                "num_contrato": num_str,
+                "objeto_original": obj_str,
+            }
+
+            # Chave normalizada em minúsculas
+            mapa_vigencia[obj_str.lower()] = info
+
+        _VIGENCIA_CACHE["ts"] = agora
+        _VIGENCIA_CACHE["data"] = mapa_vigencia
+        return mapa_vigencia
+
+    except Exception:
+        return _VIGENCIA_CACHE.get("data", {})
+
+
+def invalidar_cache_vigencia():
+    """Força recarregar os dados do Google Sheets na próxima chamada."""
+    _VIGENCIA_CACHE["ts"] = 0.0
+    _VIGENCIA_CACHE["data"] = {}
+

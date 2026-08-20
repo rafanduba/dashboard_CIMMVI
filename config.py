@@ -12,13 +12,20 @@ EXCEL_FILENAME = os.getenv("EXCEL_FILE", "planilha.xlsx")
 # Caminho planilha
 EXCEL_PATH = Path(os.getenv("EXCEL_PATH", str(DATA_DIR / EXCEL_FILENAME)))
 
-# Configurações do Google Sheets
+# Configurações do Google Sheets (Planilha Financeira Principal)
 GOOGLE_SHEETS_ID = os.getenv("GOOGLE_SHEETS_ID", "1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM")
 GOOGLE_SHEETS_EXPORT_URL = os.getenv(
     "GOOGLE_SHEETS_EXPORT_URL",
     f"https://docs.google.com/spreadsheets/d/{GOOGLE_SHEETS_ID}/export?format=xlsx",
 )
 DATA_SOURCE = os.getenv("DATA_SOURCE", "google_sheets")  # 'google_sheets' ou 'local'
+
+# Configurações da Planilha de Controle de Contratos e Atas (Vigência)
+GOOGLE_SHEETS_CONTRATOS_ID = os.getenv("GOOGLE_SHEETS_CONTRATOS_ID", "11rtfy7dO31la70Fy48aTUUZDgXY3Aga0")
+GOOGLE_SHEETS_CONTRATOS_URL = os.getenv(
+    "GOOGLE_SHEETS_CONTRATOS_URL",
+    f"https://docs.google.com/spreadsheets/d/{GOOGLE_SHEETS_CONTRATOS_ID}/export?format=csv",
+)
 
 # Caminho pro banco de dados
 DB_PATH = DATA_DIR / "cimmvi_amvi.db"

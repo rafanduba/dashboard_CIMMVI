@@ -785,10 +785,9 @@ def contratos_rateio_parcelas(data_inicio: str | None = None, data_fim: str | No
             FROM lancamentos
             WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
               AND tipo_lancamento = 'MOVIMENTO'
-              AND (LOWER(TRIM(categoria)) = 'contratos' OR LOWER(TRIM(categoria)) LIKE '%contrato%')
+              AND (LOWER(TRIM(categoria)) LIKE '%contrato%' OR LOWER(TRIM(categoria)) LIKE '%convênio%' OR LOWER(TRIM(categoria)) LIKE '%convenio%')
               AND descricao IS NOT NULL
               AND TRIM(descricao) != ''
-              {filtros}
         ),
         totais_contratos AS (
             SELECT
@@ -799,7 +798,7 @@ def contratos_rateio_parcelas(data_inicio: str | None = None, data_fim: str | No
             FROM lancamentos
             WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
               AND tipo_lancamento = 'MOVIMENTO'
-              AND (LOWER(TRIM(categoria)) = 'contratos' OR LOWER(TRIM(categoria)) LIKE '%contrato%')
+              AND (LOWER(TRIM(categoria)) LIKE '%contrato%' OR LOWER(TRIM(categoria)) LIKE '%convênio%' OR LOWER(TRIM(categoria)) LIKE '%convenio%')
               AND descricao IS NOT NULL
               AND TRIM(descricao) != ''
               {filtros}
@@ -822,4 +821,3 @@ def contratos_rateio_parcelas(data_inicio: str | None = None, data_fim: str | No
         ORDER BY u.contrato
     """
     return _df(sql, params)
-

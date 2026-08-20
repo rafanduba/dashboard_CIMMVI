@@ -276,6 +276,9 @@ def criar_layout() -> html.Div:
         dcc.Store(id="theme-store", data="light", storage_type="local"),
         dcc.Store(id="sidebar-collapsed", data=False),
 
+        # Gatilho de sincronização em tempo real (notifica todos os callbacks quando o ETL termina)
+        dcc.Store(id="sync-trigger", data=0),
+
         # Cache de dados para contratos de rateio (evita query a cada filtro local)
         dcc.Store(id="store-contratos-rateio", data=[]),
 

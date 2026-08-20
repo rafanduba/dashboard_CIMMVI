@@ -43,6 +43,7 @@ try:
         contratos_rateio_parcelas,
         contratos_vigencia,
         invalidar_cache_vigencia,
+        periodo_disponivel,
     )
     _DB_READY = True
 except Exception as _e:
@@ -185,12 +186,15 @@ def registrar_callbacks(app):
     # ── 5. Sincronização Google Sheets & Status no Header ────────────────
     @app.callback(
         Output("header-etl", "children"),
+        Output("sync-trigger", "data"),
         Input("btn-sync-sheets", "n_clicks"),
+        State("sync-trigger", "data"),
         prevent_initial_call=False,
     )
-    def sincronizar_e_atualizar_header(n_clicks_sync):
+    def sincronizar_e_atualizar_header(n_clicks_sync, sync_count):
         from dash import ctx
         from etl.load import executar_etl_completo
+        new_sync_count = (sync_count or 0)
         if ctx.triggered_id == "btn-sync-sheets" and n_clicks_sync and n_clicks_sync > 0:
             try:
                 executar_etl_completo("google_sheets")
@@ -200,9 +204,10 @@ def registrar_callbacks(app):
                     pass
                 global _DB_READY
                 _DB_READY = True
+                new_sync_count += 1
             except Exception as exc:
                 logger.error("Erro ao sincronizar com Google Sheets: %s", exc)
-        return _get_header_etl_info()
+        return _get_header_etl_info(), new_sync_count
 
     # ── 6. Visão Executiva: Saldos, KPIs e Gráficos ─────────────────────
     @app.callback(
@@ -231,8 +236,9 @@ def registrar_callbacks(app):
         Input("filtro-data",         "start_date"),
         Input("filtro-data",         "end_date"),
         Input("theme-store",         "data"),
+        Input("sync-trigger",        "data"),
     )
-    def atualizar_visao_executiva(conta_sel, data_ini, data_fim, tema=None):
+    def atualizar_visao_executiva(conta_sel, data_ini, data_fim, tema=None, _sync=None):
         tema = tema or "light"
         if not _DB_READY:
             fig_v = empty_fig("Banco não inicializado — execute o ETL primeiro.", theme=tema)
@@ -427,8 +433,9 @@ def registrar_callbacks(app):
         Input("filtro-data",         "start_date"),
         Input("filtro-data",         "end_date"),
         Input("theme-store",         "data"),
+        Input("sync-trigger",        "data"),
     )
-    def atualizar_municipios_consorciados(data_ini, data_fim, tema=None):
+    def atualizar_municipios_consorciados(data_ini, data_fim, tema=None, _sync=None):
         tema = tema or "light"
         if not _DB_READY:
             fig_v = empty_fig("Banco não inicializado — execute o ETL primeiro.", theme=tema)
@@ -682,8 +689,9 @@ def registrar_callbacks(app):
         Input("filtro-contrato-periodo", "end_date"),
         Input("filtro-data", "start_date"),
         Input("filtro-data", "end_date"),
+        Input("sync-trigger", "data"),
     )
-    def carregar_contratos_rateio(dt_ini_c, dt_fim_c, dt_ini_g, dt_fim_g):
+    def carregar_contratos_rateio(dt_ini_c, dt_fim_c, dt_ini_g, dt_fim_g, _sync=None):
         if not _DB_READY:
             return []
         try:
@@ -860,4 +868,27 @@ def registrar_callbacks(app):
         except Exception as ex_cr:
             logger.error("Erro ao carregar contratos de rateio: %s", ex_cr)
             return [], default_opts
+
+    # ── 9. Atualização dinâmica dos limites de data após sincronização ────────
+    @app.callback(
+        Output("filtro-data", "min_date_allowed"),
+        Output("filtro-data", "max_date_allowed"),
+        Output("filtro-contrato-periodo", "min_date_allowed"),
+        Output("filtro-contrato-periodo", "max_date_allowed"),
+        Input("sync-trigger", "data"),
+        prevent_initial_call=True,
+    )
+    def atualizar_limites_data(_sync):
+        if not _DB_READY:
+            return no_update, no_update, no_update, no_update
+        try:
+            p = periodo_disponivel()
+            d_min = p.get("data_min")
+            d_max = p.get("data_max")
+            if d_min and d_max:
+                return d_min, d_max, d_min, d_max
+        except Exception:
+            pass
+        return no_update, no_update, no_update, no_update
+
 

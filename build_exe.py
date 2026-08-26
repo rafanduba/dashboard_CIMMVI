@@ -28,9 +28,10 @@ def build() -> None:
         str(BASE_DIR / "run_desktop.py"),
         "--name=Dashboard_CIMMVI",
         "--noconfirm",
-        "--onedir",  # Gera uma pasta com o executável e dependências
+        "--onefile",  # Gera um único arquivo .exe (sem pasta de dependências)
         "--noconsole",  # Oculta a janela de terminal/prompt de comando ao abrir
         "--clean",
+        f"--distpath={BASE_DIR}",  # Gera o .exe direto na raiz do projeto
         # Inclui a pasta de scripts SQL no executável
         f"--add-data={BASE_DIR / 'sql'}{sep}sql",
         # Inclui os assets visuais do Dash no executável
@@ -40,10 +41,10 @@ def build() -> None:
     print("🔧 Parâmetros do PyInstaller:", " ".join(cmd_args))
     PyInstaller.__main__.run(cmd_args)
 
-    dist_path = BASE_DIR / "dist" / "Dashboard_CIMMVI"
+    exe_path = BASE_DIR / "Dashboard_CIMMVI.exe"
     print("\n✅ Compilação concluída com sucesso!")
-    print(f"📁 O executável e os arquivos foram gerados em:\n   {dist_path}\n")
-    print(f"▶️  Para rodar o programa, execute:\n   {dist_path / 'Dashboard_CIMMVI.exe'}\n")
+    print(f"📁 O executável foi gerado em:\n   {exe_path}\n")
+    print(f"▶️  Para rodar o programa, execute:\n   {exe_path}\n")
 
 
 if __name__ == "__main__":

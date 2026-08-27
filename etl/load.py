@@ -18,24 +18,76 @@ from config import DATABASE_URL
 
 logger = logging.getLogger(__name__)
 
-# Caminho do schema SQL relativo a este arquivo
-SCHEMA_PATH = Path(__file__).resolve().parent.parent / "sql" / "schema.sql"
+# Caminho do schema SQL:
+# - Em modo .exe (PyInstaller): o arquivo está na pasta temporária de extração (sys._MEIPASS)
+#   pois foi incluído via --add-data e extraído automaticamente pelo PyInstaller.
+# - Em modo desenvolvimento: caminho relativo ao próprio arquivo load.py.
+if getattr(sys, "frozen", False):
+    SCHEMA_PATH = Path(sys._MEIPASS) / "sql" / "schema.sql"
+else:
+    SCHEMA_PATH = Path(__file__).resolve().parent.parent / "sql" / "schema.sql"
 
 # Engine reutilizada entre chamadas (singleton simples)
 _engine: Engine | None = None
+_SCHEMA_CRIADO: bool = False
+_DADOS_VERIFICADOS: bool = False
 
 
 def get_engine() -> Engine:
-    #Retorna (e reaproveita) a engine SQLAlchemy configurada em config.py
+    """Retorna (e reaproveita) a engine SQLAlchemy configurada em config.py com otimizações para SQLite."""
     global _engine
     if _engine is None:
-        _engine = create_engine(DATABASE_URL, future=True)
+        is_sqlite = "sqlite" in DATABASE_URL.lower()
+        connect_args = {"check_same_thread": False, "timeout": 30} if is_sqlite else {}
+        _engine = create_engine(DATABASE_URL, future=True, connect_args=connect_args)
+        if is_sqlite:
+            try:
+                with _engine.connect() as conn:
+                    conn.execute(text("PRAGMA journal_mode = WAL;"))
+                    conn.execute(text("PRAGMA synchronous = NORMAL;"))
+                    conn.execute(text("PRAGMA cache_size = -64000;"))
+                    conn.execute(text("PRAGMA temp_store = MEMORY;"))
+            except Exception as exc:
+                logger.warning("Não foi possível aplicar pragmas de performance do SQLite: %s", exc)
     return _engine
 
 
-def criar_schema(engine: Engine | None = None) -> None:
-    #Executa o sql/schema.sql inteiro (idempotente: usa IF NOT EXISTS / DROP VIEW IF EXISTS)
+def _migrar_schema_se_necessario(engine: Engine) -> None:
+    """Detecta e corrige schemas antigos com CHECK constraints rígidos.
+
+    Caso a tabela `lancamentos` tenha o antigo CHECK constraint em
+    `forma_pagamento` (que causava falha no INSERT para valores como
+    'TED', 'DOC', etc.), a tabela é descartada para ser recriada
+    com o schema atualizado pelo `criar_schema`.
+    """
+    try:
+        with engine.connect() as conn:
+            row = conn.execute(
+                text("SELECT sql FROM sqlite_master WHERE type='table' AND name='lancamentos'")
+            ).fetchone()
+            if row and row[0] and "forma_pagamento IN" in row[0]:
+                logger.warning(
+                    "Schema antigo detectado (CHECK constraint rígido em forma_pagamento). "
+                    "Recriando tabela lancamentos..."
+                )
+                with engine.begin() as conn2:
+                    conn2.execute(text("DROP TABLE IF EXISTS lancamentos"))
+                logger.info("Tabela lancamentos descartada — será recriada com schema atualizado.")
+    except Exception as exc:
+        logger.warning("Não foi possível verificar/migrar schema: %s", exc)
+
+
+def criar_schema(engine: Engine | None = None, force: bool = False) -> None:
+    """Executa o sql/schema.sql uma única vez por execução para evitar lentidão."""
+    global _SCHEMA_CRIADO
+    if _SCHEMA_CRIADO and not force:
+        return
+
     engine = engine or get_engine()
+
+    # Migra automaticamente bancos com schema antigo antes de aplicar o novo
+    _migrar_schema_se_necessario(engine)
+
     sql_script = SCHEMA_PATH.read_text(encoding="utf-8")
 
     logger.info("Criando/atualizando schema a partir de %s", SCHEMA_PATH)
@@ -51,32 +103,36 @@ def criar_schema(engine: Engine | None = None) -> None:
                 if statement:
                     conn.execute(text(statement))
 
+    _SCHEMA_CRIADO = True
     logger.info("Schema pronto.")
 
 
-def executar_etl_completo(fonte: str = "google_sheets", engine: Engine | None = None) -> dict:
-    """Executa o pipeline ETL completo (Extract -> Transform -> Load) a partir da fonte especificada."""
-    from config import DATA_SOURCE
-    fonte_usada = fonte or DATA_SOURCE
+def executar_etl_completo(engine: Engine | None = None) -> dict:
+    """Executa o pipeline ETL completo (Extract -> Transform -> Load) direto do Google Sheets."""
+    global _DADOS_VERIFICADOS
     engine = engine or get_engine()
-    criar_schema(engine)
+    criar_schema(engine, force=True)
 
-    logger.info("Executando ETL completo a partir de '%s'...", fonte_usada)
+    logger.info("Executando ETL completo a partir do Google Sheets...")
     from etl.extract import extrair_todos_os_dados
     from etl.transform import transform_all
 
-    brutos = extrair_todos_os_dados(fonte_usada)
+    brutos = extrair_todos_os_dados()
     final = transform_all(brutos)
-    resumo = carregar_dados(final, arquivo_origem=str(fonte_usada), engine=engine)
+    resumo = carregar_dados(final, arquivo_origem="google_sheets", engine=engine)
+    _DADOS_VERIFICADOS = True
     logger.info("ETL completo concluído com sucesso!")
     return resumo
 
 
-def garantir_dados_carregados(engine: Engine | None = None) -> None:
+def garantir_dados_carregados(engine: Engine | None = None, force: bool = False) -> None:
     """Verifica se o banco de dados possui lançamentos.
-    Se estiver vazio, executa o schema e roda a carga a partir do Google Sheets (ou local).
+    Se estiver vazio, executa o schema e roda a carga a partir do Google Sheets.
     """
-    from config import DATA_SOURCE
+    global _DADOS_VERIFICADOS
+    if _DADOS_VERIFICADOS and not force:
+        return
+
     engine = engine or get_engine()
     criar_schema(engine)
 
@@ -84,13 +140,15 @@ def garantir_dados_carregados(engine: Engine | None = None) -> None:
         with engine.connect() as conn:
             count = conn.execute(text("SELECT COUNT(*) FROM lancamentos")).scalar()
             if count and count > 0:
+                _DADOS_VERIFICADOS = True
                 return
     except Exception:
         pass
 
-    logger.info("Banco de dados vazio. Executando ETL automático...")
+    logger.info("Banco de dados vazio. Executando ETL automático via Google Sheets...")
     try:
-        executar_etl_completo(fonte=DATA_SOURCE, engine=engine)
+        executar_etl_completo(engine=engine)
+        _DADOS_VERIFICADOS = True
     except Exception as exc:
         logger.error("Erro no ETL automático: %s", exc, exc_info=True)
 

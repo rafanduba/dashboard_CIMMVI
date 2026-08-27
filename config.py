@@ -1,35 +1,39 @@
 import os
+import sys
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
+# Quando empacotado como .exe (PyInstaller --onefile), os arquivos de código
+# ficam em uma pasta temporária (_MEIxxxxxx) que é apagada ao fechar o programa.
+# Para garantir que o banco de dados e a pasta data/ persistam ao lado do .exe,
+# usamos sys.executable (caminho do .exe) em vez de __file__ (pasta temporária).
+if getattr(sys, "frozen", False):
+    # Rodando como .exe: usa o diretório onde o .exe está
+    BASE_DIR = Path(sys.executable).resolve().parent
+else:
+    # Rodando como script Python normal (desenvolvimento)
+    BASE_DIR = Path(__file__).resolve().parent
 
-## Pasta de entradas (planilha)
+## Pasta de dados (banco SQLite)
 DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
-# Nome planilha
-EXCEL_FILENAME = os.getenv("EXCEL_FILE", "planilha.xlsx")
-# Caminho planilha
-EXCEL_PATH = Path(os.getenv("EXCEL_PATH", str(DATA_DIR / EXCEL_FILENAME)))
+# Caminho pro banco de dados
+DB_PATH = DATA_DIR / "cimmvi_amvi.db"
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DB_PATH}")
 
-# Configurações do Google Sheets (Planilha Financeira Principal)
+# Google Sheets — Planilha Financeira Principal
 GOOGLE_SHEETS_ID = os.getenv("GOOGLE_SHEETS_ID", "1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM")
 GOOGLE_SHEETS_EXPORT_URL = os.getenv(
     "GOOGLE_SHEETS_EXPORT_URL",
     f"https://docs.google.com/spreadsheets/d/{GOOGLE_SHEETS_ID}/export?format=xlsx",
 )
-DATA_SOURCE = os.getenv("DATA_SOURCE", "google_sheets")  # 'google_sheets' ou 'local'
 
-# Configurações da Planilha de Controle de Contratos e Atas (Vigência)
+# Google Sheets — Planilha de Controle de Contratos e Atas (Vigência)
 GOOGLE_SHEETS_CONTRATOS_ID = os.getenv("GOOGLE_SHEETS_CONTRATOS_ID", "11rtfy7dO31la70Fy48aTUUZDgXY3Aga0")
 GOOGLE_SHEETS_CONTRATOS_URL = os.getenv(
     "GOOGLE_SHEETS_CONTRATOS_URL",
     f"https://docs.google.com/spreadsheets/d/{GOOGLE_SHEETS_CONTRATOS_ID}/export?format=csv",
 )
-
-# Caminho pro banco de dados
-DB_PATH = DATA_DIR / "cimmvi_amvi.db"
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DB_PATH}")
 
 # Mapeamento das abas da planilha
 # Impede falhas por erros de digitação

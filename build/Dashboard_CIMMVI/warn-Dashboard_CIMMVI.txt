@@ -24,7 +24,6 @@ missing module named posix - imported by posixpath (optional), shutil (condition
 missing module named resource - imported by posix (top-level)
 missing module named _frozen_importlib_external - imported by importlib._bootstrap (delayed), importlib (optional), importlib.abc (optional), zipimport (top-level)
 excluded module named _frozen_importlib - imported by importlib (optional), importlib.abc (optional), zipimport (top-level)
-missing module named _scproxy - imported by urllib.request (conditional)
 missing module named multiprocessing.BufferTooShort - imported by multiprocessing (top-level), multiprocessing.connection (top-level)
 missing module named multiprocessing.AuthenticationError - imported by multiprocessing (top-level), multiprocessing.forkserver (top-level), multiprocessing.connection (top-level)
 missing module named multiprocessing.get_context - imported by multiprocessing (top-level), multiprocessing.pool (top-level), multiprocessing.managers (top-level), multiprocessing.sharedctypes (top-level)
@@ -410,3 +409,4 @@ missing module named multiprocess - imported by dash.background_callback.manager
 missing module named diskcache - imported by dash.background_callback.managers.diskcache_manager (delayed, optional)
 missing module named 'celery.backends' - imported by dash.background_callback.managers.celery_manager (delayed, optional)
 missing module named celery - imported by dash.background_callback.managers.celery_manager (delayed, optional)
+missing module named _scproxy - imported by urllib.request (conditional)

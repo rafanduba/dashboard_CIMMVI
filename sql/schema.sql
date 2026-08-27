@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS lancamentos (
 
     entidade TEXT CHECK (entidade IN ('CIMMVI', 'AMVI')),
 
-    forma_pagamento TEXT CHECK (forma_pagamento IN ('Pix', 'Boleto', 'DIRF')),
+    forma_pagamento TEXT,  -- ex: 'Pix', 'Boleto', 'DIRF', 'TED', 'DOC', etc.
 
     -- derivados da coluna MOVIMENTAÇÃO (positivo=entrada, negativo=saída)
     entradas NUMERIC(12,2) DEFAULT 0,
@@ -53,6 +53,14 @@ CREATE TABLE IF NOT EXISTS lancamentos (
     hash_linha TEXT NOT NULL,
     UNIQUE(hash_linha)
 );
+
+-- ÍNDICES DE PERFORMANCE --
+CREATE INDEX IF NOT EXISTS idx_lancamentos_tipo_data ON lancamentos(tipo_lancamento, data_pagamento);
+CREATE INDEX IF NOT EXISTS idx_lancamentos_conta ON lancamentos(conta);
+CREATE INDEX IF NOT EXISTS idx_lancamentos_situacao ON lancamentos(situacao);
+CREATE INDEX IF NOT EXISTS idx_lancamentos_categoria ON lancamentos(categoria);
+CREATE INDEX IF NOT EXISTS idx_lancamentos_entidade ON lancamentos(entidade);
+CREATE INDEX IF NOT EXISTS idx_lancamentos_forma_pagamento ON lancamentos(forma_pagamento);
 
 
 -- VIEWS PARA O DASHBOARD --

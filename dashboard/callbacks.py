@@ -43,6 +43,7 @@ try:
         contratos_rateio_parcelas,
         contratos_vigencia,
         invalidar_cache_vigencia,
+        limpar_caches_queries,
         periodo_disponivel,
     )
     _DB_READY = True
@@ -197,9 +198,10 @@ def registrar_callbacks(app):
         new_sync_count = (sync_count or 0)
         if ctx.triggered_id == "btn-sync-sheets" and n_clicks_sync and n_clicks_sync > 0:
             try:
-                executar_etl_completo("google_sheets")
+                executar_etl_completo()
                 try:
                     invalidar_cache_vigencia()
+                    limpar_caches_queries()
                 except Exception:
                     pass
                 global _DB_READY

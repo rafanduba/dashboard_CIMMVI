@@ -21,8 +21,7 @@ from etl.load import get_engine, criar_schema, garantir_dados_carregados
 # ---------------------------------------------------------------------------
 
 def _conn():
-    """Retorna uma conexão a partir da engine singleton (garantindo dados)."""
-    garantir_dados_carregados()
+    """Retorna uma conexão a partir da engine singleton rápida."""
     return get_engine().connect()
 
 
@@ -616,24 +615,31 @@ def ultima_carga() -> dict | None:
 # 10. FILTROS DE SUPORTE (valores unicos para dropdowns)
 # ===========================================================================
 
+import functools
+
+
+@functools.lru_cache(maxsize=16)
 def contas_disponiveis() -> list[str]:
     """Lista de contas presentes no banco (para dropdowns)."""
     rows = _df("SELECT DISTINCT conta FROM lancamentos WHERE conta IS NOT NULL ORDER BY conta")
     return rows["conta"].tolist()
 
 
+@functools.lru_cache(maxsize=16)
 def entidades_disponiveis() -> list[str]:
     """Lista de entidades presentes no banco (para dropdowns)."""
     rows = _df("SELECT DISTINCT entidade FROM lancamentos WHERE entidade IS NOT NULL ORDER BY entidade")
     return rows["entidade"].tolist()
 
 
+@functools.lru_cache(maxsize=16)
 def situacoes_disponiveis() -> list[str]:
     """Lista de situacoes presentes no banco (para dropdowns)."""
     rows = _df("SELECT DISTINCT situacao FROM lancamentos WHERE situacao IS NOT NULL ORDER BY situacao")
     return rows["situacao"].tolist()
 
 
+@functools.lru_cache(maxsize=16)
 def periodo_disponivel() -> dict:
     """
     Retorna a data minima e maxima dos lancamentos.
@@ -652,6 +658,14 @@ def periodo_disponivel() -> dict:
     return {"data_min": row[0], "data_max": row[1]} if row else {}
 
 
+def limpar_caches_queries():
+    """Limpa os caches de memória após uma carga de ETL."""
+    contas_disponiveis.cache_clear()
+    entidades_disponiveis.cache_clear()
+    situacoes_disponiveis.cache_clear()
+    periodo_disponivel.cache_clear()
+
+
 def adimplencia_municipios(data_inicio: str | None = None, data_fim: str | None = None) -> pd.DataFrame:
     """
     Retorna os municípios do Rateio Municipal CIMMVI e seu status de adimplência.
@@ -660,11 +674,6 @@ def adimplencia_municipios(data_inicio: str | None = None, data_fim: str | None 
     - previsto_total: soma de TODOS os lançamentos registrados na planilha (sem filtro de data),
       representando o valor total previsto para o ciclo completo do município.
     """
-    try:
-        criar_schema()
-    except Exception:
-        pass
-
     filtros = ""
     params = {}
     if data_inicio:
@@ -754,11 +763,6 @@ def contratos_rateio_parcelas(data_inicio: str | None = None, data_fim: str | No
     Retorna os contratos da conta 'CIMMVI - Rateio Banco do Brasil' (categoria = 'Contratos')
     junto com a parcela atual, restante e total obtidas da última ocorrência de cada contrato.
     """
-    try:
-        criar_schema()
-    except Exception:
-        pass
-
     filtros = ""
     params = {}
     if data_inicio:
@@ -842,7 +846,9 @@ def contratos_vigencia() -> dict:
       - num_contrato: str
       - objeto_original: str
     """
+    import io
     import time
+    import urllib.request
     from config import GOOGLE_SHEETS_CONTRATOS_URL
 
     agora = time.time()
@@ -851,8 +857,15 @@ def contratos_vigencia() -> dict:
 
     url = GOOGLE_SHEETS_CONTRATOS_URL
     try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"},
+        )
+        with urllib.request.urlopen(req, timeout=4.0) as resp:
+            conteudo = resp.read().decode("utf-8", errors="replace")
+
         # Lê a planilha via export CSV do Google Sheets
-        df_raw = pd.read_csv(url, header=None, dtype=str)
+        df_raw = pd.read_csv(io.StringIO(conteudo), header=None, dtype=str)
         if df_raw.empty:
             return _VIGENCIA_CACHE.get("data", {})
 
@@ -867,7 +880,7 @@ def contratos_vigencia() -> dict:
         if header_idx is None:
             header_idx = 9  # Fallback padrão (linha 10)
 
-        df = pd.read_csv(url, skiprows=header_idx, header=0, dtype=str)
+        df = pd.read_csv(io.StringIO(conteudo), skiprows=header_idx, header=0, dtype=str)
         df.columns = [str(c).strip() for c in df.columns]
 
         col_objeto = None

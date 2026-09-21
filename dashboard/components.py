@@ -31,12 +31,21 @@ def chart_layout(theme: str = "light", **kwargs) -> dict:
     text_color = "#f8fafc" if is_dark else "#1e293b"
     text_dim_color = "#94a3b8" if is_dark else "#475569"
     border_color = "#1e2333" if is_dark else "#cbd5e1"
+    hover_bg = "#0f172a" if is_dark else "#ffffff"
+    hover_border = "#818cf8" if is_dark else "#6366f1"  # borda roxa visível no tooltip
+    hover_font_color = "#f8fafc" if is_dark else "#0f172a"
 
     base = dict(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family=FONT, color=text_color, size=12),
         margin=dict(l=12, r=12, t=36, b=12),
+        hovermode="closest",
+        hoverlabel=dict(
+            bgcolor=hover_bg,
+            bordercolor=hover_border,
+            font=dict(family=FONT, color=hover_font_color, size=12),
+        ),
         legend=dict(
             bgcolor="rgba(0,0,0,0)",
             bordercolor=border_color,
@@ -45,10 +54,19 @@ def chart_layout(theme: str = "light", **kwargs) -> dict:
             yanchor="bottom", y=1.02,
             xanchor="left", x=0,
         ),
-        xaxis=dict(gridcolor=border_color, linecolor=border_color, tickfont=dict(color=text_dim_color, size=11)),
-        yaxis=dict(gridcolor=border_color, linecolor=border_color, tickfont=dict(color=text_dim_color, size=11)),
+        xaxis=dict(
+            gridcolor=border_color,
+            linecolor=border_color,
+            tickfont=dict(color=text_dim_color, size=11),
+            showspikes=False,
+        ),
+        yaxis=dict(
+            gridcolor=border_color,
+            linecolor=border_color,
+            tickfont=dict(color=text_dim_color, size=11),
+            showspikes=False,
+        ),
         colorway=PALETA,
-        hovermode="x unified",
     )
     base.update(kwargs)
     return base

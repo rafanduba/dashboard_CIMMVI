@@ -2,6 +2,11 @@ import os
 import sys
 from pathlib import Path
 
+import shutil
+import logging
+
+_cfg_logger = logging.getLogger(__name__)
+
 # Quando empacotado como .exe (PyInstaller --onefile), os arquivos de código
 # ficam em uma pasta temporária (_MEIxxxxxx) que é apagada ao fechar o programa.
 # Para garantir que o banco de dados e a pasta data/ persistam ao lado do .exe,
@@ -19,7 +24,19 @@ DATA_DIR.mkdir(exist_ok=True)
 
 # Caminho pro banco de dados
 DB_PATH = DATA_DIR / "cimmvi_amvi.db"
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DB_PATH}")
+
+# Se o banco local não existir ou estiver zerado, mas houver uma cópia embutida no executável, restaura
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    bundled_db = Path(sys._MEIPASS) / "data" / "cimmvi_amvi.db"
+    if (not DB_PATH.exists() or DB_PATH.stat().st_size == 0) and bundled_db.exists():
+        try:
+            shutil.copy2(bundled_db, DB_PATH)
+            _cfg_logger.info("Banco de dados pré-carregado restaurado com sucesso de %s para %s", bundled_db, DB_PATH)
+        except Exception as _copy_err:
+            _cfg_logger.warning("Não foi possível copiar banco embutido: %s", _copy_err)
+
+# Garante barras normais (/) no caminho da URL SQLite no Windows (requisito do SQLAlchemy)
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DB_PATH.resolve().as_posix()}")
 
 # Google Sheets — Planilha Financeira Principal
 GOOGLE_SHEETS_ID = os.getenv("GOOGLE_SHEETS_ID", "1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM")
@@ -40,7 +57,7 @@ GOOGLE_SHEETS_CONTRATOS_URL = os.getenv(
 # Dados fixos por aba (ex: aba da AMVI sempre vai ser a mesma conta, entidade e banco)
 # expected_columns: colunas mínimas que devem existir em cada aba (case-insensitive)
 SHEETS_CONFIG = {
-    "CIMMVI - Rateio Banco do Brasil": {
+    "CIMMVI - ADM - BB": {
         "conta": "CIMMVI - Rateio Banco do Brasil",
         "entidade": "CIMMVI",
         "banco": "Banco do Brasil",
@@ -50,7 +67,7 @@ SHEETS_CONFIG = {
             "DATA PAGAMENTO", "SITUAÇÃO", "FORMA PAGAMENTO", "MOVIMENTAÇÃO", "SALDO ACUMULADO",
         ],
     },
-    "CIMMVI - Licenciamento Caixa - ": {
+    "CIMMVI - Lic. Amb. - Caixa ": {
         "conta": "CIMMVI - Licenciamento Caixa",
         "entidade": "CIMMVI",
         "banco": "Caixa Econômica Federal",
@@ -60,7 +77,7 @@ SHEETS_CONFIG = {
             "DATA PAGAMENTO", "SITUAÇÃO", "FORMA PAGAMENTO", "MOVIMENTAÇÃO", "SALDO ACUMULADO",
         ],
     },
-    "AMVI - Banco do Brasil - CC 439": {
+    "AMVI - Banco do Brasil - CC 4395-8": {
         "conta": "AMVI - Banco do Brasil - CC 439",
         "entidade": "AMVI",
         "banco": "Banco do Brasil",
@@ -133,9 +150,15 @@ RENAME_MAP = {
 # Chaves em lowercase — o transform faz .lower().strip() antes de comparar
 SITUACAO_MAP = {
     "pago": "Pago",
+    "recebido": "Recebido",
+    "devolvido": "Devolvido",
+    "devolucao": "Devolvido",
+    "devolução": "Devolvido",
     "em aberto": "Em aberto",
+    "aberto": "Em aberto",
     "aprovado - aguardando pagamento": "Aprovado - Aguardando Pagamento",
     "aguardando aprovação": "Aguardando Aprovação",
+    "aguardando aprovacao": "Aguardando Aprovação",
     "pagamento realizado - aguardando autorização margarete": "Pagamento Realizado - Aguardando autorização Margarete",
 }
 

@@ -15,41 +15,62 @@ from dashboard.config import (
 logger = logging.getLogger(__name__)
 
 # ════════════════════════════════════════════════════════════════════════════
-# Queries (com fallback caso o banco não exista)
+# Queries (funções puras)
 # ════════════════════════════════════════════════════════════════════════════
+from dashboard.queries import (
+    contagem_por_situacao,
+    entradas_em_aberto,
+    entradas_saidas_mensais,
+    evolucao_saldo_mensal,
+    lancamentos_detalhados,
+    saidas_em_aberto,
+    saidas_por_categoria,
+    saidas_por_forma_pagamento,
+    saldo_final_conta_1,
+    saldo_final_conta_2,
+    saldo_final_conta_3,
+    saldo_final_geral,
+    top_saidas,
+    total_entradas,
+    total_liquido,
+    total_saidas,
+    ultima_carga,
+    valor_aguardando_aprovacao,
+    adimplencia_municipios,
+    contratos_rateio_parcelas,
+    contratos_vigencia,
+    invalidar_cache_vigencia,
+    limpar_caches_queries,
+    periodo_disponivel,
+)
+
+_DB_READY = False
+
+
+def is_db_ready() -> bool:
+    """Verifica de forma dinâmica e resiliente se o banco está pronto e com dados."""
+    global _DB_READY
+    if _DB_READY:
+        return True
+    try:
+        from etl.load import garantir_dados_carregados, get_engine
+        from sqlalchemy import text
+        garantir_dados_carregados()
+        with get_engine().connect() as conn:
+            c = conn.execute(text("SELECT COUNT(*) FROM lancamentos")).scalar()
+            if c and c > 0:
+                _DB_READY = True
+                return True
+    except Exception as _e:
+        logger.warning("Banco ainda não disponível: %s", _e)
+    return False
+
+
+# Tentativa inicial de preparo do banco
 try:
-    from etl.load import garantir_dados_carregados
-    garantir_dados_carregados()
-    from dashboard.queries import (
-        contagem_por_situacao,
-        entradas_em_aberto,
-        entradas_saidas_mensais,
-        evolucao_saldo_mensal,
-        lancamentos_detalhados,
-        saidas_em_aberto,
-        saidas_por_categoria,
-        saidas_por_forma_pagamento,
-        saldo_final_conta_1,
-        saldo_final_conta_2,
-        saldo_final_conta_3,
-        saldo_final_geral,
-        top_saidas,
-        total_entradas,
-        total_liquido,
-        total_saidas,
-        ultima_carga,
-        valor_aguardando_aprovacao,
-        adimplencia_municipios,
-        contratos_rateio_parcelas,
-        contratos_vigencia,
-        invalidar_cache_vigencia,
-        limpar_caches_queries,
-        periodo_disponivel,
-    )
-    _DB_READY = True
-except Exception as _e:
-    logger.warning("Banco não disponível: %s", _e)
-    _DB_READY = False
+    is_db_ready()
+except Exception:
+    pass
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -86,12 +107,18 @@ def _page_from_url(pathname: str) -> str:
 
 def _get_header_etl_info():
     """Gera os elementos de status do ETL para o cabeçalho."""
-    if not _DB_READY:
+    if not is_db_ready():
         return html.Span("⚠️ Execute o ETL para carregar os dados.", style={"color": WARNING})
     try:
         uc = ultima_carga()
         if uc:
-            ts = str(uc["iniciado_em"])[:16].replace("T", " ")
+            ts_raw = str(uc["iniciado_em"])[:16].replace("T", " ")
+            try:
+                # Formata para pt-BR: DD/MM/YYYY HH:MM
+                from datetime import datetime as _dt
+                ts = _dt.strptime(ts_raw, "%Y-%m-%d %H:%M").strftime("%d/%m/%Y %H:%M")
+            except Exception:
+                ts = ts_raw
             origem = uc.get("arquivo_origem", "")
             label_origem = "Google Sheets" if "google_sheets" in str(origem).lower() or "http" in str(origem).lower() else "Planilha Excel"
             return [
@@ -242,7 +269,7 @@ def registrar_callbacks(app):
     )
     def atualizar_visao_executiva(conta_sel, data_ini, data_fim, tema=None, _sync=None):
         tema = tema or "light"
-        if not _DB_READY:
+        if not is_db_ready():
             fig_v = empty_fig("Banco não inicializado — execute o ETL primeiro.", theme=tema)
             return (
                 EMPTY, EMPTY, EMPTY,
@@ -310,14 +337,28 @@ def registrar_callbacks(app):
             if df_sit.empty:
                 fig_sit = empty_fig(theme=tema)
             else:
+                df_sit = df_sit.copy()
+                df_sit["volume"] = df_sit["total_saidas"] + df_sit["total_entradas"]
+                if df_sit["volume"].sum() == 0:
+                    df_sit["volume"] = df_sit["quantidade"]
+                df_sit = df_sit[df_sit["volume"] > 0]
+
                 cores = [SITUACAO_CORES.get(s, PRIMARY) for s in df_sit["situacao"]]
+                hover_text = []
+                for _, r in df_sit.iterrows():
+                    sit_nome = r["situacao"]
+                    qtd = int(r["quantidade"])
+                    val = float(r["volume"])
+                    hover_text.append(f"<b>{sit_nome}</b><br>Volume: {formata_brl(val)}<br>Qtd: {qtd} lançamentos<extra></extra>")
+
                 fig_sit = go.Figure(go.Pie(
                     labels=df_sit["situacao"],
-                    values=df_sit["total_saidas"],
+                    values=df_sit["volume"],
                     hole=0.54,
                     marker=dict(colors=cores, line=dict(color="rgba(0,0,0,0.1)", width=2)),
                     textinfo="percent",
-                    hovertemplate="<b>%{label}</b><br>R$\u00a0%{value:,.2f}  (%{percent})<extra></extra>",
+                    hovertemplate="%{customdata}",
+                    customdata=hover_text,
                 ))
                 fig_sit.update_layout(**chart_layout(
                     theme=tema,
@@ -369,23 +410,27 @@ def registrar_callbacks(app):
             else:
                 df_cat = df_cat.sort_values("total_saidas", ascending=True)
                 cores_cat = (PALETA * 4)[:len(df_cat)]
+                max_sai = float(df_cat["total_saidas"].max()) if not df_cat.empty else 100.0
+
                 fig_cat = go.Figure(go.Bar(
                     x=df_cat["total_saidas"],
                     y=df_cat["categoria"],
                     orientation="h",
                     marker_color=cores_cat,
-                    hovertemplate="<b>%{y}</b><br>R$\u00a0%{x:,.2f}<extra></extra>",
+                    hovertemplate="<b>%{y}</b><br>Total de saídas: <b>R$\u00a0%{x:,.2f}</b><extra></extra>",
                     text=df_cat["total_saidas"].apply(
                         lambda v: f"R$\u00a0{v:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
                     ),
                     textposition="outside",
+                    cliponaxis=False,
                 ))
                 fig_cat.update_layout(**chart_layout(
                     theme=tema,
-                    margin=dict(l=12, r=110, t=20, b=12),
-                    xaxis=dict(visible=False),
+                    margin=dict(l=12, r=135, t=10, b=12),
+                    xaxis=dict(visible=False, showgrid=False, showspikes=False, range=[0, max_sai * 1.30]),
+                    yaxis=dict(showgrid=False, showspikes=False, tickfont=dict(size=11)),
                     showlegend=False,
-                    hovermode="y unified",
+                    hovermode="y",
                 ))
 
                 total_saidas_cat = df_cat["total_saidas"].sum()
@@ -439,7 +484,7 @@ def registrar_callbacks(app):
     )
     def atualizar_municipios_consorciados(data_ini, data_fim, tema=None, _sync=None):
         tema = tema or "light"
-        if not _DB_READY:
+        if not is_db_ready():
             fig_v = empty_fig("Banco não inicializado — execute o ETL primeiro.", theme=tema)
             return "0", EMPTY, EMPTY, EMPTY, fig_v, fig_v, fig_v, [], []
 
@@ -694,7 +739,7 @@ def registrar_callbacks(app):
         Input("sync-trigger", "data"),
     )
     def carregar_contratos_rateio(dt_ini_c, dt_fim_c, dt_ini_g, dt_fim_g, _sync=None):
-        if not _DB_READY:
+        if not is_db_ready():
             return []
         try:
             data_ini = dt_ini_c or dt_ini_g
@@ -834,7 +879,7 @@ def registrar_callbacks(app):
                     has_pending = False
                     if isinstance(restantes, int) and restantes > 0:
                         has_pending = True
-                    elif sit != "Pago" and sit != "—":
+                    elif sit not in ("Pago", "Recebido", "—") and sit != "":
                         has_pending = True
                     if not has_pending:
                         continue
@@ -881,7 +926,7 @@ def registrar_callbacks(app):
         prevent_initial_call=True,
     )
     def atualizar_limites_data(_sync):
-        if not _DB_READY:
+        if not is_db_ready():
             return no_update, no_update, no_update, no_update
         try:
             p = periodo_disponivel()

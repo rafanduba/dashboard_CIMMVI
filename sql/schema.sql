@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS lancamentos (
 
     situacao TEXT CHECK (situacao IN (
         'Pago',
+        'Recebido',
+        'Devolvido',
         'Em aberto',
         'Aprovado - Aguardando Pagamento',
         'Aguardando Aprovação',
@@ -75,10 +77,11 @@ CREATE VIEW vw_saldo_final_geral AS
             saldo_acumulado,
             ROW_NUMBER() OVER(
                 PARTITION BY conta
-                ORDER BY data_pagamento DESC, linha_planilha DESC
-            ) AS id_ultimo_saldo -- pega o último saldo acumulado de cada conta e coloca de primeiro (índice 1) pra ser usado no where abaixo
+                ORDER BY linha_planilha DESC, id DESC
+            ) AS id_ultimo_saldo -- pega o último saldo acumulado físico na planilha não "Em aberto"
         FROM lancamentos
         WHERE saldo_acumulado IS NOT NULL
+          AND situacao != 'Em aberto'
     )
 SELECT
     SUM(saldo_acumulado) AS vw_saldo_final_geral
@@ -93,9 +96,9 @@ SELECT
     saldo_acumulado AS saldo_final
 FROM lancamentos
 WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
-  AND situacao = 'Pago'
+  AND situacao != 'Em aberto'
   AND saldo_acumulado IS NOT NULL
-ORDER BY data_pagamento DESC, linha_planilha DESC
+ORDER BY linha_planilha DESC, id DESC
 LIMIT 1;
 
 
@@ -106,9 +109,9 @@ SELECT
     saldo_acumulado AS saldo_final
 FROM lancamentos
 WHERE conta = 'CIMMVI - Licenciamento Caixa'
-  AND situacao = 'Pago'
+  AND situacao != 'Em aberto'
   AND saldo_acumulado IS NOT NULL
-ORDER BY data_pagamento DESC, linha_planilha DESC
+ORDER BY linha_planilha DESC, id DESC
 LIMIT 1;
 
 
@@ -119,9 +122,9 @@ SELECT
     saldo_acumulado AS saldo_final
 FROM lancamentos
 WHERE conta = 'AMVI - Banco do Brasil - CC 439'
-  AND situacao = 'Pago'
+  AND situacao != 'Em aberto'
   AND saldo_acumulado IS NOT NULL
-ORDER BY data_pagamento DESC, linha_planilha DESC
+ORDER BY linha_planilha DESC, id DESC
 LIMIT 1;
 
 
@@ -137,9 +140,11 @@ CREATE VIEW vw_saldos_por_conta AS
             SELECT id,
                    ROW_NUMBER() OVER (
                        PARTITION BY conta
-                       ORDER BY data_pagamento DESC, linha_planilha DESC
+                       ORDER BY linha_planilha DESC, id DESC
                    ) AS rn
             FROM lancamentos
+            WHERE saldo_acumulado IS NOT NULL
+              AND situacao != 'Em aberto'
         ) sub
         WHERE rn = 1
     )
@@ -319,7 +324,7 @@ ORDER BY adimplente DESC, u.municipio;
 
 CREATE TABLE IF NOT EXISTS etl_execucoes (
     id                INTEGER PRIMARY KEY AUTOINCREMENT,
-    iniciado_em       TEXT    DEFAULT (datetime('now')),
+    iniciado_em       TEXT    DEFAULT (datetime('now', 'localtime')),
     finalizado_em     TEXT,
     arquivo_origem    TEXT,
     status            TEXT    DEFAULT 'EM_ANDAMENTO',

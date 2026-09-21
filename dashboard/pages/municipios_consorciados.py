@@ -35,7 +35,9 @@ _TABLE_COND_ADIM = [
 _TABLE_COND_LANC = [
     {"if": {"row_index": "odd"}, "backgroundColor": CARD2},
     {"if": {"filter_query": '{situacao} = "Em aberto"'}, "color": "#f87171", "fontWeight": "600"},
-    {"if": {"filter_query": '{situacao} = "Pago"'}, "color": "#34d399"},
+    {"if": {"filter_query": '{situacao} = "Pago"'}, "color": "#818cf8", "fontWeight": "600"},
+    {"if": {"filter_query": '{situacao} = "Recebido"'}, "color": "#34d399", "fontWeight": "600"},
+    {"if": {"filter_query": '{situacao} = "Devolvido"'}, "color": "#38bdf8", "fontWeight": "600"},
     {"if": {"filter_query": '{situacao} = "Aguardando Aprovação"'}, "color": "#fbbf24"},
     {"if": {"column_id": "entradas"}, "color": "#34d399"},
     {"if": {"column_id": "saidas"}, "color": "#f87171"},

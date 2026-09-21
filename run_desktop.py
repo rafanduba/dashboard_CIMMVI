@@ -4,20 +4,35 @@ Executa o servidor Dash localmente e abre a interface automaticamente no navegad
 """
 
 import logging
+import os
+import shutil
+import sqlite3
 import sys
 import threading
 import time
 import urllib.error
 import urllib.request
 import webbrowser
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+# Importações explícitas para garantir empacotamento completo pelo PyInstaller
+import openpyxl
+import pandas as pd
+import sqlalchemy
+
 # Garante que a raiz do projeto esteja no sys.path
-BASE_DIR = Path(__file__).resolve().parent
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys.executable).resolve().parent
+else:
+    BASE_DIR = Path(__file__).resolve().parent
+
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
+from config import DATA_DIR, DB_PATH
 from dashboard.app import criar_app
+from etl.load import checkpoint_wal, garantir_dados_carregados
 
 logger = logging.getLogger(__name__)
 
@@ -45,11 +60,34 @@ def abrir_navegador(url: str = "http://127.0.0.1:8050") -> None:
         webbrowser.open(url)
 
 
-def main() -> None:
+def configurar_logging() -> None:
+    """Configura logging em console e em arquivo de log rotativo para depuração com --noconsole."""
+    log_file = DATA_DIR / "dashboard_desktop.log"
+    handlers = [
+        RotatingFileHandler(log_file, maxBytes=2 * 1024 * 1024, backupCount=2, encoding="utf-8"),
+    ]
+    # Se houver stdout/stderr ativo (ex: rodando via prompt)
+    if sys.stdout is not None:
+        handlers.append(logging.StreamHandler(sys.stdout))
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        handlers=handlers,
     )
+    logger.info("Inicializando Dashboard Desktop CIMMVI / AMVI...")
+    logger.info("Diretório base: %s | Banco de dados: %s", BASE_DIR, DB_PATH)
+
+
+def main() -> None:
+    configurar_logging()
+
+    # Prepara o banco e consolida o WAL antes de levantar o servidor
+    try:
+        garantir_dados_carregados()
+        checkpoint_wal()
+    except Exception as exc:
+        logger.error("Erro na checagem inicial do banco de dados: %s", exc, exc_info=True)
 
     # Thread em segundo plano para abrir a página assim que o servidor subir
     threading.Thread(target=abrir_navegador, daemon=True).start()
@@ -61,3 +99,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

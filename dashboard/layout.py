@@ -27,32 +27,25 @@ _DD_STYLE = {
 _hoje       = str(date.today())
 _ano_inicio = str(date.today().replace(month=1, day=1))
 
-try:
-    from etl.load import garantir_dados_carregados
-    garantir_dados_carregados()
-    from dashboard.queries import (
-        contas_disponiveis, periodo_disponivel,
-    )
-    _DB_READY = True
-except Exception:
-    _DB_READY = False
+def _obter_init_filtros():
+    try:
+        from etl.load import garantir_dados_carregados
+        garantir_dados_carregados()
+        from dashboard.queries import contas_disponiveis, periodo_disponivel
+        p = periodo_disponivel() or {}
+        d_min = p.get("data_min") or _ano_inicio
+        d_max = p.get("data_max") or _hoje
+        contas_list = contas_disponiveis() or []
+        contas_opts = [{"label": "Todas as contas", "value": ""}] + [
+            {"label": c, "value": c} for c in contas_list
+        ]
+        return d_min, d_max, contas_opts
+    except Exception:
+        return _ano_inicio, _hoje, [{"label": "Todas as contas", "value": ""}]
 
-try:
-    _p = periodo_disponivel() if _DB_READY else {}
-    DATE_MIN     = _p.get("data_min") or _ano_inicio
-    DATE_MAX     = _p.get("data_max") or _hoje
-    START_PADRAO = DATE_MIN
-    END_PADRAO   = DATE_MAX
-except Exception:
-    DATE_MIN = START_PADRAO = _ano_inicio
-    DATE_MAX = END_PADRAO   = _hoje
-
-try:
-    _CONTAS = [{"label": "Todas as contas", "value": ""}] + [
-        {"label": c, "value": c} for c in (contas_disponiveis() if _DB_READY else [])
-    ]
-except Exception:
-    _CONTAS = [{"label": "Todas as contas", "value": ""}]
+DATE_MIN, DATE_MAX, _CONTAS = _obter_init_filtros()
+START_PADRAO = DATE_MIN
+END_PADRAO   = DATE_MAX
 
 
 # ════════════════════════════════════════════════════════════════════════════

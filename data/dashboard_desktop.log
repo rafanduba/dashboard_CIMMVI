@@ -1,0 +1,660 @@
+2026-09-21 16:00:38,416 [INFO] __main__: Inicializando Dashboard Desktop CIMMVI / AMVI...
+2026-09-21 16:00:38,416 [INFO] __main__: Diretório base: C:\Users\Rafael\Documents\dashboard_CIMMVI | Banco de dados: C:\Users\Rafael\Documents\dashboard_CIMMVI\data\cimmvi_amvi.db
+2026-09-21 16:00:38,430 [INFO] etl.load: SQLite WAL checkpoint executado com sucesso.
+2026-09-21 16:00:38,522 [INFO] dash.dash: Dash is running on http://127.0.0.1:8050/
+
+2026-09-21 16:00:38,529 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8050
+2026-09-21 16:00:38,532 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-09-21 16:00:39,171 [ERROR] dashboard.app: Exception on / [GET]
+Traceback (most recent call last):
+  File "flask\app.py", line 1511, in wsgi_app
+  File "flask\app.py", line 919, in full_dispatch_request
+  File "flask\app.py", line 915, in full_dispatch_request
+  File "flask\app.py", line 1291, in preprocess_request
+  File "dash\dash.py", line 1641, in _setup_server
+  File "dash\_validate.py", line 457, in validate_layout
+  File "dash\_validate.py", line 444, in _validate
+  File "dash\_validate.py", line 434, in _validate_id
+dash.exceptions.DuplicateIdError: Duplicate component id found in the initial layout: `tabela-adimplencia`
+2026-09-21 16:00:39,174 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2026-09-21 16:00:39,378 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET / HTTP/1.1" 200 -
+2026-09-21 16:00:39,379 [INFO] __main__: Servidor pronto! Abrindo dashboard no navegador: http://127.0.0.1:8050
+2026-09-21 16:00:39,486 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET / HTTP/1.1" 200 -
+2026-09-21 16:00:39,507 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /assets/custom.css?m=1790016414.6262946 HTTP/1.1" 200 -
+2026-09-21 16:00:39,507 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /_dash-component-suites/dash/deps/polyfill@7.v4_4_0m1790017234.12.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:00:39,508 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /_dash-component-suites/dash/deps/react@18.v4_4_0m1790017234.3.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:00:39,511 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /_dash-component-suites/dash/deps/react-dom@18.v4_4_0m1790017234.3.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:00:39,512 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /_dash-component-suites/dash/deps/prop-types@15.v4_4_0m1790017234.8.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:00:39,513 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /_dash-component-suites/dash/dash-renderer/build/dash_renderer.v4_4_0m1790017234.min.js HTTP/1.1" 200 -
+2026-09-21 16:00:39,516 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /_dash-component-suites/dash/dcc/dash_core_components.v4_4_0m1790017234.js HTTP/1.1" 200 -
+2026-09-21 16:00:39,523 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /_dash-component-suites/dash/dcc/dash_core_components-shared.v4_4_0m1790017234.js HTTP/1.1" 200 -
+2026-09-21 16:00:39,523 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /_dash-component-suites/dash/html/dash_html_components.v4_4_0m1790017234.min.js HTTP/1.1" 200 -
+2026-09-21 16:00:39,529 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /_dash-component-suites/dash/dash_table/bundle.v7_4_0m1790017234.js HTTP/1.1" 200 -
+2026-09-21 16:00:39,587 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:00:39,588 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:00:39,613 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:00:39,615 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:00:39,620 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:00:39,622 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:00:39,623 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:00:39,629 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:00:39,742 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:39,745 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:39,747 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:40,120 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:40,122 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:40,714 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:40,725 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:41,575 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:43,132 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:00:43,209 [INFO] etl.load: Schema pronto.
+2026-09-21 16:00:43,210 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:00:43,219 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790017243
+2026-09-21 16:00:44,661 [INFO] etl.extract: Planilha baixada com sucesso (164995 bytes).
+2026-09-21 16:00:44,801 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:00:44,804 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:44,821 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:44,913 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:45,039 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:45] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:45,326 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:45] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:00:45,386 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:00:45] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:00,834 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:01:00,911 [INFO] etl.load: Schema pronto.
+2026-09-21 16:01:00,911 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:01:00,911 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790017260
+2026-09-21 16:01:02,378 [INFO] etl.extract: Planilha baixada com sucesso (165335 bytes).
+2026-09-21 16:01:02,514 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:01:02,517 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:02,535 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:02,540 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:02,555 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:03,075 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:03,123 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:03,783 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:01:03,857 [INFO] etl.load: Schema pronto.
+2026-09-21 16:01:03,857 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:01:03,857 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790017263
+2026-09-21 16:01:05,078 [INFO] etl.extract: Planilha baixada com sucesso (164200 bytes).
+2026-09-21 16:01:05,179 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:01:05,181 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:05,198 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:05,202 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:05,218 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:05,782 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:05,787 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:05,811 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "GET / HTTP/1.1" 200 -
+2026-09-21 16:01:05,827 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:01:05,864 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:01:05,865 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:01:05,867 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:01:05,879 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:01:05,882 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:01:05,884 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:01:05,887 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:01:05,888 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:01:05,894 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:01:05,897 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:05,900 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:05,902 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:06,027 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:06,030 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:06,206 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:06,418 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:06,540 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:07,825 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:01:07,898 [INFO] etl.load: Schema pronto.
+2026-09-21 16:01:07,899 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:01:07,899 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790017267
+2026-09-21 16:01:09,078 [INFO] etl.extract: Planilha baixada com sucesso (164252 bytes).
+2026-09-21 16:01:09,188 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:01:09,189 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:09,204 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:09,208 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:09,267 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:09,738 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:01:09,794 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:01:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:12,272 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:02:12,279 [INFO] etl.load: Schema pronto.
+2026-09-21 16:02:12,279 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:02:12,279 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790017332
+2026-09-21 16:02:13,627 [INFO] etl.extract: Planilha baixada com sucesso (164262 bytes).
+2026-09-21 16:02:13,736 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:02:13,738 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:13,756 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:13,760 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:13,844 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:14,283 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:14,359 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:14,519 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "GET / HTTP/1.1" 200 -
+2026-09-21 16:02:14,525 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:02:14,548 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:02:14,549 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:02:14,551 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:02:14,564 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:02:14,564 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:02:14,566 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:02:14,568 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:02:14,575 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:02:14,583 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:14,585 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:02:14,588 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:14,589 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:14,673 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:14,677 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:14,843 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:15,083 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:15] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:02:15,178 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:02:15] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:39,271 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:37:39,295 [INFO] etl.load: Schema pronto.
+2026-09-21 16:37:39,295 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:37:39,295 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790019459
+2026-09-21 16:37:40,394 [INFO] etl.extract: Planilha baixada com sucesso (164182 bytes).
+2026-09-21 16:37:40,526 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:37:40,529 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:40,549 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:40,554 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:41,346 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:41,348 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:42,021 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:42,449 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "GET / HTTP/1.1" 200 -
+2026-09-21 16:37:42,456 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:37:42,479 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:37:42,481 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:37:42,485 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:37:42,493 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:37:42,495 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:37:42,496 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:37:42,502 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:37:42,503 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:37:42,510 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:37:42,512 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:42,517 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:42,518 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:42,622 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:42,627 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:42,821 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:43,270 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:37:43,292 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:37:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:12,528 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:41:12,553 [INFO] etl.load: Schema pronto.
+2026-09-21 16:41:12,553 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:41:12,554 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790019672
+2026-09-21 16:41:13,818 [INFO] etl.extract: Planilha baixada com sucesso (164987 bytes).
+2026-09-21 16:41:13,942 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:41:13,944 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:13,965 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:13,970 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:13,988 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:14,525 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:14,639 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:15,809 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "GET / HTTP/1.1" 200 -
+2026-09-21 16:41:15,815 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:41:15,843 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:41:15,845 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:41:15,847 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:41:15,858 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:15,859 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:15,862 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:15,865 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:15,866 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:15,872 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:15,878 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:15,881 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:15,882 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:15,987 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:15,990 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:15] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:16,144 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:16,643 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:16,646 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:25,108 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:41:25,135 [INFO] etl.load: Schema pronto.
+2026-09-21 16:41:25,135 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:41:25,135 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790019685
+2026-09-21 16:41:26,375 [INFO] etl.extract: Planilha baixada com sucesso (164579 bytes).
+2026-09-21 16:41:26,490 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:41:26,493 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:26,510 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:26,514 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:26,565 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:27,187 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:27,189 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:31,951 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:31] "GET / HTTP/1.1" 200 -
+2026-09-21 16:41:31,957 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:31] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:41:31,980 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:31] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:41:31,981 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:31] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:41:31,983 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:31] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:41:31,994 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:31] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:31,996 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:31] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:31,998 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:31] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:32,000 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:32] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:32,002 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:32] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:32,011 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:32,012 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:32] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:32,014 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:32,017 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:32,094 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:32,097 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:32,225 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:32,694 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:32,810 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:35,394 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "GET / HTTP/1.1" 200 -
+2026-09-21 16:41:35,401 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:41:35,424 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:41:35,426 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:41:35,427 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:41:35,439 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:35,442 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:35,444 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:35,446 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:35,447 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:35,456 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:35,458 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:35,462 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:35,463 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:35,541 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:35,544 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:35,710 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:36,073 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:36,139 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:36,869 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "GET / HTTP/1.1" 200 -
+2026-09-21 16:41:36,875 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:41:36,896 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:41:36,897 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:41:36,899 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:41:36,910 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:36,911 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:36,913 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:36,915 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:36,920 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:36,927 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:36,929 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:36,931 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:36,932 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:37,014 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:37,015 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:37,169 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:37,581 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:37,637 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:38,155 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "GET / HTTP/1.1" 200 -
+2026-09-21 16:41:38,162 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:41:38,184 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:41:38,186 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:41:38,188 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:41:38,199 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:38,201 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:38,203 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:38,207 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:38,208 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:38,215 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:38,222 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:38,224 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:38,227 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:41:38,295 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:38,296 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:38,464 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:38,907 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:38,956 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:50,419 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET / HTTP/1.1" 200 -
+2026-09-21 16:41:50,438 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /assets/custom.css?m=1790016414.6262946 HTTP/1.1" 200 -
+2026-09-21 16:41:50,438 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/deps/polyfill@7.v4_4_0m1790017234.12.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,440 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/deps/react@18.v4_4_0m1790017234.3.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,443 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/deps/react-dom@18.v4_4_0m1790017234.3.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,448 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/deps/prop-types@15.v4_4_0m1790017234.8.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,451 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/dash-renderer/build/dash_renderer.v4_4_0m1790017234.min.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,452 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/dcc/dash_core_components-shared.v4_4_0m1790017234.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,452 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/dcc/dash_core_components.v4_4_0m1790017234.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,454 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/html/dash_html_components.v4_4_0m1790017234.min.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,456 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/dash_table/bundle.v7_4_0m1790017234.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,513 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:41:50,515 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:41:50,517 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:41:50,535 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,536 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,539 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,542 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,545 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,550 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "GET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1" 200 -
+2026-09-21 16:41:50,563 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:50,567 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:50,568 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:50,939 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:50,943 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:50] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:51,165 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:51,565 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:41:51,600 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:41:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:28,366 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:28,375 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:29,012 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:29,019 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:35,405 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:35,412 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:50,373 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:50] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:50,380 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:50] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:54,321 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:54,327 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:55,135 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:55] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:42:55,140 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:42:55] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:47:06,021 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:47:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:47:10,652 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:47:10] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:47:16,823 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:47:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:47:19,807 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:47:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:47:26,721 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:47:26] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:02,571 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "GET /visao_executiva HTTP/1.1" 200 -
+2026-09-21 16:50:02,578 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:50:02,650 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:50:02,652 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:50:02,653 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:50:02,667 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:02,667 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:02,675 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:02,677 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:02,678 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:02,688 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:02,690 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:02,698 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:02,698 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:02,973 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:02,975 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:03,191 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:03,576 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:03,651 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:13,455 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "GET /visao_executiva HTTP/1.1" 200 -
+2026-09-21 16:50:13,463 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:50:13,486 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:50:13,488 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:50:13,491 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:50:13,504 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:13,505 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:13,510 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:13,511 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:13,512 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:13,521 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:13,523 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:13,528 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:13,530 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:13,616 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:13,620 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:13,788 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:14,188 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:14,294 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:16,913 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:50:16,923 [INFO] etl.load: Schema pronto.
+2026-09-21 16:50:16,924 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:50:16,924 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790020216
+2026-09-21 16:50:18,212 [INFO] etl.extract: Planilha baixada com sucesso (164611 bytes).
+2026-09-21 16:50:18,356 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:50:18,358 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:18,375 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:18,380 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:18,435 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:18,984 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:19,027 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:20,371 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /visao_executiva HTTP/1.1" 200 -
+2026-09-21 16:50:20,381 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /assets/custom.css?m=1790016414.6262946 HTTP/1.1" 200 -
+2026-09-21 16:50:20,385 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_dash-component-suites/dash/deps/react@18.v4_4_0m1790017234.3.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:50:20,388 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_dash-component-suites/dash/deps/polyfill@7.v4_4_0m1790017234.12.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:50:20,389 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_dash-component-suites/dash/deps/prop-types@15.v4_4_0m1790017234.8.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:50:20,389 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_dash-component-suites/dash/deps/react-dom@18.v4_4_0m1790017234.3.1.min.js HTTP/1.1" 200 -
+2026-09-21 16:50:20,393 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_dash-component-suites/dash/dash-renderer/build/dash_renderer.v4_4_0m1790017234.min.js HTTP/1.1" 200 -
+2026-09-21 16:50:20,395 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_dash-component-suites/dash/dcc/dash_core_components.v4_4_0m1790017234.js HTTP/1.1" 200 -
+2026-09-21 16:50:20,398 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_dash-component-suites/dash/dcc/dash_core_components-shared.v4_4_0m1790017234.js HTTP/1.1" 200 -
+2026-09-21 16:50:20,401 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_dash-component-suites/dash/html/dash_html_components.v4_4_0m1790017234.min.js HTTP/1.1" 200 -
+2026-09-21 16:50:20,403 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_dash-component-suites/dash/dash_table/bundle.v7_4_0m1790017234.js HTTP/1.1" 200 -
+2026-09-21 16:50:20,429 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:50:20,428 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:50:20,431 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:50:20,444 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:20,446 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:20,449 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:20,450 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:20,451 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:20,459 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:20,460 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:20,465 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:20,466 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:20,550 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:20,553 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:20,686 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:20] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:21,120 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:21,125 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:28,603 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "GET / HTTP/1.1" 200 -
+2026-09-21 16:50:28,610 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:50:28,683 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:50:28,684 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:50:28,702 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:28,703 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:28,708 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:28,709 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:28,710 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:28,717 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:50:28,727 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:28,731 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:28,734 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:28] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:29,117 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:29,122 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:29,290 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:29,748 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:50:29,784 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:50:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:07,804 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "GET / HTTP/1.1" 200 -
+2026-09-21 16:54:07,810 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:54:07,837 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:54:07,838 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:54:07,840 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:54:07,856 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:07,857 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:07,860 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:07,862 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:07,863 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:07,871 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:07,879 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:07,883 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:07,885 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:07] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:08,138 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:08,139 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:08,307 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:08,776 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:08,810 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:15,234 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:54:15,239 [INFO] etl.load: Schema pronto.
+2026-09-21 16:54:15,240 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:54:15,240 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790020455
+2026-09-21 16:54:16,357 [INFO] etl.extract: Planilha baixada com sucesso (165004 bytes).
+2026-09-21 16:54:16,468 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:54:16,469 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:16,487 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:16,495 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:16,512 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:17,110 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:17,223 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:17,637 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "GET / HTTP/1.1" 200 -
+2026-09-21 16:54:17,643 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:54:17,664 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:54:17,666 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:54:17,668 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:54:17,677 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:17,678 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:17,681 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:17,682 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:17,684 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:17,690 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:17,694 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:17,696 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:17,698 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:17,774 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:17,778 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:17,903 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:18,438 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:18,450 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:35,131 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "GET / HTTP/1.1" 200 -
+2026-09-21 16:54:35,137 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:54:35,187 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:54:35,189 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:54:35,208 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:35,208 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:35,213 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:35,216 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:35,216 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:35,221 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:35,234 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:35,238 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:35,239 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:35,627 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:35,629 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:35,845 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:36,217 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:36,283 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:38,076 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:54:38,099 [INFO] etl.load: Schema pronto.
+2026-09-21 16:54:38,099 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:54:38,100 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790020478
+2026-09-21 16:54:39,258 [INFO] etl.extract: Planilha baixada com sucesso (165012 bytes).
+2026-09-21 16:54:39,510 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:54:39,512 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:39,533 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:39,539 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:39,554 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:40,093 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:40,175 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:42,313 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "GET / HTTP/1.1" 200 -
+2026-09-21 16:54:42,321 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:54:42,345 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:54:42,347 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:54:42,349 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:54:42,360 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:42,361 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:42,365 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:42,367 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:42,368 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:42,375 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:54:42,380 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:42,383 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:42,385 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:42,501 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:42,504 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:42,673 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:43,040 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:54:43,127 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:54:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:25,101 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "GET / HTTP/1.1" 200 -
+2026-09-21 16:57:25,108 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:57:25,132 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:57:25,134 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:57:25,136 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:57:25,147 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:25,149 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:25,154 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:25,155 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:25,156 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:25,163 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:25,167 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:25,171 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:25,172 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:25,257 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:25,261 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:25,396 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:25,854 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:25,956 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:33,354 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "GET / HTTP/1.1" 200 -
+2026-09-21 16:57:33,361 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 16:57:33,383 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 16:57:33,385 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 16:57:33,387 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "GET /_favicon.ico?v=4.4.0 HTTP/1.1" 200 -
+2026-09-21 16:57:33,398 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:33,402 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:33,404 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:33,404 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:33,409 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:33,414 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:33,415 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 16:57:33,418 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:33,421 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:33,500 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:33,502 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:33,639 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:34,069 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:34,117 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:36,226 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI85682\sql\schema.sql
+2026-09-21 16:57:36,232 [INFO] etl.load: Schema pronto.
+2026-09-21 16:57:36,232 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 16:57:36,232 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790020656
+2026-09-21 16:57:37,540 [INFO] etl.extract: Planilha baixada com sucesso (165031 bytes).
+2026-09-21 16:57:37,667 [ERROR] dashboard.callbacks: Erro ao sincronizar com Google Sheets: Worksheet named 'CIMMVI - Rateio Banco do Brasil' not found
+2026-09-21 16:57:37,669 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:37,689 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:37,695 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:37,708 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:38,355 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 16:57:38,368 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 16:57:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:35,721 [INFO] __main__: Inicializando Dashboard Desktop CIMMVI / AMVI...
+2026-09-21 17:32:35,721 [INFO] __main__: Diretório base: C:\Users\Rafael\Documents\dashboard_CIMMVI | Banco de dados: C:\Users\Rafael\Documents\dashboard_CIMMVI\data\cimmvi_amvi.db
+2026-09-21 17:32:35,722 [INFO] etl.load: SQLite WAL checkpoint executado com sucesso.
+2026-09-21 17:32:35,794 [INFO] dash.dash: Dash is running on http://127.0.0.1:8050/
+
+2026-09-21 17:32:35,799 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8050
+2026-09-21 17:32:35,799 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-09-21 17:32:36,452 [ERROR] dashboard.app: Exception on / [GET]
+Traceback (most recent call last):
+  File "flask\app.py", line 1511, in wsgi_app
+  File "flask\app.py", line 919, in full_dispatch_request
+  File "flask\app.py", line 915, in full_dispatch_request
+  File "flask\app.py", line 1291, in preprocess_request
+  File "dash\dash.py", line 1641, in _setup_server
+  File "dash\_validate.py", line 457, in validate_layout
+  File "dash\_validate.py", line 444, in _validate
+  File "dash\_validate.py", line 434, in _validate_id
+dash.exceptions.DuplicateIdError: Duplicate component id found in the initial layout: `tabela-adimplencia`
+2026-09-21 17:32:36,454 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2026-09-21 17:32:36,659 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET / HTTP/1.1" 200 -
+2026-09-21 17:32:36,660 [INFO] __main__: Servidor pronto! Abrindo dashboard no navegador: http://127.0.0.1:8050
+2026-09-21 17:32:36,790 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET / HTTP/1.1" 200 -
+2026-09-21 17:32:36,805 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET /_dash-component-suites/dash/deps/polyfill@7.v4_4_0m1790022752.12.1.min.js HTTP/1.1" 200 -
+2026-09-21 17:32:36,806 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "[36mGET /assets/custom.css?m=1790016414.6262946 HTTP/1.1[0m" 304 -
+2026-09-21 17:32:36,805 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET /_dash-component-suites/dash/deps/react@18.v4_4_0m1790022752.3.1.min.js HTTP/1.1" 200 -
+2026-09-21 17:32:36,811 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET /_dash-component-suites/dash/deps/react-dom@18.v4_4_0m1790022752.3.1.min.js HTTP/1.1" 200 -
+2026-09-21 17:32:36,813 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET /_dash-component-suites/dash/deps/prop-types@15.v4_4_0m1790022752.8.1.min.js HTTP/1.1" 200 -
+2026-09-21 17:32:36,814 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET /_dash-component-suites/dash/dash-renderer/build/dash_renderer.v4_4_0m1790022752.min.js HTTP/1.1" 200 -
+2026-09-21 17:32:36,816 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET /_dash-component-suites/dash/dcc/dash_core_components.v4_4_0m1790022752.js HTTP/1.1" 200 -
+2026-09-21 17:32:36,817 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET /_dash-component-suites/dash/dcc/dash_core_components-shared.v4_4_0m1790022752.js HTTP/1.1" 200 -
+2026-09-21 17:32:36,819 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET /_dash-component-suites/dash/html/dash_html_components.v4_4_0m1790022752.min.js HTTP/1.1" 200 -
+2026-09-21 17:32:36,823 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET /_dash-component-suites/dash/dash_table/bundle.v7_4_0m1790022752.js HTTP/1.1" 200 -
+2026-09-21 17:32:36,888 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET /_dash-layout HTTP/1.1" 200 -
+2026-09-21 17:32:36,889 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-09-21 17:32:36,916 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "[36mGET /_dash-component-suites/dash/dcc/async-datepicker.js HTTP/1.1[0m" 304 -
+2026-09-21 17:32:36,917 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-09-21 17:32:36,925 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-09-21 17:32:36,927 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-09-21 17:32:36,927 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-09-21 17:32:36,936 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:36] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-09-21 17:32:37,053 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:37,055 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:37,057 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:37,390 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:37,393 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:37,686 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:37,699 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:38,822 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:45,424 [INFO] etl.load: Criando/atualizando schema a partir de C:\Users\Rafael\AppData\Local\Temp\_MEI59082\sql\schema.sql
+2026-09-21 17:32:45,453 [INFO] etl.load: Schema pronto.
+2026-09-21 17:32:45,453 [INFO] etl.load: Executando ETL completo a partir do Google Sheets...
+2026-09-21 17:32:45,464 [INFO] etl.extract: Baixando planilha atualizada diretamente do Google Sheets: https://docs.google.com/spreadsheets/d/1EYzC435Suhu9aFi6NLNZtr0T6u2w8flPma5_jcDEgzM/export?format=xlsx&_t=1790022765
+2026-09-21 17:32:46,836 [INFO] etl.extract: Planilha baixada com sucesso (164946 bytes).
+2026-09-21 17:32:46,986 [INFO] etl.extract: Header detectado automaticamente na linha 1 (0-based) da aba 'CIMMVI - ADM - BB'.
+2026-09-21 17:32:46,986 [INFO] etl.extract: Lendo aba 'CIMMVI - ADM - BB' (aba real: 'CIMMVI - ADM - BB', header na linha 1)
+2026-09-21 17:32:47,086 [INFO] etl.extract: Aba 'CIMMVI - ADM - BB': 226 linhas extraídas.
+2026-09-21 17:32:47,096 [INFO] etl.extract: Header detectado automaticamente na linha 0 (0-based) da aba 'CIMMVI - Lic. Amb. - Caixa '.
+2026-09-21 17:32:47,096 [INFO] etl.extract: Lendo aba 'CIMMVI - Lic. Amb. - Caixa ' (aba real: 'CIMMVI - Lic. Amb. - Caixa ', header na linha 0)
+2026-09-21 17:32:47,380 [INFO] etl.extract: Aba 'CIMMVI - Lic. Amb. - Caixa ': 1142 linhas extraídas.
+2026-09-21 17:32:47,380 [INFO] etl.extract: Aba configurada 'AMVI - Banco do Brasil - CC 4395-8' mapeada para a aba real 'AMVI - Banco do Brasil - CC 439'
+2026-09-21 17:32:47,387 [INFO] etl.extract: Header detectado automaticamente na linha 0 (0-based) da aba 'AMVI - Banco do Brasil - CC 439'.
+2026-09-21 17:32:47,387 [INFO] etl.extract: Lendo aba 'AMVI - Banco do Brasil - CC 4395-8' (aba real: 'AMVI - Banco do Brasil - CC 439', header na linha 0)
+2026-09-21 17:32:47,498 [INFO] etl.extract: Aba 'AMVI - Banco do Brasil - CC 4395-8': 97 linhas extraídas.
+2026-09-21 17:32:47,861 [INFO] etl.load: SQLite WAL checkpoint executado com sucesso.
+2026-09-21 17:32:47,861 [INFO] etl.load: Carga concluída: {'linhas_lidas': 1465, 'linhas_inseridas': 1465, 'linhas_ignoradas': 0}
+2026-09-21 17:32:47,861 [INFO] etl.load: ETL completo concluído com sucesso!
+2026-09-21 17:32:47,863 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:47,885 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:47,893 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:48,323 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:48,704 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-09-21 17:32:49,064 [INFO] werkzeug: 127.0.0.1 - - [21/Sep/2026 17:32:49] "POST /_dash-update-component HTTP/1.1" 200 -

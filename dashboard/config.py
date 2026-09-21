@@ -28,10 +28,12 @@ CONTA_ESTILOS = {
 }
 
 SITUACAO_CORES = {
-    "Pago":                                                        SUCCESS,
-    "Em aberto":                                                   DANGER,
-    "Aguardando Aprovação":                                        WARNING,
-    "Aprovado - Aguardando Pagamento":                             INFO,
+    "Recebido":                                                    SUCCESS,    # Verde para entradas recebidas
+    "Pago":                                                        PRIMARY,    # Indigo/roxo para saídas pagas
+    "Devolvido":                                                   INFO,       # Ciano/azul claro para devoluções
+    "Em aberto":                                                   DANGER,     # Vermelho para pendências
+    "Aguardando Aprovação":                                        WARNING,    # Amarelo/âmbar
+    "Aprovado - Aguardando Pagamento":                             "#38bdf8",
     "Pagamento Realizado - Aguardando autorização Margarete":      MUTED,
     "Nao informado":                                               MUTED,
 }

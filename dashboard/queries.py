@@ -359,7 +359,7 @@ def contagem_por_situacao(
         WHERE tipo_lancamento = 'MOVIMENTO'
           {filtros}
         GROUP BY situacao
-        ORDER BY total_saidas DESC
+        ORDER BY (COALESCE(SUM(saidas), 0) + COALESCE(SUM(entradas), 0)) DESC
     """
     return _df(sql, params)
 
@@ -710,7 +710,7 @@ def adimplencia_municipios(data_inicio: str | None = None, data_fim: str | None 
             SELECT
                 LOWER(TRIM(descricao)) AS municipio_key,
                 COALESCE(SUM(entradas), 0) AS recebido,
-                COUNT(CASE WHEN (situacao = 'Pago' OR entradas > 0) THEN 1 END) AS qtd_pagas
+                COUNT(CASE WHEN (situacao IN ('Pago', 'Recebido') OR entradas > 0) THEN 1 END) AS qtd_pagas
             FROM lancamentos
             WHERE conta = 'CIMMVI - Rateio Banco do Brasil'
               AND tipo_lancamento = 'MOVIMENTO'

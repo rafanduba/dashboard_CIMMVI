@@ -10,8 +10,31 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 
 
+def consolidar_banco_dados() -> None:
+    """Aplica o schema atualizado e consolida todas as transações no arquivo principal .db antes de empacotar."""
+    db_file = BASE_DIR / "data" / "cimmvi_amvi.db"
+    schema_file = BASE_DIR / "sql" / "schema.sql"
+    if db_file.exists():
+        import sqlite3
+        try:
+            print("💾 Atualizando views e consolidando banco SQLite (WAL checkpoint)...")
+            con = sqlite3.connect(str(db_file))
+            if schema_file.exists():
+                sql_script = schema_file.read_text(encoding="utf-8")
+                con.executescript(sql_script)
+            con.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+            con.execute("VACUUM;")
+            con.close()
+            print("✅ Banco SQLite consolidado e atualizado com sucesso.")
+        except Exception as err:
+            print(f"⚠️ Aviso ao consolidar banco SQLite: {err}")
+
+
 def build() -> None:
     print("🚀 Iniciando a compilação do executável do Dashboard CIMMVI / AMVI...")
+
+    # Garante que o banco esteja consolidado antes de empacotar
+    consolidar_banco_dados()
 
     try:
         import PyInstaller.__main__
@@ -36,6 +59,16 @@ def build() -> None:
         f"--add-data={BASE_DIR / 'sql'}{sep}sql",
         # Inclui os assets visuais do Dash no executável
         f"--add-data={BASE_DIR / 'dashboard' / 'assets'}{sep}dashboard/assets",
+        # Inclui o banco de dados inicial consolidado para garantir funcionamento imediato/offline
+        f"--add-data={BASE_DIR / 'data' / 'cimmvi_amvi.db'}{sep}data",
+        # Dependências dinâmicas essenciais para extração e banco
+        "--hidden-import=openpyxl",
+        "--hidden-import=openpyxl.cell",
+        "--hidden-import=openpyxl.workbook",
+        "--hidden-import=openpyxl.reader.excel",
+        "--hidden-import=sqlite3",
+        "--hidden-import=sqlalchemy.dialects.sqlite",
+        "--hidden-import=certifi",
     ]
 
     print("🔧 Parâmetros do PyInstaller:", " ".join(cmd_args))

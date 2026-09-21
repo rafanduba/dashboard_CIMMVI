@@ -189,11 +189,11 @@ def layout() -> html.Div:
         html.Div([
             card([
                 section_title("Saídas por Categoria"),
-                dcc.Graph(id="chart-categoria", config={"displayModeBar": False}, style={"height": "360px"}),
+                dcc.Graph(id="chart-categoria", config={"displayModeBar": False}, style={"height": "420px"}),
             ], extra={"flex": "3", "minWidth": "300px"}),
             card([
                 section_title("Distribuição por Categoria (%)"),
-                dcc.Graph(id="chart-categoria-pizza", config={"displayModeBar": False}, style={"height": "360px"}),
+                dcc.Graph(id="chart-categoria-pizza", config={"displayModeBar": False}, style={"height": "420px"}),
             ], extra={"flex": "2", "minWidth": "280px"}),
         ], style={"display": "flex", "gap": "24px", "marginBottom": "28px", "flexWrap": "wrap"}),
 

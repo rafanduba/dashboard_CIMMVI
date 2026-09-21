@@ -23,14 +23,33 @@ logger = logging.getLogger(__name__)
 #   pois foi incluído via --add-data e extraído automaticamente pelo PyInstaller.
 # - Em modo desenvolvimento: caminho relativo ao próprio arquivo load.py.
 if getattr(sys, "frozen", False):
-    SCHEMA_PATH = Path(sys._MEIPASS) / "sql" / "schema.sql"
+    candidatos_schema = [
+        Path(sys._MEIPASS) / "sql" / "schema.sql",
+        Path(sys.executable).resolve().parent / "sql" / "schema.sql",
+    ]
 else:
-    SCHEMA_PATH = Path(__file__).resolve().parent.parent / "sql" / "schema.sql"
+    candidatos_schema = [
+        Path(__file__).resolve().parent.parent / "sql" / "schema.sql",
+    ]
+
+SCHEMA_PATH = next((p for p in candidatos_schema if p.exists()), candidatos_schema[0])
 
 # Engine reutilizada entre chamadas (singleton simples)
 _engine: Engine | None = None
 _SCHEMA_CRIADO: bool = False
 _DADOS_VERIFICADOS: bool = False
+
+
+def checkpoint_wal(engine: Engine | None = None) -> None:
+    """Executa checkpoint TRUNCATE no WAL do SQLite para consolidar transações no arquivo .db."""
+    try:
+        eng = engine or get_engine()
+        if eng.dialect.name == "sqlite":
+            with eng.connect() as conn:
+                conn.execute(text("PRAGMA wal_checkpoint(TRUNCATE);"))
+            logger.info("SQLite WAL checkpoint executado com sucesso.")
+    except Exception as exc:
+        logger.warning("Falha ao executar SQLite WAL checkpoint: %s", exc)
 
 
 def get_engine() -> Engine:
@@ -56,19 +75,18 @@ def _migrar_schema_se_necessario(engine: Engine) -> None:
     """Detecta e corrige schemas antigos com CHECK constraints rígidos.
 
     Caso a tabela `lancamentos` tenha o antigo CHECK constraint em
-    `forma_pagamento` (que causava falha no INSERT para valores como
-    'TED', 'DOC', etc.), a tabela é descartada para ser recriada
-    com o schema atualizado pelo `criar_schema`.
+    `forma_pagamento` ou ainda não suporte 'Recebido' e 'Devolvido' em `situacao`,
+    a tabela é descartada para ser recriada com o schema atualizado pelo `criar_schema`.
     """
     try:
         with engine.connect() as conn:
             row = conn.execute(
                 text("SELECT sql FROM sqlite_master WHERE type='table' AND name='lancamentos'")
             ).fetchone()
-            if row and row[0] and "forma_pagamento IN" in row[0]:
+            if row and row[0] and ("forma_pagamento IN" in row[0] or "'Recebido'" not in row[0] or "'Devolvido'" not in row[0]):
                 logger.warning(
-                    "Schema antigo detectado (CHECK constraint rígido em forma_pagamento). "
-                    "Recriando tabela lancamentos..."
+                    "Schema antigo detectado (CHECK constraint desatualizado em situacao ou forma_pagamento). "
+                    "Recriando tabela lancamentos com novo schema..."
                 )
                 with engine.begin() as conn2:
                     conn2.execute(text("DROP TABLE IF EXISTS lancamentos"))
@@ -127,14 +145,27 @@ def executar_etl_completo(engine: Engine | None = None) -> dict:
 
 def garantir_dados_carregados(engine: Engine | None = None, force: bool = False) -> None:
     """Verifica se o banco de dados possui lançamentos.
-    Se estiver vazio, executa o schema e roda a carga a partir do Google Sheets.
+    Se estiver vazio, tenta restaurar banco embutido do executável ou executa o schema e roda ETL.
     """
     global _DADOS_VERIFICADOS
     if _DADOS_VERIFICADOS and not force:
         return
 
+    import shutil
+    from config import DB_PATH
+
+    # Se estiver rodando como executável e o banco estiver zerado ou ausente, restaura o embutido
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        bundled = Path(sys._MEIPASS) / "data" / "cimmvi_amvi.db"
+        if bundled.exists() and (not DB_PATH.exists() or DB_PATH.stat().st_size == 0):
+            try:
+                shutil.copy2(bundled, DB_PATH)
+                logger.info("Banco embutido restaurado em %s", DB_PATH)
+            except Exception as _ce:
+                logger.warning("Falha ao restaurar banco embutido: %s", _ce)
+
     engine = engine or get_engine()
-    criar_schema(engine)
+    criar_schema(engine, force=True)
 
     try:
         with engine.connect() as conn:
@@ -158,10 +189,10 @@ def _registrar_execucao(engine: Engine, arquivo_origem: str) -> int | None:
     with engine.begin() as conn:
         result = conn.execute(
             text(
-                "INSERT INTO etl_execucoes (arquivo_origem, status) "
-                "VALUES (:arquivo, 'EM_ANDAMENTO')"
+                "INSERT INTO etl_execucoes (iniciado_em, arquivo_origem, status) "
+                "VALUES (:iniciado_em, :arquivo, 'EM_ANDAMENTO')"
             ),
-            {"arquivo": arquivo_origem},
+            {"iniciado_em": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "arquivo": arquivo_origem},
         )
         return result.lastrowid if hasattr(result, "lastrowid") else None
 
@@ -232,6 +263,8 @@ def carregar_dados(
             linhas_inseridas=linhas_inseridas,
             linhas_ignoradas=linhas_ignoradas,
         )
+
+        checkpoint_wal(engine)
 
         resumo = {
             "linhas_lidas": linhas_lidas,

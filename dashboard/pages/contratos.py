@@ -74,8 +74,22 @@ _TABLE_COND_CONTRATOS = [
     {"if": {"row_index": "odd"}, "backgroundColor": CARD2},
     {
         "if": {"column_id": "situacao", "filter_query": '{situacao} = "Pago"'},
+        "backgroundColor": "rgba(99, 102, 241, 0.15)",
+        "color": PRIMARY,
+        "fontWeight": "700",
+        "borderRadius": "20px",
+    },
+    {
+        "if": {"column_id": "situacao", "filter_query": '{situacao} = "Recebido"'},
         "backgroundColor": "rgba(16, 185, 129, 0.15)",
         "color": SUCCESS,
+        "fontWeight": "700",
+        "borderRadius": "20px",
+    },
+    {
+        "if": {"column_id": "situacao", "filter_query": '{situacao} = "Devolvido"'},
+        "backgroundColor": "rgba(6, 182, 212, 0.15)",
+        "color": INFO,
         "fontWeight": "700",
         "borderRadius": "20px",
     },

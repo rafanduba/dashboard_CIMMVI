@@ -2,10 +2,14 @@
 
 import io
 import logging
+import ssl
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
+# Importação estática para garantir empacotamento completo pelo PyInstaller
+import openpyxl
 import pandas as pd
 
 from config import GOOGLE_SHEETS_EXPORT_URL, SHEETS_CONFIG
@@ -15,6 +19,22 @@ logger = logging.getLogger(__name__)
 
 class EstruturaInvalidaError(ValueError):  # dispara quando as colunas não batem com o esperado
     pass
+
+
+def _criar_contexto_ssl() -> ssl.SSLContext:
+    """Cria contexto SSL seguro com fallback para evitar erros de certificados em executáveis Windows."""
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except Exception:
+        pass
+    try:
+        return ssl.create_default_context()
+    except Exception:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        return ctx
 
 
 def baixar_planilha_google_sheets(url: str = GOOGLE_SHEETS_EXPORT_URL) -> bytes:
@@ -30,8 +50,17 @@ def baixar_planilha_google_sheets(url: str = GOOGLE_SHEETS_EXPORT_URL) -> bytes:
             "Pragma": "no-cache",
         },
     )
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        content = resp.read()
+    ctx = _criar_contexto_ssl()
+    try:
+        with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:
+            content = resp.read()
+    except Exception as err:
+        logger.warning("Tentativa com contexto SSL padrão falhou (%s). Tentando fallback...", err)
+        ctx_insecure = ssl.create_default_context()
+        ctx_insecure.check_hostname = False
+        ctx_insecure.verify_mode = ssl.CERT_NONE
+        with urllib.request.urlopen(req, timeout=30, context=ctx_insecure) as resp:
+            content = resp.read()
 
     logger.info("Planilha baixada com sucesso (%d bytes).", len(content))
     return content

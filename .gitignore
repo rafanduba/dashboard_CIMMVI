@@ -1,0 +1,24 @@
+# Executável compilado
+*.exe
+*.pkg
+
+# Pasta de build do PyInstaller
+build/
+dist/
+
+# Banco de dados SQLite
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Logs
+*.log
+data/*.log
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Ambientes virtuais
+.venv/
+venv/

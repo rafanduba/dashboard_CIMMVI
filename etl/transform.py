@@ -150,7 +150,9 @@ def transform_sheet(df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
 
     # Classificação do tipo de lançamento
     df["tipo_lancamento"] = df["descricao"].apply(_classificar_linha)
-    df.loc[df["situacao"].isna() & (df["tipo_lancamento"] != "MOVIMENTO"), "situacao"] = "Pago"
+    mascara_nao_mov = df["situacao"].isna() & (df["tipo_lancamento"] != "MOVIMENTO")
+    df.loc[mascara_nao_mov & (df["entradas"] >= df["saidas"]), "situacao"] = "Recebido"
+    df.loc[mascara_nao_mov & (df["entradas"] < df["saidas"]), "situacao"] = "Pago"
 
     # Hash de deduplicação
     df["hash_linha"] = df.apply(_gerar_hash, axis=1)

@@ -34,6 +34,13 @@ from config import DATA_DIR, DB_PATH
 from dashboard.app import criar_app
 from etl.load import checkpoint_wal, garantir_dados_carregados
 
+# Carrega variáveis do arquivo .env (se existir) — ex: GEMINI_API_KEY
+try:
+    from dotenv import load_dotenv  # type: ignore[import]
+    load_dotenv(BASE_DIR / ".env", override=False)
+except ImportError:
+    pass  # python-dotenv não instalado; variáveis do sistema são usadas
+
 logger = logging.getLogger(__name__)
 
 

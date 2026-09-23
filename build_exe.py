@@ -69,6 +69,8 @@ def build() -> None:
         "--hidden-import=sqlite3",
         "--hidden-import=sqlalchemy.dialects.sqlite",
         "--hidden-import=certifi",
+        "--hidden-import=google.generativeai",
+        "--hidden-import=dotenv",
     ]
 
     print("🔧 Parâmetros do PyInstaller:", " ".join(cmd_args))

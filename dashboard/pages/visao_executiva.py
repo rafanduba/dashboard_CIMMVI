@@ -157,13 +157,18 @@ def layout() -> html.Div:
         section_title("Status de Adimplência dos Municípios"),
         html.Div([
             dash_table.DataTable(
-                id="tabela-adimplencia",
+                id="tabela-adimplencia-executiva",
                 columns=[
                     {"name": "Município", "id": "municipio"},
                     {"name": "Status", "id": "status"},
                     {"name": "Parcelas Pagas", "id": "parcelas"},
+                    {"name": "Total Recebido", "id": "recebido_fmt"},
+                    {"name": "Saldo a Receber", "id": "saldo_fmt"},
                 ],
                 data=[],
+                sort_action="native",
+                page_size=15,
+                page_action="native",
                 style_table={"overflowX": "auto"},
                 style_header={
                     "backgroundColor": CARD2, "color": TEXT_DIM,
@@ -181,6 +186,8 @@ def layout() -> html.Div:
                     {"if": {"row_index": "odd"}, "backgroundColor": CARD2},
                     {"if": {"filter_query": '{status} = "✅ Adimplente"'}, "color": SUCCESS, "fontWeight": "600"},
                     {"if": {"filter_query": '{status} = "❌ Inadimplente"'}, "color": DANGER, "fontWeight": "600"},
+                    {"if": {"column_id": "recebido_fmt"}, "color": SUCCESS, "fontWeight": "600"},
+                    {"if": {"column_id": "saldo_fmt"}, "color": WARNING, "fontWeight": "600"},
                 ],
             ),
         ], style={"marginBottom": "36px"}),

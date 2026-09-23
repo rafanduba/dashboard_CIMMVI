@@ -12,6 +12,14 @@ from pathlib import Path
 # Garante que a raiz do projeto esteja no path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
+# Carrega variáveis do arquivo .env (se existir) — ex: GEMINI_API_KEY
+try:
+    from dotenv import load_dotenv  # type: ignore[import]
+    _env_file = Path(__file__).resolve().parent.parent / ".env"
+    load_dotenv(_env_file, override=False)
+except ImportError:
+    pass  # python-dotenv não instalado; variáveis do sistema são usadas
+
 from dash import Dash
 
 from dashboard.callbacks import registrar_callbacks
@@ -27,11 +35,13 @@ def criar_app() -> Dash:
 
     from dashboard.layout import criar_layout
 
+    assets_dir = Path(__file__).resolve().parent / "assets"
     app = Dash(
         __name__,
         title="Dashboard CIMMVI / AMVI",
         update_title=None,
         suppress_callback_exceptions=True,
+        assets_folder=str(assets_dir),
     )
 
     app.layout = criar_layout()

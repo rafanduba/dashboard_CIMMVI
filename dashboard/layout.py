@@ -11,6 +11,16 @@ from dashboard.config import (
 )
 
 # ════════════════════════════════════════════════════════════════════════════
+# Mensagem de boas-vindas do chatbot
+# ════════════════════════════════════════════════════════════════════════════
+_CHATBOT_WELCOME = (
+    "Olá! Sou o assistente financeiro do CIMMVI/AMVI. "
+    "Posso responder perguntas sobre saldos, lançamentos, "
+    "municípios consorciados e contratos.\n\n"
+    "Como posso ajudar?"
+)
+
+# ════════════════════════════════════════════════════════════════════════════
 # Estilo do DatePickerRange / Dropdowns (barra de filtros)
 # ════════════════════════════════════════════════════════════════════════════
 _DD_STYLE = {
@@ -170,6 +180,31 @@ def _topbar() -> html.Header:
                             "transition": "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                         },
                     ),
+                    html.Button(
+                        id="btn-topbar-chatbot",
+                        className="topbar-chatbot-btn",
+                        n_clicks=0,
+                        title="Abrir Assistente Financeiro IA (Gemini)",
+                        children=[
+                            html.Span("💬", style={"fontSize": "14px"}),
+                            html.Span("Assistente IA"),
+                        ],
+                        style={
+                            "background": "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                            "border": "none",
+                            "color": "#ffffff",
+                            "padding": "8px 16px",
+                            "borderRadius": "20px",
+                            "cursor": "pointer",
+                            "fontSize": "12px",
+                            "fontWeight": "600",
+                            "display": "flex",
+                            "alignItems": "center",
+                            "gap": "6px",
+                            "boxShadow": "0 2px 8px rgba(139, 92, 246, 0.35)",
+                            "transition": "all 0.2s ease",
+                        },
+                    ),
                     dcc.Loading(
                         id="loading-sync",
                         type="dot",
@@ -218,6 +253,147 @@ def filtros_bar() -> html.Div:
         }),
     ], extra={"marginBottom": "20px", "padding": "16px 24px"})
 
+
+# ════════════════════════════════════════════════════════════════════════════
+# Widget Chatbot Flutuante
+# ════════════════════════════════════════════════════════════════════════════
+
+def _chatbot_widget() -> html.Div:
+    """Botão flutuante 💬 + painel de chat deslizante."""
+
+    # Mensagem de boas-vindas (bolha do bot)
+    welcome_msg = html.Div(
+        className="chat-bubble chat-bubble-bot",
+        children=[
+            html.Div("🤖", className="chat-avatar"),
+            html.Div(_CHATBOT_WELCOME, className="chat-text"),
+        ],
+    )
+
+    return html.Div(
+        id="chatbot-container",
+        className="chatbot-container",
+        style={
+            "position": "fixed",
+            "bottom": "28px",
+            "right": "28px",
+            "zIndex": "99999",
+            "display": "flex",
+            "flexDirection": "column",
+            "alignItems": "flex-end",
+            "gap": "12px",
+        },
+        children=[
+
+            # ── Painel de chat ────────────────────────────────────────────
+            html.Div(
+                id="chatbot-panel",
+                className="chatbot-panel chatbot-panel-closed",
+                children=[
+
+                    # Cabeçalho
+                    html.Div(
+                        className="chatbot-header",
+                        children=[
+                            html.Div([
+                                html.Span("🤖", style={"fontSize": "18px"}),
+                                html.Div([
+                                    html.Div("Assistente Financeiro", className="chatbot-header-title"),
+                                    html.Div("CIMMVI / AMVI • Powered by Gemini", className="chatbot-header-sub"),
+                                ]),
+                            ], style={"display": "flex", "alignItems": "center", "gap": "10px"}),
+                            html.Div([
+                                html.Button(
+                                    "🗑️",
+                                    id="btn-chatbot-clear",
+                                    className="chatbot-icon-btn",
+                                    title="Limpar conversa",
+                                    n_clicks=0,
+                                ),
+                                html.Button(
+                                    "✕",
+                                    id="btn-chatbot-close",
+                                    className="chatbot-icon-btn",
+                                    title="Fechar",
+                                    n_clicks=0,
+                                ),
+                            ], style={"display": "flex", "gap": "4px"}),
+                        ],
+                    ),
+
+                    # Área de mensagens
+                    html.Div(
+                        id="chatbot-messages",
+                        className="chatbot-messages",
+                        children=[welcome_msg],
+                    ),
+
+                    # Indicador de digitação (oculto por padrão)
+                    html.Div(
+                        id="chatbot-typing",
+                        className="chatbot-typing hidden",
+                        children=[
+                            html.Div("🤖", className="chat-avatar"),
+                            html.Div([
+                                html.Span(className="typing-dot"),
+                                html.Span(className="typing-dot"),
+                                html.Span(className="typing-dot"),
+                            ], className="typing-dots"),
+                        ],
+                    ),
+
+                    # Input + botão enviar
+                    html.Div(
+                        className="chatbot-input-area",
+                        children=[
+                            dcc.Input(
+                                id="chatbot-input",
+                                type="text",
+                                placeholder="Digite sua pergunta...",
+                                className="chatbot-input",
+                                debounce=False,
+                                n_submit=0,
+                                value="",
+                            ),
+                            html.Button(
+                                "➤",
+                                id="btn-chatbot-send",
+                                className="chatbot-send-btn",
+                                n_clicks=0,
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+
+            # ── Botão flutuante ───────────────────────────────────────────
+            html.Button(
+                id="btn-chatbot-toggle",
+                className="chatbot-fab",
+                n_clicks=0,
+                title="Assistente Financeiro (Gemini IA)",
+                style={
+                    "width": "56px",
+                    "height": "56px",
+                    "borderRadius": "50%",
+                    "border": "none",
+                    "background": "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+                    "color": "white",
+                    "fontSize": "24px",
+                    "cursor": "pointer",
+                    "display": "flex",
+                    "alignItems": "center",
+                    "justifyContent": "center",
+                    "boxShadow": "0 4px 20px rgba(99, 102, 241, 0.5), 0 2px 8px rgba(0,0,0,0.2)",
+                    "flexShrink": "0",
+                    "position": "relative",
+                },
+                children=[
+                    html.Span("💬", id="chatbot-fab-icon", className="chatbot-fab-icon", style={"lineHeight": "1"}),
+                ],
+            ),
+        ],
+    )
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -275,6 +451,8 @@ def criar_layout() -> html.Div:
         # Cache de dados para contratos de rateio (evita query a cada filtro local)
         dcc.Store(id="store-contratos-rateio", data=[]),
 
+        # Histórico de mensagens do chatbot
+        dcc.Store(id="chatbot-historico", data=[]),
 
         # Navegação por URL interna
         dcc.Location(id="url", refresh=False),
@@ -294,6 +472,9 @@ def criar_layout() -> html.Div:
                 ], style={"padding": "24px"}),
             ],
         ),
+
+        # ── Chatbot Flutuante ─────────────────────────────────────────────
+        _chatbot_widget(),
 
     ],
     id="app-container",

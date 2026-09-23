@@ -135,6 +135,72 @@ def _get_header_etl_info():
         return EMPTY
 
 
+def _calcular_adimplencia_municipios(data_ini: str | None = None, data_fim: str | None = None) -> list[dict]:
+    """Calcula os registros de adimplência dos municípios para exibição nas tabelas."""
+    try:
+        df_adim = adimplencia_municipios(data_inicio=data_ini, data_fim=data_fim)
+        if df_adim.empty:
+            return []
+        records = []
+        for _, r in df_adim.iterrows():
+            muni = str(r["municipio"])
+            rec = float(r.get("recebido") or 0.0)
+            pt = int(r.get("parc_total") or 12)
+            pr = r.get("parc_restante")
+            pa = r.get("parc_atual")
+            adim = int(r.get("adimplente") or 0)
+            qp = int(r.get("qtd_pagas") or 0)
+
+            # Determina quantas parcelas foram pagas (com base nos dados da planilha)
+            if pd.notna(pa) and int(pa) > 0:
+                p_pagas = int(pa)
+            elif pd.notna(pr):
+                p_pagas = max(1, pt - int(pr))
+            elif qp > 0:
+                p_pagas = qp
+            else:
+                p_pagas = 1
+
+            previsto_sql = float(r.get("previsto_total") or 0.0)
+            base_ref = max(rec, previsto_sql)
+
+            if base_ref > 0 and p_pagas > 0:
+                media_parc = base_ref / p_pagas
+                prev = media_parc * pt
+            else:
+                prev = 0.0
+
+            saldo = max(0.0, prev - rec)
+
+            if pd.notna(pa) and pd.notna(pt):
+                p_info = f"{int(pa)}/{int(pt)}"
+            elif pd.notna(pr) and pd.notna(pt):
+                p_info = f"{int(pt) - int(pr)}/{int(pt)}"
+            elif qp > 0:
+                p_info = f"{qp}/{pt}"
+            else:
+                p_info = f"—/{pt}"
+
+            status_str = "✅ Adimplente" if adim == 1 else "❌ Inadimplente"
+
+            records.append({
+                "municipio": muni,
+                "previsto": prev,
+                "recebido": rec,
+                "saldo": saldo,
+                "previsto_fmt": formata_brl(prev),
+                "recebido_fmt": formata_brl(rec),
+                "saldo_fmt": formata_brl(saldo),
+                "parcelas": p_info,
+                "status": status_str,
+                "adimplente": adim,
+            })
+        return records
+    except Exception as ex:
+        logger.error("Erro ao calcular adimplência dos municípios: %s", ex)
+        return []
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # Registro dos callbacks modularizados
 # ════════════════════════════════════════════════════════════════════════════
@@ -261,6 +327,8 @@ def registrar_callbacks(app):
         Output("chart-mensal",       "figure"),
         Output("chart-categoria",        "figure"),
         Output("chart-categoria-pizza",  "figure"),
+        # Tabela de Adimplência
+        Output("tabela-adimplencia-executiva", "data"),
         Input("filtro-conta",        "value"),
         Input("filtro-data",         "start_date"),
         Input("filtro-data",         "end_date"),
@@ -276,6 +344,7 @@ def registrar_callbacks(app):
                 EMPTY, EMPTY, EMPTY,
                 EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
                 fig_v, fig_v, fig_v, fig_v, fig_v,
+                [],
             )
 
         conta = conta_sel or None
@@ -458,12 +527,16 @@ def registrar_callbacks(app):
             fig_cat = empty_fig(f"Erro: {ex}", theme=tema)
             fig_cat_pizza = empty_fig(f"Erro: {ex}", theme=tema)
 
+        # Tabela de Adimplência dos Municípios
+        dados_adim_exec = _calcular_adimplencia_municipios(data_ini, data_fim)
+
         return (
             sg, s_cimmvi, s_amvi,
             sc1, sc2, sc3,
             kpi_ent, kpi_sai, kpi_liq, kpi_ab_sai, kpi_ab_ent, kpi_ag,
             fig_saldo, fig_sit, fig_mensal,
             fig_cat, fig_cat_pizza,
+            dados_adim_exec,
         )
 
     # ── 7. Municípios Consorciados ─────────────────────────────────────────
@@ -529,8 +602,8 @@ def registrar_callbacks(app):
 
         # Municípios
         try:
-            df_adim = adimplencia_municipios(data_inicio=data_ini, data_fim=data_fim)
-            if df_adim.empty:
+            records = _calcular_adimplencia_municipios(data_ini, data_fim)
+            if not records:
                 kpi_muni_total = "0"
                 kpi_muni_previsto = kpi_muni_recebido = kpi_muni_saldo = EMPTY
                 dados_adimplencia = []
@@ -538,82 +611,12 @@ def registrar_callbacks(app):
                 fig_muni_adim = empty_fig("Sem dados de adimplência", theme=tema)
                 fig_muni_rank = empty_fig("Sem dados de ranking", theme=tema)
             else:
-                total_munis = len(df_adim)
-                records = []
-                tot_prev = 0.0
-                tot_rec = 0.0
-                tot_saldo = 0.0
-                c_adim = 0
-                c_inadim = 0
-
-                for _, r in df_adim.iterrows():
-                    muni = str(r["municipio"])
-                    rec = float(r.get("recebido") or 0.0)
-                    pt = int(r.get("parc_total") or 12)
-                    pr = r.get("parc_restante")
-                    pa = r.get("parc_atual")
-                    adim = int(r.get("adimplente") or 0)
-                    qp = int(r.get("qtd_pagas") or 0)
-
-                    # Determina quantas parcelas foram pagas (com base nos dados da planilha)
-                    if pd.notna(pa) and int(pa) > 0:
-                        p_pagas = int(pa)
-                    elif pd.notna(pr):
-                        p_pagas = max(1, pt - int(pr))
-                    elif qp > 0:
-                        p_pagas = qp
-                    else:
-                        p_pagas = 1
-
-                    # previsto_sql = soma de TODOS os lançamentos no DB para o município (sem filtro de data).
-                    # Pode incluir parcelas que o filtro de categoria do recebido perdeu.
-                    previsto_sql = float(r.get("previsto_total") or 0.0)
-
-                    # Usa o maior entre recebido e previsto_sql como base para a média por parcela,
-                    # garantindo que parcelas com categoria levemente diferente não sejam perdidas.
-                    base_ref = max(rec, previsto_sql)
-
-                    if base_ref > 0 and p_pagas > 0:
-                        # Média real por parcela (derivada dos valores reais da planilha) × total do contrato
-                        media_parc = base_ref / p_pagas
-                        prev = media_parc * pt
-                    else:
-                        prev = 0.0
-
-                    saldo = max(0.0, prev - rec)
-
-                    tot_rec += rec
-                    tot_prev += prev
-                    tot_saldo += saldo
-
-                    if adim == 1:
-                        c_adim += 1
-                    else:
-                        c_inadim += 1
-
-                    if pd.notna(pa) and pd.notna(pt):
-                        p_info = f"{int(pa)}/{int(pt)}"
-                    elif pd.notna(pr) and pd.notna(pt):
-                        p_info = f"{int(pt) - int(pr)}/{int(pt)}"
-                    elif qp > 0:
-                        p_info = f"{qp}/{pt}"
-                    else:
-                        p_info = f"—/{pt}"
-
-                    status_str = "✅ Adimplente" if adim == 1 else "❌ Inadimplente"
-
-                    records.append({
-                        "municipio": muni,
-                        "previsto": prev,
-                        "recebido": rec,
-                        "saldo": saldo,
-                        "previsto_fmt": formata_brl(prev),
-                        "recebido_fmt": formata_brl(rec),
-                        "saldo_fmt": formata_brl(saldo),
-                        "parcelas": p_info,
-                        "status": status_str,
-                        "adimplente": adim,
-                    })
+                total_munis = len(records)
+                tot_prev = sum(r["previsto"] for r in records)
+                tot_rec = sum(r["recebido"] for r in records)
+                tot_saldo = sum(r["saldo"] for r in records)
+                c_adim = sum(1 for r in records if r.get("adimplente") == 1)
+                c_inadim = total_munis - c_adim
 
                 kpi_muni_total = str(total_munis)
                 kpi_muni_previsto = formata_brl(tot_prev)
@@ -937,5 +940,119 @@ def registrar_callbacks(app):
         except Exception:
             pass
         return no_update, no_update, no_update, no_update
+
+
+    # ════════════════════════════════════════════════════════════════════════
+    # Callbacks do Chatbot
+    # ════════════════════════════════════════════════════════════════════════
+
+    # ── Toggle: abrir/fechar painel ─────────────────────────────────────────
+    @app.callback(
+        Output("chatbot-panel", "className"),
+        Output("btn-chatbot-toggle", "className"),
+        Input("btn-chatbot-toggle", "n_clicks"),
+        Input("btn-topbar-chatbot", "n_clicks"),
+        Input("btn-chatbot-close", "n_clicks"),
+        State("chatbot-panel", "className"),
+        prevent_initial_call=True,
+    )
+    def toggle_chatbot_panel(n_toggle, n_topbar, n_close, current_class):
+        from dash import ctx
+        triggered = ctx.triggered_id
+
+        is_open = "chatbot-panel-open" in (current_class or "")
+
+        if triggered == "btn-chatbot-close" or (is_open and triggered in ("btn-chatbot-toggle", "btn-topbar-chatbot")):
+            return "chatbot-panel chatbot-panel-closed", "chatbot-fab"
+        else:
+            return "chatbot-panel chatbot-panel-open", "chatbot-fab chatbot-fab-active"
+
+    # ── Enviar mensagem ─────────────────────────────────────────────────────
+    @app.callback(
+        Output("chatbot-messages", "children"),
+        Output("chatbot-historico", "data"),
+        Output("chatbot-input", "value"),
+        Input("btn-chatbot-send", "n_clicks"),
+        Input("chatbot-input", "n_submit"),
+        State("chatbot-input", "value"),
+        State("chatbot-historico", "data"),
+        State("chatbot-messages", "children"),
+        prevent_initial_call=True,
+    )
+    def enviar_mensagem(n_send, n_submit, pergunta, historico, mensagens_atuais):
+        from dashboard.chatbot import responder_pergunta
+
+        if not pergunta or not pergunta.strip():
+            return no_update, no_update, no_update
+
+        pergunta = pergunta.strip()
+        historico = historico or []
+
+        # Garante que mensagens_atuais é lista
+        if mensagens_atuais is None:
+            mensagens_atuais = []
+        if not isinstance(mensagens_atuais, list):
+            mensagens_atuais = [mensagens_atuais]
+
+        # Bolha da mensagem do usuário
+        bolha_usuario = html.Div(
+            className="chat-bubble chat-bubble-user",
+            children=[
+                html.Div(pergunta, className="chat-text"),
+                html.Div("👤", className="chat-avatar"),
+            ],
+        )
+
+        # Chama a API Gemini
+        try:
+            resposta = responder_pergunta(pergunta, historico)
+        except Exception as e:
+            resposta = f"⚠️ Erro ao processar: {str(e)[:200]}"
+
+        # Bolha da resposta do bot (suporta quebras de linha)
+        linhas_resposta = []
+        for linha in resposta.split("\n"):
+            if linha.strip():
+                linhas_resposta.append(html.Span(linha))
+            linhas_resposta.append(html.Br())
+
+        bolha_bot = html.Div(
+            className="chat-bubble chat-bubble-bot",
+            children=[
+                html.Div("🤖", className="chat-avatar"),
+                html.Div(linhas_resposta, className="chat-text"),
+            ],
+        )
+
+        # Atualiza histórico para próxima chamada
+        novo_historico = historico + [
+            {"role": "user",  "parts": [pergunta]},
+            {"role": "model", "parts": [resposta]},
+        ]
+        # Mantém apenas últimas 20 mensagens (10 trocas)
+        if len(novo_historico) > 20:
+            novo_historico = novo_historico[-20:]
+
+        novas_mensagens = list(mensagens_atuais) + [bolha_usuario, bolha_bot]
+
+        return novas_mensagens, novo_historico, ""
+
+    # ── Limpar histórico ────────────────────────────────────────────────────
+    @app.callback(
+        Output("chatbot-messages", "children", allow_duplicate=True),
+        Output("chatbot-historico", "data", allow_duplicate=True),
+        Input("btn-chatbot-clear", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def limpar_chat(n_clicks):
+        from dashboard.layout import _CHATBOT_WELCOME
+        welcome_msg = html.Div(
+            className="chat-bubble chat-bubble-bot",
+            children=[
+                html.Div("🤖", className="chat-avatar"),
+                html.Div(_CHATBOT_WELCOME, className="chat-text"),
+            ],
+        )
+        return [welcome_msg], []
 
 

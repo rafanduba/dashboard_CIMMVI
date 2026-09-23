@@ -1,4 +1,4 @@
-# Execut�vel compilado
+# Executável compilado
 *.exe
 *.pkg
 
@@ -11,6 +11,9 @@ data/*.db
 data/*.db-wal
 data/*.db-shm
 
+# Variáveis de ambiente (chaves de API) — NÃO commitar!
+.env
+
 # Logs
 *.log
 data/*.log
@@ -21,4 +24,5 @@ __pycache__/
 
 # Ambientes virtuais
 .venv/
+powershell.cmd
 venv/
